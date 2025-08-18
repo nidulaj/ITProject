@@ -9,6 +9,8 @@ app.use(express.json());
 
 connectDB();
 
+app.use('/auth/customer', require('./routes/customerAuthRoute'));
+
 app.listen(5000, () => {
   console.log('Server started on http://localhost:5000');
 });
