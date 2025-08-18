@@ -35,11 +35,6 @@ const updateProfile = async (id, firstName, lastName, phone, address) => {
     return result.rows[0]
 };
 
-const deleteProfile = async (id) => {
-    const query = `DELETE FROM "customers" WHERE "cus_id" = $1 RETURNING *`;
-    const values = [id]
-    const result = await pool.query(query, values)
-    return result.rows[0]
-};
+
 
 module.exports = { createCustomer, findUserByEmail, login, updateProfile, deleteProfile, accountStatus };
