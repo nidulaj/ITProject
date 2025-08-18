@@ -1,4 +1,4 @@
-const {createCustomer, findUserByEmail, login} = require("../models/customerAuthModel");
+const {createCustomer, findUserByEmail, login, updateProfile, deleteProfile, accountStatus} = require("../models/customerAuthModel");
 
 const registerCustomer = async (req, res) => {
     const { firstName, lastName, email, phone, address, password } = req.body;
@@ -28,6 +28,10 @@ const loginCustomer = async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials" });
         }
 
+        if (!customer.isActive) {
+            return res.status(403).json({ message: "Account is disabled" });
+        }
+
         res.status(200).json(customer);
     } catch (error) {
         console.error("Error logging in customer:", error);
@@ -35,4 +39,22 @@ const loginCustomer = async (req, res) => {
     }
 };
 
-module.exports = { registerCustomer, loginCustomer };
+const updateUserProfile = async (req, res) => {
+    const { id, firstName, lastName, phone, address } = req.body;
+
+    try {
+        const updatedCustomer = await updateProfile(id, firstName, lastName, phone, address);
+
+        if (!updatedCustomer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+
+        res.status(200).json({ message: "Customer profile updated successfully", customer: updatedCustomer });
+    } catch (error) {
+        console.error("Error updating customer profile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+module.exports = { registerCustomer, loginCustomer, updateUserProfile };
