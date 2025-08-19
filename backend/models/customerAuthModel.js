@@ -22,19 +22,24 @@ const login = async (email, password) => {
 };
 
 const accountStatus = async (id) => {
-    const query = `SELECT "isActive" FROM "customers" WHERE "cus_id" = $1`;
+    const query = `SELECT "is_active" FROM "customers" WHERE "cus_id" = $1`;
     const values = [id]
     const result = await pool.query(query, values)
     return result.rows[0]
 };
 
 const updateProfile = async (id, firstName, lastName, phone, address) => {
-    const query = `UPDATE "customers" SET "first_name" = $1, "last_name" = $2, "phone" = $3, "address" = $4 WHERE "cus_id" = $5 RETURNING *`;
+    const query = `UPDATE "customers" SET "first_name" = $1, "last_name" = $2, "phone" = $3, "address" = $4, "updated_at" = NOW() WHERE "cus_id" = $5 RETURNING *`;
     const values = [firstName, lastName, phone, address, id]
     const result = await pool.query(query, values)
     return result.rows[0]
 };
 
+const selfDeleteProfile = async (id) => {
+    const query = `UPDATE customers SET is_active = false, delete_type = 'self', deleted_at = NOW(), permanent_delete_at = NOW() + interval '30 days' WHERE cus_id = $1 RETURNING *`;
+    const values = [id]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+};
 
-
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, deleteProfile, accountStatus };
+module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, accountStatus };
