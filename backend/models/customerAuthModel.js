@@ -35,4 +35,18 @@ const selfDeleteProfile = async (id) => {
     return result.rows[0]
 };
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile };
+const storeVerificationCode = async (id, code) => {
+    const query = "UPDATE customers SET verification_code=$1, verification_code_expires=NOW() + interval '3 minutes' WHERE cus_id=$2"
+    const values = [code, id]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+};
+
+const getVerificationDetails = async (id) => {
+    const query = "SELECT verification_code, verification_code_expires FROM customers WHERE cus_id=$1";
+    const values = [id];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+};
+
+module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails };
