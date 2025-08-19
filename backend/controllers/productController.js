@@ -1,16 +1,15 @@
-const { createProduct, getAllProducts } = require('../models/productModel');
+const { createProduct } = require('../models/productModel');
 
-// Create a new product
 const addProduct = async (req, res) => {
-  const { name, description, price, stock_quantity } = req.body;
+  const { name, description, price, stock_quantity, category } = req.body;
 
-  // Validate input data (Basic validation, you can expand it)
-  if (!name || !description || !price || !stock_quantity) {
+  // Basic validation for required fields
+  if (!name || !description || !price || !stock_quantity || !category) {
     return res.status(400).json({ error: 'All fields are required.' });
   }
 
   try {
-    const newProduct = await createProduct(name, description, price, stock_quantity);
+    const newProduct = await createProduct(name, description, price, stock_quantity, category);
     res.status(201).json({ message: 'Product created successfully', product: newProduct });
   } catch (error) {
     console.error('Error creating product:', error);
