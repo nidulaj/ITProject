@@ -21,13 +21,6 @@ const login = async (email, password) => {
     return result.rows[0]
 };
 
-const accountStatus = async (id) => {
-    const query = `SELECT "is_active" FROM "customers" WHERE "cus_id" = $1`;
-    const values = [id]
-    const result = await pool.query(query, values)
-    return result.rows[0]
-};
-
 const updateProfile = async (id, firstName, lastName, phone, address) => {
     const query = `UPDATE "customers" SET "first_name" = $1, "last_name" = $2, "phone" = $3, "address" = $4, "updated_at" = NOW() WHERE "cus_id" = $5 RETURNING *`;
     const values = [firstName, lastName, phone, address, id]
@@ -42,4 +35,4 @@ const selfDeleteProfile = async (id) => {
     return result.rows[0]
 };
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, accountStatus };
+module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile };
