@@ -1,5 +1,6 @@
 const { createProduct } = require('../models/productModel');
 
+
 const addProduct = async (req, res) => {
   const { name, description, price, stock_quantity, category } = req.body;
 
@@ -17,6 +18,8 @@ const addProduct = async (req, res) => {
   }
 };
 
+const { getAllProducts } = require('../models/productModel');
+
 // Get all products (Optional)
 const getProducts = async (req, res) => {
   try {
@@ -27,5 +30,7 @@ const getProducts = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
 
 module.exports = { addProduct, getProducts };
