@@ -18,9 +18,10 @@ const addProduct = async (req, res) => {
   }
 };
 
+// Get all products 
 const { getAllProducts } = require('../models/productModel');
 
-// Get all products (Optional)
+
 const getProducts = async (req, res) => {
   try {
     const products = await getAllProducts();
@@ -31,6 +32,27 @@ const getProducts = async (req, res) => {
   }
 };
 
+//update
+const { updateProduct } = require('../models/productModel');  // Import updateProduct function
+
+const updateProductDetails = async (req, res) => {
+  const { product_id, name, description, price, stock_quantity, category } = req.body;
+
+  // Validate input data
+  if (!product_id || !name || !description || !price || !stock_quantity || !category) {
+    return res.status(400).json({ error: 'All fields are required.' });
+  }
+
+  try {
+    const updatedProduct = await updateProduct(product_id, name, description, price, stock_quantity, category);
+    res.status(200).json({ message: 'Product updated successfully', product: updatedProduct });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 
-module.exports = { addProduct, getProducts };
+
+
+module.exports = { addProduct, getProducts,updateProductDetails };
