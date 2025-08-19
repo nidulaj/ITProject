@@ -1,4 +1,4 @@
-const {createCustomer, findUserByEmail, login, updateProfile, deleteProfile, accountStatus} = require("../models/customerAuthModel");
+const {createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, accountStatus} = require("../models/customerAuthModel");
 
 const registerCustomer = async (req, res) => {
     const { firstName, lastName, email, phone, address, password } = req.body;
@@ -56,5 +56,21 @@ const updateUserProfile = async (req, res) => {
     }
 };
 
+const selfDeleteUserProfile = async (req, res) => {
+    const { id } = req.body;
 
-module.exports = { registerCustomer, loginCustomer, updateUserProfile };
+    try {
+        const deletedCustomer = await selfDeleteProfile(id);
+
+        if (!deletedCustomer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+
+        res.status(200).json({ message: "Account deleted. Recoverable for 30 days.", customer: deletedCustomer });
+    } catch (error) {
+        console.error("Error deleting customer profile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+module.exports = { registerCustomer, loginCustomer, updateUserProfile, selfDeleteUserProfile };
