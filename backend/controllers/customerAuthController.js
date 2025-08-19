@@ -4,9 +4,11 @@ const {
   login,
   updateProfile,
   selfDeleteProfile,
+  storeVerificationCode,
+  getVerificationDetails
 } = require("../models/customerAuthModel");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
-
+const {sendSMS} = require("../utils/smsService");
 const jwt = require("jsonwebtoken");
 
 
@@ -158,11 +160,51 @@ const logout = (req, res) => {
   res.status(200).json({ message: "Logout successful" });
 };
 
+
+const phoneNumberVerificationSend = async (req, res) => {
+  const { customerId, phoneNumber } = req.body;
+
+  try {
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+    await sendSMS(phoneNumber, verificationCode);
+    await storeVerificationCode(customerId, verificationCode);
+    res.status(200).json({ message: "Verification code sent successfully" });
+
+  } catch (error) {
+    console.error("Error sending verification code:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+const verifyVerificationCode = async (req, res) => {
+  const { customerId, code } = req.body;
+
+  try {
+    const verificationInfo = await getVerificationDetails(customerId);
+    if (!code || verificationInfo.verification_code !== code) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    if (new Date() > new Date(verificationInfo.verification_code_expires)) {
+      return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    res.status(200).json({ message: "Verification successful" });
+
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 module.exports = {
   registerCustomer,
   loginCustomer,
   updateUserProfile,
   selfDeleteUserProfile,
   refreshToken,
-  logout
+  logout,
+  phoneNumberVerificationSend,
+  verifyVerificationCode
 };
