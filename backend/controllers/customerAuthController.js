@@ -166,7 +166,7 @@ const phoneNumberVerificationSend = async (req, res) => {
 
   try {
     const verificationCode = Math.floor(100000 + Math.random() * 900000);
-    //await sendSMS(phoneNumber, verificationCode);
+    await sendSMS(phoneNumber, verificationCode);
     await storeVerificationCode(customerId, verificationCode);
     res.status(200).json({ message: "Verification code sent successfully" });
 
