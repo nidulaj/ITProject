@@ -43,7 +43,7 @@ const storeVerificationCode = async (id, code) => {
 };
 
 const getVerificationDetails = async (id) => {
-    const query = "SELECT verification_code, verification_code_expires FROM customers WHERE cus_id=$1";
+    const query = "SELECT verification_code_expires, verification_code FROM customers WHERE cus_id=$1";
     const values = [id];
     const result = await pool.query(query, values);
     return result.rows[0];

@@ -1,4 +1,4 @@
-require(".dotenv").config();
+require("dotenv").config();
 const twilio = require("twilio");
 
 const client = new twilio(
@@ -20,4 +20,4 @@ const sendSMS = async (toPhone, code) => {
   }
 };
 
-module.exports = sendSMS;
+module.exports = {sendSMS};

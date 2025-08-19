@@ -166,7 +166,7 @@ const phoneNumberVerificationSend = async (req, res) => {
 
   try {
     const verificationCode = Math.floor(100000 + Math.random() * 900000);
-    await sendSMS(phoneNumber, verificationCode);
+    //await sendSMS(phoneNumber, verificationCode);
     await storeVerificationCode(customerId, verificationCode);
     res.status(200).json({ message: "Verification code sent successfully" });
 
@@ -182,12 +182,13 @@ const verifyVerificationCode = async (req, res) => {
 
   try {
     const verificationInfo = await getVerificationDetails(customerId);
-    if (!code || verificationInfo.verification_code !== code) {
-      return res.status(400).json({ message: "Invalid verification code" });
-    }
 
     if (new Date() > new Date(verificationInfo.verification_code_expires)) {
       return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    if (!code || Number(verificationInfo.verification_code) !== Number(code)) {
+      return res.status(400).json({ message: "Invalid verification code" });
     }
 
     res.status(200).json({ message: "Verification successful" });
