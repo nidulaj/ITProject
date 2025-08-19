@@ -52,7 +52,24 @@ const updateProductDetails = async (req, res) => {
   }
 };
 
+// Delete a product from the database
+const { deleteProduct } = require('../models/productModel');  // Import deleteProduct function
+
+
+const deleteProductDetails = async (req, res) => {
+  const { id } = req.params;  // Get the product_id from the URL parameters
+
+  try {
+    const deletedProduct = await deleteProduct(id);
+    res.status(200).json({ message: 'Product deleted successfully', product: deletedProduct });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 
 
-module.exports = { addProduct, getProducts,updateProductDetails };
+
+
+module.exports = { addProduct, getProducts,updateProductDetails,deleteProductDetails };

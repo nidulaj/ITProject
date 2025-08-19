@@ -46,5 +46,27 @@ const updateProduct = async (product_id, name, description, price, stock_quantit
 
 
 
+// Delete a product from the database
+const deleteProduct = async (product_id) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM products WHERE product_id = $1 RETURNING *',
+      [product_id]  // Use the product_id to delete the correct product
+    );
 
-module.exports = { createProduct, getAllProducts,updateProduct };
+    if (result.rows.length === 0) {
+      throw new Error('Product not found');  // If no product was deleted
+    }
+
+    return result.rows[0];  // Return the deleted product (optional)
+  } catch (error) {
+    console.error('Error deleting product:', error.message);
+    throw error;  // Rethrow the error to handle it in the controller
+  }
+};
+
+
+
+
+
+module.exports = { createProduct, getAllProducts,updateProduct,deleteProduct };
