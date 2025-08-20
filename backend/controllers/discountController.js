@@ -53,9 +53,98 @@ const deleteDiscountController = async (req, res) => {
   }
 };
 
+// ---------------- Discount Logic ----------------
+
+// Check if discount is currently active (for seasonal offers)
+function isDiscountActive(discount) {
+  const today = new Date();
+  return today >= new Date(discount.valid_from) && today <= new Date(discount.valid_to);
+}
+
+// Check eligibility based on criteria
+function isEligible(totalPrice, discount) {
+  const criteria = discount.eligibility_criteria;
+
+  if (!criteria) return true; // No criteria → eligible by default
+
+  if (criteria === "seasonal") {
+    // Seasonal offers are handled by isDiscountActive
+    return true;
+  }
+
+  // Total price thresholds
+  if (criteria.startsWith("totalPrice>")) {
+    const minPrice = parseFloat(criteria.split(">")[1]);
+    return totalPrice >= minPrice;
+  }
+
+  // Default to eligible if unknown criteria
+  return true;
+}
+
+// Apply discount based on type
+function applyDiscount(totalPrice, discount) {
+  if (discount.discount_type === "Percentage") {
+    return totalPrice - (totalPrice * (discount.value / 100));
+  } else if (discount.discount_type === "Fixed") {
+    return totalPrice - discount.value;
+  }
+  return totalPrice;
+}
+
+// Calculate the best discount among eligible discounts
+function calculateBestDiscount(totalPrice, discounts) {
+  let bestPrice = totalPrice;
+  let bestDiscount = null;
+
+  discounts.forEach(discount => {
+    // For seasonal offers, check the date validity
+    if (discount.eligibility_criteria === "seasonal" && !isDiscountActive(discount)) {
+      return; // skip if seasonal and not active
+    }
+
+    // Check total price / other eligibility
+    if (isEligible(totalPrice, discount)) {
+      const discountedPrice = applyDiscount(totalPrice, discount);
+      if (discountedPrice < bestPrice) {
+        bestPrice = discountedPrice;
+        bestDiscount = discount;
+      }
+    }
+  });
+
+  return {
+    originalPrice: totalPrice,
+    finalPrice: bestPrice,
+    discountApplied: bestDiscount
+  };
+}
+
+// ---------------- Controllers ----------------
+
+// Apply best discount
+const applyBestDiscount = async (req, res) => {
+  try {
+    const { totalPrice } = req.body;
+
+    if (!totalPrice) {
+      return res.status(400).json({ error: "Total price is required" });
+    }
+
+    const discounts = await getAllDiscounts();
+    const result = calculateBestDiscount(totalPrice, discounts);
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error applying discount:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createDiscountController,
   getAllDiscountsController,
   updateDiscountController,
-  deleteDiscountController
+  deleteDiscountController,
+  applyBestDiscount //changed
 };
