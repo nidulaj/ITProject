@@ -2,6 +2,8 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const {connectDB} = require('./db/dbConnect');
+
+const discountRoutes = require('./routes/discountRoutes')
 const ingredientRoutes = require('./routes/ingredientRoutes');
 const specialRoutes=require('./routes/specialRoutes');
 const finalRoutes=require('./routes/finalRoutes');
@@ -30,10 +32,7 @@ app.use('/api/ingredient', ingredientRoutes);
 app.use('/api/special',specialRoutes);
 app.use('/api/final',finalRoutes);
 app.use('/api/store',storeRoutes);
-
-
-
-
+app.use('/api/discounts', discountRoutes);
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");
