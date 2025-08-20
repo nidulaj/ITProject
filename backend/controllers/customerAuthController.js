@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const {
   createCustomer,
   findUserByEmail,
@@ -6,10 +7,12 @@ const {
   selfDeleteProfile,
   storeVerificationCode,
   getVerificationDetails
+  , deleteVerificationCode
 } = require("../models/customerAuthModel");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 const {sendSMS} = require("../utils/smsService");
-const jwt = require("jsonwebtoken");
+const {send2FACode, sendVerificationLink, sendResetPasswordLink} = require("../utils/emailService");
+
 
 
 const registerCustomer = async (req, res) => {
@@ -49,6 +52,19 @@ const loginCustomer = async (req, res) => {
 
     if (!customer.is_active) {
       return res.status(403).json({ message: "Account is disabled" });
+    }
+
+    // if (!customer.is_verified) {
+    //   const verificationLink = `http://yourfrontend.com/verify-email?token=${customer.verification_token}`;
+    //   await sendVerificationLink(customer.email, verificationLink);
+    //   return res.status(403).json({ message: "Account not verified. Verification link sent." });
+    // }
+    console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
+    if (customer.is_2FA_enabled) {
+      const verificationCode = Math.floor(100000 + Math.random() * 900000);
+      await send2FACode(customer.email, verificationCode);
+      await storeVerificationCode(customer.cus_id, verificationCode);
+      return res.status(403).json({ message: "2FA code sent to email" });
     }
 
     const accessToken = generateAccessToken(customer);
@@ -166,7 +182,7 @@ const phoneNumberVerificationSend = async (req, res) => {
 
   try {
     const verificationCode = Math.floor(100000 + Math.random() * 900000);
-    await sendSMS(phoneNumber, verificationCode);
+    // await sendSMS(phoneNumber, verificationCode);
     await storeVerificationCode(customerId, verificationCode);
     res.status(200).json({ message: "Verification code sent successfully" });
 
@@ -191,6 +207,7 @@ const verifyVerificationCode = async (req, res) => {
       return res.status(400).json({ message: "Invalid verification code" });
     }
 
+    await deleteVerificationCode(customerId);
     res.status(200).json({ message: "Verification successful" });
 
   } catch (error) {

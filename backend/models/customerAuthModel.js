@@ -49,4 +49,11 @@ const getVerificationDetails = async (id) => {
     return result.rows[0];
 };
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails };
+const deleteVerificationCode = async (id) => {
+    const query = "UPDATE customers SET verification_code=NULL, verification_code_expires=NULL WHERE cus_id=$1";
+    const values = [id];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+};
+
+module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode };
