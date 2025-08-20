@@ -5,16 +5,14 @@ const {connectDB} = require('./db/dbConnect');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 connectDB();
 
-// Use the product routes
 app.use('/api/products', productRoutes);
-
-//use order routes
 app.use('/api/orders',orderRoutes);
 
 app.listen(5000, () => {
