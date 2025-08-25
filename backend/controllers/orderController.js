@@ -24,7 +24,7 @@ const placeOrder = async (req, res) => {
   }
 };
 
-// Function to get orders for a customer
+// Function to get orders for customer
 const getCustomerOrders = async (req, res) => {
   const { customer_id } = req.params;
   try {
