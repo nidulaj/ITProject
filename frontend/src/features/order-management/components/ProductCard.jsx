@@ -1,4 +1,14 @@
 const ProductCard = ({ product, onEdit, onDelete, loading }) => {
+  // Debug logging to check product data
+  console.log('ProductCard received product:', product);
+  console.log('Product name:', product.name);
+  console.log('Product description:', product.description);
+  console.log('All product keys:', Object.keys(product));
+  console.log('Product name field exists:', 'name' in product);
+  console.log('Product description field exists:', 'description' in product);
+  console.log('Product product_name field:', product.product_name);
+  console.log('Product product_description field:', product.product_description);
+  
   const getImageSrc = () => {
     if (product.image) {
       // If image is base64 string
@@ -22,7 +32,7 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
         <div className="product-image">
           <img 
             src={getImageSrc()} 
-            alt={product.name}
+            alt={product.name || product.product_name || 'Product'}
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'flex';
@@ -41,8 +51,8 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
       )}
       
       <div className="product-info">
-        <h3>{product.name}</h3>
-        <p className="description">{product.description}</p>
+        <h3>{product.name || product.product_name || 'No Name'}</h3>
+        <p className="description">{product.description || product.product_description || 'No Description'}</p>
         <div className="product-details">
           <span className="price">${product.price}</span>
           <span className="stock">Stock: {product.stock_quantity}</span>

@@ -20,6 +20,8 @@ const ProductCatalog = () => {
     try {
       setLoading(true);
       const response = await axios.get(API_BASE_URL);
+      console.log('API Response:', response.data);
+      console.log('Products received:', response.data.products);
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);

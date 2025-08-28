@@ -35,6 +35,14 @@ const { getAllProducts } = require('../models/productModel');
 const getProducts = async (req, res) => {
   try {
     const products = await getAllProducts();
+    console.log('Raw products from database:', products);
+    console.log('First product structure:', products[0]);
+    if (products[0]) {
+      console.log('First product name field:', products[0].name);
+      console.log('First product description field:', products[0].description);
+      console.log('First product product_name field:', products[0].product_name);
+      console.log('First product product_description field:', products[0].product_description);
+    }
     res.status(200).json({ products });
   } catch (error) {
     console.error('Error fetching products:', error);

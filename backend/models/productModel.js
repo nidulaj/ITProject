@@ -16,7 +16,25 @@ const createProduct = async (name, description, price, stock_quantity, category,
     }
     
     const result = await pool.query(query, values);
-    return result.rows[0];  // Return the inserted product (including product_id)
+    
+    // Map database field names to frontend expected field names
+    const newProduct = {
+      product_id: result.rows[0].product_id,
+      name: result.rows[0].product_name,  // Map product_name to name
+      description: result.rows[0].product_description,  // Map product_description to description
+      price: result.rows[0].price,
+      stock_quantity: result.rows[0].stock_quantity,
+      category: result.rows[0].category,
+      created_at: result.rows[0].created_at,
+      updated_at: result.rows[0].updated_at
+    };
+    
+    // Convert image buffer to base64 for frontend response
+    if (result.rows[0].product_image) {
+      newProduct.image = result.rows[0].product_image.toString('base64');
+    }
+    
+    return newProduct;
   } catch (error) {
     console.error('Error creating product:', error.message);
     console.error(error.stack);
@@ -29,14 +47,34 @@ const createProduct = async (name, description, price, stock_quantity, category,
 const getAllProducts = async () => {
   try {
     const result = await pool.query('SELECT * FROM products');
-    // Convert image buffer to base64 for frontend
+    console.log('Raw database result:', result.rows[0]);
+    if (result.rows[0]) {
+      console.log('Database columns:', Object.keys(result.rows[0]));
+    }
+    // Convert field names and image buffer to match frontend expectations
     const products = result.rows.map(product => {
+      console.log('Processing product:', product);
+      const mappedProduct = {
+        product_id: product.product_id,
+        name: product.product_name,  // Map product_name to name
+        description: product.product_description,  // Map product_description to description
+        price: product.price,
+        stock_quantity: product.stock_quantity,
+        category: product.category,
+        created_at: product.created_at,
+        updated_at: product.updated_at
+      };
+      
+      console.log('Mapped product:', mappedProduct);
+      
+      // Convert image buffer to base64 for frontend
       if (product.product_image) {
-        product.image = product.product_image.toString('base64');
-        delete product.product_image; // Remove the original buffer field
+        mappedProduct.image = product.product_image.toString('base64');
       }
-      return product;
+      
+      return mappedProduct;
     });
+    console.log('Final products array:', products);
     return products;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -63,11 +101,21 @@ const updateProduct = async (product_id, name, description, price, stock_quantit
     
     const result = await pool.query(query, values);
     
+    // Map database field names to frontend expected field names
+    const updatedProduct = {
+      product_id: result.rows[0].product_id,
+      name: result.rows[0].product_name,  // Map product_name to name
+      description: result.rows[0].product_description,  // Map product_description to description
+      price: result.rows[0].price,
+      stock_quantity: result.rows[0].stock_quantity,
+      category: result.rows[0].category,
+      created_at: result.rows[0].created_at,
+      updated_at: result.rows[0].updated_at
+    };
+    
     // Convert image buffer to base64 for frontend response
-    const updatedProduct = result.rows[0];
-    if (updatedProduct.product_image) {
-      updatedProduct.image = updatedProduct.product_image.toString('base64');
-      delete updatedProduct.product_image;
+    if (result.rows[0].product_image) {
+      updatedProduct.image = result.rows[0].product_image.toString('base64');
     }
     
     return updatedProduct;
