@@ -6,14 +6,16 @@ const {
   updateProfile,
   selfDeleteProfile,
   storeVerificationCode,
-  getVerificationDetails
-  , deleteVerificationCode
+  getVerificationDetails,
+  deleteVerificationCode,
 } = require("../models/customerAuthModel");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
-const {sendSMS} = require("../utils/smsService");
-const {send2FACode, sendVerificationLink, sendResetPasswordLink} = require("../utils/emailService");
-
-
+const { sendSMS } = require("../utils/smsService");
+const {
+  send2FACode,
+  sendVerificationLink,
+  sendResetPasswordLink,
+} = require("../utils/emailService");
 
 const registerCustomer = async (req, res) => {
   const { firstName, lastName, email, phone, address, password } = req.body;
@@ -33,13 +35,14 @@ const registerCustomer = async (req, res) => {
       address,
       password
     );
-    res.status(201).json(customer);
+    res
+      .status(201)
+      .json({ message: "Customer registered successfully", customer });
   } catch (error) {
     console.error("Error registering customer:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
@@ -59,11 +62,20 @@ const loginCustomer = async (req, res) => {
     //   await sendVerificationLink(customer.email, verificationLink);
     //   return res.status(403).json({ message: "Account not verified. Verification link sent." });
     // }
-    console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
+    //console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
     if (customer.is_2FA_enabled) {
       const verificationCode = Math.floor(100000 + Math.random() * 900000);
       await send2FACode(customer.email, verificationCode);
       await storeVerificationCode(customer.cus_id, verificationCode);
+
+      const tempToken = generateTempToken(customer);
+
+      res.cookie("tempToken", tempToken, {
+        httpOnly: true,
+        secure: true, // set true in production (HTTPS)
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
       return res.status(403).json({ message: "2FA code sent to email" });
     }
 
@@ -83,14 +95,15 @@ const loginCustomer = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
-    res.status(200).json({ message: "Login successful", accessToken, refreshToken });
+    console.log("Login successful, tokens set in cookies");
+    res
+      .status(200)
+      .json({ message: "Login successful", accessToken, refreshToken });
   } catch (error) {
     console.error("Error logging in customer:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const updateUserProfile = async (req, res) => {
   const { id, firstName, lastName, phone, address } = req.body;
@@ -108,18 +121,15 @@ const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Customer profile updated successfully",
-        customer: updatedCustomer,
-      });
+    res.status(200).json({
+      message: "Customer profile updated successfully",
+      customer: updatedCustomer,
+    });
   } catch (error) {
     console.error("Error updating customer profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const selfDeleteUserProfile = async (req, res) => {
   const { id } = req.body;
@@ -131,18 +141,15 @@ const selfDeleteUserProfile = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
-    res
-      .status(200)
-      .json({
-        message: "Account deleted. Recoverable for 30 days.",
-        customer: deletedCustomer,
-      });
+    res.status(200).json({
+      message: "Account deleted. Recoverable for 30 days.",
+      customer: deletedCustomer,
+    });
   } catch (error) {
     console.error("Error deleting customer profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const refreshToken = async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
@@ -160,22 +167,25 @@ const refreshToken = async (req, res) => {
       secure: true,
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
-    }); 
+    });
 
-    res.status(200).json({ message: "Access Tokens refreshed", accessToken: newAccessToken});
+    res
+      .status(200)
+      .json({
+        message: "Access Tokens refreshed",
+        accessToken: newAccessToken,
+      });
   } catch (error) {
     console.error("Error refreshing tokens:", error);
     res.status(403).json({ message: "Invalid refresh token" });
   }
 };
 
-
 const logout = (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logout successful" });
 };
-
 
 const phoneNumberVerificationSend = async (req, res) => {
   const { customerId, phoneNumber } = req.body;
@@ -185,16 +195,16 @@ const phoneNumberVerificationSend = async (req, res) => {
     // await sendSMS(phoneNumber, verificationCode);
     await storeVerificationCode(customerId, verificationCode);
     res.status(200).json({ message: "Verification code sent successfully" });
-
   } catch (error) {
     console.error("Error sending verification code:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-
 const verifyVerificationCode = async (req, res) => {
-  const { customerId, code } = req.body;
+  const customerId = req.user.id;
+  const { code } = req.body;
+  console.log(customerId, code);
 
   try {
     const verificationInfo = await getVerificationDetails(customerId);
@@ -209,12 +219,11 @@ const verifyVerificationCode = async (req, res) => {
 
     await deleteVerificationCode(customerId);
     res.status(200).json({ message: "Verification successful" });
-
   } catch (error) {
     console.error("Error verifying code:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 module.exports = {
   registerCustomer,
@@ -224,5 +233,5 @@ module.exports = {
   refreshToken,
   logout,
   phoneNumberVerificationSend,
-  verifyVerificationCode
+  verifyVerificationCode,
 };
