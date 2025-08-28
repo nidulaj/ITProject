@@ -32,18 +32,51 @@ const ProductCatalog = () => {
   const handleAddProduct = async (formData) => {
     try {
       setLoading(true);
-      await axios.post(API_BASE_URL, {
-        ...formData,
-        price: parseFloat(formData.price),
-        stock_quantity: parseInt(formData.stock_quantity)
+      
+      // Create FormData for file upload
+      const productData = new FormData();
+      productData.append('name', formData.name);
+      productData.append('description', formData.description);
+      productData.append('price', parseFloat(formData.price));
+      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('category', formData.category);
+      
+      if (formData.image) {
+        productData.append('image', formData.image);
+      }
+      
+      console.log('Sending product data:', {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        stock_quantity: formData.stock_quantity,
+        category: formData.category,
+        hasImage: !!formData.image
       });
+      
+      const response = await axios.post(API_BASE_URL, productData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      console.log('Product added successfully:', response.data);
       
       // Refresh products list to get the new product with ID
       await fetchProducts();
       alert('Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Failed to add product');
+      
+      let errorMessage = 'Failed to add product';
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage += ': ' + error.response.data.details;
+        }
+      }
+      
+      alert(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -53,26 +86,53 @@ const ProductCatalog = () => {
   const handleUpdateProduct = async (formData) => {
     try {
       setLoading(true);
-      await axios.put(`${API_BASE_URL}/${editingProduct.product_id}`, {
-        product_id: editingProduct.product_id,
-        ...formData,
-        price: parseFloat(formData.price),
-        stock_quantity: parseInt(formData.stock_quantity)
+      
+      // Create FormData for file upload
+      const productData = new FormData();
+      productData.append('name', formData.name);
+      productData.append('description', formData.description);
+      productData.append('price', parseFloat(formData.price));
+      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('category', formData.category);
+      
+      if (formData.image) {
+        productData.append('image', formData.image);
+      }
+      
+      console.log('Updating product with ID:', editingProduct.product_id);
+      console.log('Sending update data:', {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        stock_quantity: formData.stock_quantity,
+        category: formData.category,
+        hasImage: !!formData.image
       });
       
-      setProducts(prev => 
-        prev.map(product => 
-          product.product_id === editingProduct.product_id 
-            ? { ...product, ...formData, price: parseFloat(formData.price), stock_quantity: parseInt(formData.stock_quantity) }
-            : product
-        )
-      );
+      const response = await axios.put(`${API_BASE_URL}/${editingProduct.product_id}`, productData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       
+      console.log('Product updated successfully:', response.data);
+      
+      // Refresh products list to get updated data with image
+      await fetchProducts();
       setEditingProduct(null);
       alert('Product updated successfully!');
     } catch (error) {
       console.error('Error updating product:', error);
-      alert('Failed to update product');
+      
+      let errorMessage = 'Failed to update product';
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage += ': ' + error.response.data.details;
+        }
+      }
+      
+      alert(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -90,12 +150,25 @@ const ProductCatalog = () => {
 
     try {
       setLoading(true);
-      await axios.delete(`${API_BASE_URL}/${productId}`);
+      console.log('Deleting product with ID:', productId);
+      
+      const response = await axios.delete(`${API_BASE_URL}/${productId}`);
+      console.log('Product deleted successfully:', response.data);
+      
       setProducts(prev => prev.filter(product => product.product_id !== productId));
       alert('Product deleted successfully!');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      
+      let errorMessage = 'Failed to delete product';
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage += ': ' + error.response.data.details;
+        }
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

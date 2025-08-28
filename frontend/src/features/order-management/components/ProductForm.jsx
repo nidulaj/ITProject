@@ -6,8 +6,10 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
     description: '',
     price: '',
     stock_quantity: '',
-    category: ''
+    category: '',
+    image: null
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   // Update form when editing product changes
   useEffect(() => {
@@ -17,16 +19,25 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
         description: editingProduct.description,
         price: editingProduct.price.toString(),
         stock_quantity: editingProduct.stock_quantity.toString(),
-        category: editingProduct.category
+        category: editingProduct.category,
+        image: null // Reset image when editing
       });
+      // Set image preview if product has an image
+      if (editingProduct.image) {
+        setImagePreview(`data:image/jpeg;base64,${editingProduct.image}`);
+      } else {
+        setImagePreview(null);
+      }
     } else {
       setFormData({
         name: '',
         description: '',
         price: '',
         stock_quantity: '',
-        category: ''
+        category: '',
+        image: null
       });
+      setImagePreview(null);
     }
   }, [editingProduct]);
 
@@ -38,11 +49,53 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        image: file
+      }));
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: null
+    }));
+    setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('image');
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name || !formData.description || !formData.price || !formData.stock_quantity || !formData.category) {
-      alert('Please fill in all fields');
+      alert('Please fill in all required fields (name, description, price, stock quantity, and category)');
       return;
     }
 
@@ -59,8 +112,15 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
         description: '',
         price: '',
         stock_quantity: '',
-        category: ''
+        category: '',
+        image: null
       });
+      setImagePreview(null);
+      // Reset file input
+      const fileInput = document.getElementById('image');
+      if (fileInput) {
+        fileInput.value = '';
+      }
     } catch (error) {
       // Error handling is done in parent component
     }
@@ -137,6 +197,36 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             required
           />
         </div>
+
+        <div className="form-group">
+          <label htmlFor="image">Product Image:</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="file-input"
+          />
+          <small className="file-help">Supported formats: JPG, PNG, GIF (Max: 5MB)</small>
+        </div>
+
+        {imagePreview && (
+          <div className="image-preview-container">
+            <label>Image Preview:</label>
+            <div className="image-preview">
+              <img src={imagePreview} alt="Product preview" />
+              <button 
+                type="button" 
+                onClick={removeImage}
+                className="remove-image-btn"
+                title="Remove image"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="form-buttons">
           <button type="submit" disabled={loading}>
