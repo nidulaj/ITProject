@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import { useNavigate , Link } from "react-router-dom";
 
 export default function Register() {
   const [userData, setUserData] = React.useState({
@@ -35,63 +36,83 @@ export default function Register() {
 
   return (
     <div>
-      <form className="register-form" onSubmit={handleSubmit}>
-        <label htmlFor="firstName">First Name:</label>
-        <input
-          type="text"
-          id="firstName"
-          name="firstName"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="lastName">Last Name:</label>
-        <input
-          type="text"
-          id="lastName"
-          name="lastName"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="phone">Phone:</label>
-        <input
-          type="text"
-          id="phone"
-          name="phone"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="address">Address:</label>
-        <input
-          type="text"
-          id="address"
-          name="address"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          required
-          onChange={handleChange}
-        />
-
-        <button type="submit">Register</button>
-      </form>
+  <h2>Register</h2>
+  <form className="register-form" onSubmit={handleSubmit}>
+    <div>
+      <label htmlFor="firstName">First Name:</label><br />
+      <input
+        type="text"
+        id="firstName"
+        name="firstName"
+        required
+        onChange={handleChange}
+      />
     </div>
+
+    <div>
+      <label htmlFor="lastName">Last Name:</label><br />
+      <input
+        type="text"
+        id="lastName"
+        name="lastName"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <label htmlFor="email">Email:</label><br />
+      <input
+        type="email"
+        id="email"
+        name="email"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <label htmlFor="phone">Phone:</label><br />
+      <input
+        type="text"
+        id="phone"
+        name="phone"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <label htmlFor="address">Address:</label><br />
+      <input
+        type="text"
+        id="address"
+        name="address"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <label htmlFor="password">Password:</label><br />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <button type="submit">Register</button>
+    </div>
+
+    <div>
+      <Link to="/login">Login</Link>
+    </div>
+  </form>
+</div>
+
   );
 }

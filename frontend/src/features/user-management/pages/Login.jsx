@@ -1,8 +1,12 @@
-import React from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../../../components/AuthContext";
+import { useNavigate , Link } from "react-router-dom";
 
 export default function Login() {
-  const [credentials, setCredentials] = React.useState({
+  const { setIsLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [credentials, setCredentials] = useState({
     email: "",
     password: "",
   });
@@ -18,9 +22,18 @@ export default function Login() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/login",
-        credentials
+        credentials, { withCredentials: true }
       );
-      console.log(res.data.message);
+
+      if(res.data.is_2FA_enabled){
+        navigate("/verify2FA");
+        console.log(res.data.message);
+      }else{
+        navigate("/dashboard");
+        setIsLoggedIn(true);
+        console.log(res.data.message);
+      }
+      
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
@@ -31,27 +44,39 @@ export default function Login() {
   };
   return (
     <div>
-      <form className="login-form" onSubmit={handleSubmit}>
-        <label htmlFor="email">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          required
-          onChange={handleChange}
-        />
-
-        <label htmlFor="password">Password:</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          required
-          onChange={handleChange}
-        />
-
-        <button type="submit">Login</button>
-      </form>
+  <h2>Login</h2>
+  <form onSubmit={handleSubmit}>
+    <div>
+      <label htmlFor="email">Email:</label><br />
+      <input
+        type="email"
+        id="email"
+        name="email"
+        required
+        onChange={handleChange}
+      />
     </div>
+
+    <div>
+      <label htmlFor="password">Password:</label><br />
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        onChange={handleChange}
+      />
+    </div>
+
+    <div>
+      <button type="submit">Login</button>
+    </div>
+    
+    <div>
+      <Link to="/register">Register</Link>
+    </div>
+  </form>
+</div>
+
   );
 }

@@ -8,8 +8,15 @@ const {
   storeVerificationCode,
   getVerificationDetails,
   deleteVerificationCode,
+  emailVerification,
+  findUserById
 } = require("../models/customerAuthModel");
-const { generateAccessToken, generateRefreshToken } = require("../utils/token");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  generateTempToken,
+  generateEmailVerificationToken
+} = require("../utils/token");
 const { sendSMS } = require("../utils/smsService");
 const {
   send2FACode,
@@ -57,12 +64,14 @@ const loginCustomer = async (req, res) => {
       return res.status(403).json({ message: "Account is disabled" });
     }
 
-    // if (!customer.is_verified) {
-    //   const verificationLink = `http://yourfrontend.com/verify-email?token=${customer.verification_token}`;
-    //   await sendVerificationLink(customer.email, verificationLink);
-    //   return res.status(403).json({ message: "Account not verified. Verification link sent." });
-    // }
-    //console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
+    if (!customer.is_email_verified) {
+      const verificationToken = generateEmailVerificationToken(customer);
+      const verificationLink = `http://localhost:5000/api/auth/verify-email?token=${verificationToken}`;
+      await sendVerificationLink(customer.email, verificationLink);
+      return res.status(403).json({ message: "Account not verified. Verification link sent." });
+    }
+    console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
+
     if (customer.is_2FA_enabled) {
       const verificationCode = Math.floor(100000 + Math.random() * 900000);
       await send2FACode(customer.email, verificationCode);
@@ -72,11 +81,13 @@ const loginCustomer = async (req, res) => {
 
       res.cookie("tempToken", tempToken, {
         httpOnly: true,
-        secure: true, // set true in production (HTTPS)
+        secure: false, // set true in production (HTTPS)
         sameSite: "strict",
         maxAge: 15 * 60 * 1000, // 15 minutes
       });
-      return res.status(403).json({ message: "2FA code sent to email" });
+      return res
+        .status(200)
+        .json({ message: "2FA code sent to email", is_2FA_enabled: true });
     }
 
     const accessToken = generateAccessToken(customer);
@@ -84,14 +95,14 @@ const loginCustomer = async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true, // set true in production (HTTPS)
+      secure: false, // set true in production (HTTPS)
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
@@ -164,17 +175,15 @@ const refreshToken = async (req, res) => {
 
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Access Tokens refreshed",
-        accessToken: newAccessToken,
-      });
+    res.status(200).json({
+      message: "Access Tokens refreshed",
+      accessToken: newAccessToken,
+    });
   } catch (error) {
     console.error("Error refreshing tokens:", error);
     res.status(403).json({ message: "Invalid refresh token" });
@@ -225,6 +234,95 @@ const verifyVerificationCode = async (req, res) => {
   }
 };
 
+const verify2FACode = async (req, res) => {
+  const customerId = req.user.id;
+  const { code } = req.body;
+  console.log(customerId, code);
+
+  try {
+    const verificationInfo = await getVerificationDetails(customerId);
+
+    if (new Date() > new Date(verificationInfo.verification_code_expires)) {
+      return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    if (!code || Number(verificationInfo.verification_code) !== Number(code)) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+    await deleteVerificationCode(customerId);
+    const customer = req.user;
+    const accessToken = generateAccessToken(customer);
+    const refreshToken = generateRefreshToken(customer);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false, // set true in production (HTTPS)
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.clearCookie("tempToken");
+
+    console.log("Login successful, tokens set in cookies");
+    res
+      .status(200)
+      .json({ message: "Login successful", accessToken, refreshToken });
+  } catch (error) {
+    console.error("Error verifying code:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  const token = req.query.token;
+
+  try {
+  const user = jwt.verify(token, process.env.EMAIL_TOKEN_SECRET);
+  console.log("Email verification token valid for user:", user);
+
+  const customerId = user.id;
+
+  console.log("Calling emailVerification with customerId:", customerId);
+
+  const newStatus = await emailVerification(customerId);
+
+  console.log("Email verified, updated user:", newStatus);
+
+  res.redirect("http://localhost:5173/verifyEmail");
+} catch (err) {
+  console.error("Error in verifyEmail:", err);
+  res.status(400).json({ message: "Invalid or expired token" });
+}
+
+};
+
+const resend2FACode = async (req, res) => {
+  const customerId = req.user.id;
+
+  try {
+    const customer = await findUserById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000);
+    await send2FACode(customer.email, verificationCode);
+    await storeVerificationCode(customerId, verificationCode);
+
+    res.status(200).json({ message: "2FA code resent to email" });
+  } catch (error) {
+    console.error("Error resending 2FA code:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerCustomer,
   loginCustomer,
@@ -234,4 +332,7 @@ module.exports = {
   logout,
   phoneNumberVerificationSend,
   verifyVerificationCode,
+  verify2FACode,
+  verifyEmail,
+  resend2FACode
 };
