@@ -1,12 +1,20 @@
-import { useState } from 'react'
 import ProductCatalog from './features/order-management/pages/ProductCatalog'
-import './App.css'
+import ThemeProvider from './contexts/ThemeContext'
+import NotificationProvider from './contexts/NotificationContext'
+import DarkModeToggle from './components/DarkModeToggle'
+import NotificationContainer from './components/NotificationContainer'
 
 function App() {
   return (
-    <>
-      <ProductCatalog />
-    </>
+    <ThemeProvider>
+      <NotificationProvider>
+        <div className="relative">
+          <NotificationContainer />
+          <DarkModeToggle />
+          <ProductCatalog />
+        </div>
+      </NotificationProvider>
+    </ThemeProvider>
   )
 }
 
