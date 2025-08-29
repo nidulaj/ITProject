@@ -1,3 +1,4 @@
+import './App.css'
 import ProductCatalog from './features/order-management/pages/ProductCatalog'
 import ThemeProvider from './contexts/ThemeContext'
 import NotificationProvider from './contexts/NotificationContext'
