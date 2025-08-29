@@ -14,6 +14,13 @@ const findUserByEmail = async (email) => {
     return result.rows[0]
 };
 
+const findUserById = async (id) => {
+    const query = `SELECT * FROM "customers" WHERE "cus_id" = $1`;
+    const values = [id]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+};
+
 const login = async (email, password) => {
     const query = `SELECT * FROM "customers" WHERE "email" = $1 AND "password" = $2`;
     const values = [email, password]
@@ -56,4 +63,11 @@ const deleteVerificationCode = async (id) => {
     return result.rows[0];
 };
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode };
+const emailVerification =  async (id) => {
+    const query = 'UPDATE "customers" SET is_email_verified = true WHERE cus_id=$1 RETURNING *'
+    const values = [id]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+}
+
+module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById };
