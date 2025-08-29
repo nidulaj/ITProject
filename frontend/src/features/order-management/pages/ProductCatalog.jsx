@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
+import { useNotification } from '../../../contexts/NotificationContext';
 import './ProductCatalog.css';
 
-const ProductCatalog = () => {
+const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { showSuccess, showError } = useNotification();
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
 
@@ -25,7 +27,7 @@ const ProductCatalog = () => {
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert('Failed to fetch products');
+      showError('Failed to fetch products');
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ const ProductCatalog = () => {
       
       // Refresh products list to get the new product with ID
       await fetchProducts();
-      alert('Product added successfully!');
+      showSuccess('Product added successfully!');
     } catch (error) {
       console.error('Error adding product:', error);
       
@@ -78,7 +80,7 @@ const ProductCatalog = () => {
         }
       }
       
-      alert(errorMessage);
+      showError(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -122,7 +124,7 @@ const ProductCatalog = () => {
       // Refresh products list to get updated data with image
       await fetchProducts();
       setEditingProduct(null);
-      alert('Product updated successfully!');
+      showSuccess('Product updated successfully!');
     } catch (error) {
       console.error('Error updating product:', error);
       
@@ -134,7 +136,7 @@ const ProductCatalog = () => {
         }
       }
       
-      alert(errorMessage);
+      showError(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -158,7 +160,7 @@ const ProductCatalog = () => {
       console.log('Product deleted successfully:', response.data);
       
       setProducts(prev => prev.filter(product => product.product_id !== productId));
-      alert('Product deleted successfully!');
+      showSuccess('Product deleted successfully!');
     } catch (error) {
       console.error('Error deleting product:', error);
       
@@ -170,7 +172,7 @@ const ProductCatalog = () => {
         }
       }
       
-      alert(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -182,19 +184,22 @@ const ProductCatalog = () => {
 
   return (
     <div className="product-catalog-container">
-      <ProductForm
-        editingProduct={editingProduct}
-        loading={loading}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        onCancelEdit={handleCancelEdit}
-      />
-      <ProductGrid
-        products={products}
-        loading={loading}
-        onEditProduct={handleEditProduct}
-        onDeleteProduct={handleDeleteProduct}
-      />
+      <div className="catalog-content">
+        <ProductForm
+          editingProduct={editingProduct}
+          loading={loading}
+          onAddProduct={handleAddProduct}
+          onUpdateProduct={handleUpdateProduct}
+          onCancelEdit={handleCancelEdit}
+        />
+        
+        <ProductGrid
+          products={products}
+          loading={loading}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDeleteProduct}
+        />
+      </div>
     </div>
   );
 };

@@ -54,7 +54,7 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
         <h3>{product.name || product.product_name || 'No Name'}</h3>
         <p className="description">{product.description || product.product_description || 'No Description'}</p>
         <div className="product-details">
-          <span className="price">${product.price}</span>
+          <span className="price">LKR {product.price}</span>
           <span className="stock">Stock: {product.stock_quantity}</span>
           <span className="category">{product.category}</span>
         </div>

@@ -60,6 +60,10 @@
     @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-4;
   }
 
+  .customer-product-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+
   .product-card {
     @apply bg-white dark:bg-gray-800 rounded-xl p-0 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 overflow-hidden flex flex-col hover:transform hover:-translate-y-1 hover:shadow-lg;
   }
