@@ -123,10 +123,21 @@ const getSingleOrder = async (req, res) => {
       });
     }
 
+    // Fetch order items
+    let orderItems = [];
+    try {
+      orderItems = await getOrderItemsByOrderId(order_id);
+      console.log(`Retrieved ${orderItems.length} items for order ${order_id}`);
+    } catch (itemsError) {
+      console.error('Error fetching order items, continuing with empty array:', itemsError);
+      // Continue with empty items array
+    }
+
     console.log(`Retrieved order: ${order.order_id}`);
     res.status(200).json({ 
       success: true,
-      order: order 
+      order: order,
+      items: orderItems
     });
   } catch (error) {
     console.error('Error fetching single order:', error);

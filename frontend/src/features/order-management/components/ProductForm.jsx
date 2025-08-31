@@ -128,10 +128,10 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
 
   return (
     <div className="left-panel">
-      <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+      <h2 className="panel-title">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
       <form onSubmit={handleSubmit} className="product-form">
         <div className="form-group">
-          <label htmlFor="name">Product Name:</label>
+          <label htmlFor="name" className="form-label">Product Name:</label>
           <input
             type="text"
             id="name"
@@ -140,11 +140,12 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             onChange={handleInputChange}
             placeholder="Enter product name"
             required
+            className="form-input"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="description">Description:</label>
+          <label htmlFor="description" className="form-label">Description:</label>
           <textarea
             id="description"
             name="description"
@@ -153,11 +154,12 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             placeholder="Enter product description"
             rows="3"
             required
+            className="form-input form-textarea"
           ></textarea>
         </div>
 
         <div className="form-group">
-          <label htmlFor="price">Price (LKR):</label>
+          <label htmlFor="price" className="form-label">Price (LKR):</label>
           <input
             type="number"
             id="price"
@@ -168,11 +170,12 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             step="0.01"
             min="0"
             required
+            className="form-input"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="stock_quantity">Stock Quantity:</label>
+          <label htmlFor="stock_quantity" className="form-label">Stock Quantity:</label>
           <input
             type="number"
             id="stock_quantity"
@@ -182,11 +185,12 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             placeholder="Enter stock quantity"
             min="0"
             required
+            className="form-input"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="category">Category:</label>
+          <label htmlFor="category" className="form-label">Category:</label>
           <input
             type="text"
             id="category"
@@ -195,11 +199,12 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             onChange={handleInputChange}
             placeholder="Enter category"
             required
+            className="form-input"
           />
         </div>
 
         <div className="form-group">
-          <label htmlFor="image">Product Image:</label>
+          <label htmlFor="image" className="form-label">Product Image:</label>
           <input
             type="file"
             id="image"
@@ -213,7 +218,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
 
         {imagePreview && (
           <div className="image-preview-container">
-            <label>Image Preview:</label>
+            <label className="form-label">Image Preview:</label>
             <div className="image-preview">
               <img src={imagePreview} alt="Product preview" />
               <button 
@@ -229,11 +234,11 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
         )}
 
         <div className="form-buttons">
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} className="btn-primary">
             {loading ? 'Processing...' : (editingProduct ? 'Update Product' : 'Add Product')}
           </button>
           {editingProduct && (
-            <button type="button" onClick={onCancelEdit} className="cancel-btn">
+            <button type="button" onClick={onCancelEdit} className="btn-secondary">
               Cancel
             </button>
           )}

@@ -83,6 +83,35 @@ const getOrderById = async (order_id) => {
   }
 };
 
+// Get order items by order ID
+const getOrderItemsByOrderId = async (order_id) => {
+  try {
+    // First check if the order_items table exists
+    const tableCheck = await pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'order_items')"
+    );
+    
+    const tableExists = tableCheck.rows[0].exists;
+    
+    if (!tableExists) {
+      console.log('order_items table does not exist, returning empty array');
+      return [];
+    }
+    
+    const result = await pool.query(
+      'SELECT * FROM order_items WHERE order_id = $1',
+      [order_id]
+    );
+    
+    console.log(`Found ${result.rows.length} items for order ${order_id}`);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching order items by order ID:', error);
+    // Return empty array instead of throwing to prevent API failure
+    return [];
+  }
+};
+
 // Update order status
 const updateOrderStatus = async (order_id, order_status) => {
   try {
@@ -130,6 +159,7 @@ module.exports = {
   getAllOrders,
   getOrdersByCustomer,
   getOrderById,
+  getOrderItemsByOrderId,
   updateOrderStatus,
   updatePaymentStatus,
   deleteOrder

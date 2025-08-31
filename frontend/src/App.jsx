@@ -1,7 +1,8 @@
 import './App.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProductCatalog from './features/order-management/pages/ProductCatalog'
 import CustomerCatalog from './features/order-management/pages/CustomerCatalog'
+import OrderManagementDashboard from './features/order-management/pages/OrderManagementDashboard'
 import OrderManagement from './features/order-management/pages/OrderManagement'
 import ThemeProvider from './contexts/ThemeContext'
 import NotificationProvider from './contexts/NotificationContext'
@@ -9,6 +10,21 @@ import NotificationContainer from './components/NotificationContainer'
 
 function App() {
   const [currentView, setCurrentView] = useState('customer'); // Start with customer catalog
+
+  // Listen for navigation events from components
+  useEffect(() => {
+    const handleNavigation = (event) => {
+      if (event.detail && event.detail.view) {
+        setCurrentView(event.detail.view);
+      }
+    };
+
+    window.addEventListener('navigate', handleNavigation);
+    
+    return () => {
+      window.removeEventListener('navigate', handleNavigation);
+    };
+  }, []);
 
   return (
     <ThemeProvider>
@@ -20,7 +36,7 @@ function App() {
               <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
                 <button 
                   onClick={() => setCurrentView('orders')}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   📋 Orders
                 </button>
@@ -38,7 +54,7 @@ function App() {
               <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
                 <button 
                   onClick={() => setCurrentView('admin')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   ⚙️ Admin Panel
                 </button>
@@ -49,20 +65,46 @@ function App() {
                   🛍️ Customer Shop
                 </button>
               </div>
+              <OrderManagementDashboard />
+            </div>
+          ) : currentView === 'order-management' ? (
+            <div>
+              <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+                <button 
+                  onClick={() => setCurrentView('admin')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  ⚙️ Admin Panel
+                </button>
+                <button 
+                  onClick={() => setCurrentView('customer')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  🛍️ Customer Shop
+                </button>
+                <button 
+                  onClick={() => setCurrentView('orders')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  📋 Orders Dashboard
+                </button>
+              </div>
               <OrderManagement />
             </div>
           ) : (
             <div>
               <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
                 <button 
-                  onClick={() => setCurrentView('orders')}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  onClick={() => {
+                    setCurrentView('order-management');
+                  }}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   📋 Orders
                 </button>
                 <button 
                   onClick={() => setCurrentView('admin')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   ⚙️ Admin Panel
                 </button>

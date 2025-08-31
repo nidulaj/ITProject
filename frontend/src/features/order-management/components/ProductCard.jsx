@@ -51,26 +51,26 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
       )}
       
       <div className="product-info">
-        <h3>{product.name || product.product_name || 'No Name'}</h3>
-        <p className="description">{product.description || product.product_description || 'No Description'}</p>
+        <h3 className="product-title">{product.name || product.product_name || 'No Name'}</h3>
+        <p className="product-description">{product.description || product.product_description || 'No Description'}</p>
         <div className="product-details">
-          <span className="price">LKR {product.price}</span>
-          <span className="stock">Stock: {product.stock_quantity}</span>
-          <span className="category">{product.category}</span>
+          <span className="price-tag product-detail-item">LKR {product.price}</span>
+          <span className="stock-tag product-detail-item">Stock: {product.stock_quantity}</span>
+          <span className="category-tag product-detail-item">{product.category}</span>
         </div>
       </div>
       
       <div className="card-buttons">
         <button 
           onClick={() => onEdit(product)}
-          className="edit-btn"
+          className="card-btn edit-btn"
           disabled={loading}
         >
           Edit
         </button>
         <button 
           onClick={() => onDelete(product.product_id)}
-          className="delete-btn"
+          className="card-btn delete-btn"
           disabled={loading}
         >
           Delete

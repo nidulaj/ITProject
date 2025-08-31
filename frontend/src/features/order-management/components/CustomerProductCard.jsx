@@ -34,7 +34,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
   const isOutOfStock = product.stock_quantity === 0;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-200 hover:shadow-lg hover:transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-lg hover:transform hover:-translate-y-1">
       {/* Product Image */}
       <div className="relative h-40 overflow-hidden">
         {getImageSrc() ? (
@@ -49,7 +49,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
           />
         ) : null}
         <div 
-          className={`${getImageSrc() ? 'hidden' : 'flex'} w-full h-full bg-gray-100 dark:bg-gray-700 flex-col items-center justify-center text-gray-500 dark:text-gray-400`}
+          className={`${getImageSrc() ? 'hidden' : 'flex'} w-full h-full bg-gray-100 flex-col items-center justify-center text-gray-500`}
         >
           <span className="text-3xl mb-1">📷</span>
           <small className="text-xs">No image</small>
@@ -57,14 +57,14 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
         
         {/* Stock Badge */}
         {isOutOfStock && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+          <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
             Out of Stock
           </div>
         )}
         
         {/* Cart Indicator */}
         {cartItem && (
-          <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+          <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
             In Cart: {cartItem.quantity}
           </div>
         )}
@@ -72,20 +72,20 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
       
       {/* Product Info */}
       <div className="p-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-2">
+        <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
           {product.name || product.product_name || 'No Name'}
         </h3>
         
-        <p className="text-gray-600 dark:text-gray-300 text-xs mb-2 line-clamp-2">
+        <p className="text-gray-600 text-xs mb-2 line-clamp-2">
           {product.description || product.product_description || 'No Description'}
         </p>
         
         {/* Price and Stock */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-lg font-bold text-green-600 dark:text-green-400">
+          <span className="text-lg font-bold text-blue-600">
             LKR {product.price}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500">
             Stock: {product.stock_quantity}
           </span>
         </div>
@@ -93,7 +93,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
         {/* Category */}
         {product.category && (
           <div className="mb-3">
-            <span className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded">
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
               {product.category}
             </span>
           </div>
@@ -101,22 +101,22 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
         
         {/* Quantity Controls */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-xs text-gray-600 dark:text-gray-400">Quantity:</span>
+          <span className="text-xs text-gray-600">Quantity:</span>
           <div className="flex items-center space-x-2">
             <button
               onClick={decreaseQuantity}
               disabled={quantity <= 1}
-              className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 flex items-center justify-center text-sm font-bold hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               −
             </button>
-            <span className="w-8 text-center text-sm font-medium text-gray-900 dark:text-white">
+            <span className="w-8 text-center text-sm font-medium text-gray-900">
               {quantity}
             </span>
             <button
               onClick={increaseQuantity}
               disabled={quantity >= product.stock_quantity}
-              className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 flex items-center justify-center text-sm font-bold hover:bg-gray-300 dark:hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
               +
             </button>

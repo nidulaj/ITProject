@@ -182,23 +182,110 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
     setEditingProduct(null);
   };
 
+  // Navigation component similar to OrderManagementDashboard
+  const NavLink = ({ title, icon, isActive = false, onClick }) => {
+    return (
+      <button
+        onClick={onClick}
+        className={`w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'}`}
+      >
+        <div className="text-xl">{icon}</div>
+        <span className="font-medium">{title}</span>
+      </button>
+    );
+  };
+
+  const handleNavigation = (view) => {
+    window.dispatchEvent(new CustomEvent('navigate', { detail: { view } }));
+  };
+
   return (
-    <div className="product-catalog-container">
-      <div className="catalog-content">
-        <ProductForm
-          editingProduct={editingProduct}
-          loading={loading}
-          onAddProduct={handleAddProduct}
-          onUpdateProduct={handleUpdateProduct}
-          onCancelEdit={handleCancelEdit}
-        />
-        
-        <ProductGrid
-          products={products}
-          loading={loading}
-          onEditProduct={handleEditProduct}
-          onDeleteProduct={handleDeleteProduct}
-        />
+    <div className="flex min-h-screen">
+      {/* Left sidebar navigation */}
+      <div className="w-64 bg-white shadow-lg fixed h-full">
+        <div className="flex flex-col h-full">
+          <div className="p-6 mb-4 bg-blue-500">
+            <h1 className="text-xl font-bold text-white">Product Management</h1>
+            <p className="text-sm text-blue-100 mt-1">Catalog v1.0</p>
+          </div>
+
+          <div className="px-4 mb-6">
+            <div className="py-3 px-4 mb-6 bg-blue-100 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Total Products</span>
+                <span className="bg-blue-200 text-blue-800 text-xs font-medium rounded-full px-2 py-0.5">
+                  {products.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <NavLink 
+                title="Product Catalog"
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>}
+                isActive={true}
+              />
+              
+              <NavLink 
+                title="Refresh Products" 
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>}
+                onClick={fetchProducts}
+              />
+              
+              <NavLink 
+                title="Orders Dashboard" 
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>}
+                onClick={() => handleNavigation('orders')}
+              />
+              
+              <NavLink 
+                title="Customer Shop" 
+                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>}
+                onClick={() => handleNavigation('customer')}
+              />
+            </div>
+          </div>
+
+          <div className="mt-auto p-4">
+            <div className="bg-gray-100 rounded-lg p-3 flex items-center">
+              <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                <span className="font-medium">PM</span>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium text-gray-800">Product Manager</p>
+                <p className="text-gray-500 text-xs">Online</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="ml-64 w-full min-h-screen p-6">
+        <div className="catalog-content">
+          <ProductForm
+            editingProduct={editingProduct}
+            loading={loading}
+            onAddProduct={handleAddProduct}
+            onUpdateProduct={handleUpdateProduct}
+            onCancelEdit={handleCancelEdit}
+          />
+          
+          <ProductGrid
+            products={products}
+            loading={loading}
+            onEditProduct={handleEditProduct}
+            onDeleteProduct={handleDeleteProduct}
+          />
+        </div>
       </div>
     </div>
   );

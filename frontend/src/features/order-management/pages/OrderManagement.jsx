@@ -179,7 +179,7 @@ const OrderManagement = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Order Management</h1>
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p className="text-gray-600 text-lg">Loading orders...</p>
             </div>
           </div>
@@ -193,21 +193,21 @@ const OrderManagement = () => {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">Order Management</h1>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
             <div className="flex items-center mb-4">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error Loading Orders</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
+                <h3 className="text-sm font-medium text-blue-800">Error Loading Orders</h3>
+                <p className="text-sm text-blue-700 mt-1">{error}</p>
               </div>
             </div>
             <button 
               onClick={fetchOrders}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
             >
               Retry
             </button>
@@ -229,7 +229,7 @@ const OrderManagement = () => {
             </p>
             <button 
               onClick={fetchOrders}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -288,14 +288,14 @@ const OrderManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         #{String(order.customer_id).padStart(3, '0')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
                         {formatPrice(order.total_price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          order.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          order.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
-                          order.payment_status === 'failed' ? 'bg-red-100 text-red-800' :
+                          order.payment_status === 'pending' ? 'bg-blue-100 text-blue-800' :
+                          order.payment_status === 'paid' ? 'bg-blue-200 text-blue-800' :
+                          order.payment_status === 'failed' ? 'bg-gray-100 text-gray-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {order.payment_status}
@@ -303,12 +303,12 @@ const OrderManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          order.order_status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                          order.order_status === 'packing' ? 'bg-purple-100 text-purple-800' :
-                          order.order_status === 'out for delivery' ? 'bg-orange-100 text-orange-800' :
-                          order.order_status === 'completed' ? 'bg-green-100 text-green-800' :
-                          order.order_status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          order.order_status === 'pending' ? 'bg-blue-100 text-blue-800' :
+                          order.order_status === 'processing' ? 'bg-blue-200 text-blue-800' :
+                          order.order_status === 'packing' ? 'bg-blue-100 text-blue-800' :
+                          order.order_status === 'out for delivery' ? 'bg-blue-200 text-blue-800' :
+                          order.order_status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          order.order_status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {order.order_status}
@@ -336,7 +336,7 @@ const OrderManagement = () => {
                           {/* Delete Button */}
                           <button
                             onClick={() => handleDeleteOrder(order.order_id)}
-                            className="text-red-600 hover:text-red-900 hover:bg-red-50 p-1 rounded transition-colors duration-200"
+                            className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 p-1 rounded transition-colors duration-200"
                             title="Delete Order"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -104,12 +104,12 @@ const CustomerCatalog = () => {
   const categories = ['all', ...new Set(products.map(product => product.category).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="flex justify-between items-center py-4">
+            <h1 className="text-2xl font-bold text-gray-900">
               Product Catalog
             </h1>
             
@@ -117,6 +117,25 @@ const CustomerCatalog = () => {
             <div className="flex items-center gap-3">
               {/* Notification Icon */}
               <NotificationIcon customerId={1} />
+              
+              {/* View Orders Button with Eye Icon */}
+              <button
+                onClick={() => {
+                  // Dispatch a custom event to navigate to order management
+                  window.dispatchEvent(new CustomEvent('navigate', {
+                    detail: { 
+                      view: 'order-management'
+                    }
+                  }));
+                }}
+                className="relative p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200"
+                title="View Orders"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
               
               {/* Cart Button */}
               <button
@@ -127,7 +146,7 @@ const CustomerCatalog = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L6 5m0 0h18m-8 8l1 1m-2 0l1-1m-4 4a2 2 0 104 0 2 2 0 00-4 0zm-8 0a2 2 0 104 0 2 2 0 00-4 0z" />
                 </svg>
                 {getCartItemCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {getCartItemCount()}
                   </span>
                 )}
@@ -142,52 +161,62 @@ const CustomerCatalog = () => {
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           {/* Search */}
           <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
           
           {/* Category Filter */}
-          <div className="md:w-48">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="md:w-48 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="all">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Books">Books</option>
+            <option value="Home & Kitchen">Home & Kitchen</option>
+          </select>
         </div>
 
         {/* Products Grid */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-600 dark:text-gray-400">Loading products...</div>
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-600 dark:text-gray-400">No products found</div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredProducts.map(product => (
-              <CustomerProductCard
-                key={product.product_id}
-                product={product}
-                onAddToCart={addToCart}
-                cartItem={cart.find(item => item.product_id === product.product_id)}
-              />
-            ))}
-          </div>
-        )}
+        <div className="mb-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <div className="text-gray-600">Loading products...</div>
+              </div>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-600">No products found</div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredProducts.map(product => (
+                <CustomerProductCard
+                  key={product.product_id}
+                  product={product}
+                  onAddToCart={addToCart}
+                  cartItem={cart.find(item => item.product_id === product.product_id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Cart Sidebar */}
@@ -198,10 +227,43 @@ const CustomerCatalog = () => {
         onUpdateQuantity={updateCartQuantity}
         onRemoveItem={removeFromCart}
         onClearCart={clearCart}
+        onCheckout={handleCheckout}
         total={getCartTotal()}
       />
     </div>
   );
+
+  async function handleCheckout() {
+    try {
+      setLoading(true);
+      
+      // Create order
+      const orderData = {
+        customer_id: 1, // In a real app, this would come from user context
+        items: cart.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+      
+      const response = await axios.post('http://localhost:5000/api/orders', orderData);
+      
+      if (response.data.success) {
+        // Clear cart
+        clearCart();
+        setIsCartOpen(false);
+        showSuccess('Order placed successfully!');
+      } else {
+        showError('Failed to place order');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      showError('Failed to place order');
+    } finally {
+      setLoading(false);
+    }
+  }
 };
 
 export default CustomerCatalog;
