@@ -12,8 +12,7 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
 const recipeRoutes = require("./routes/recipeRoutes");
-
-
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 const cookieParser = require('cookie-parser')
@@ -33,6 +32,7 @@ app.use('/api/special',specialRoutes);
 app.use('/api/final',finalRoutes);
 app.use('/api/store',storeRoutes);
 app.use('/api/discounts', discountRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");

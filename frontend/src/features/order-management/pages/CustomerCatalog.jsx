@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import CustomerProductCard from '../components/CustomerProductCard';
 import CartSidebar from '../components/CartSidebar';
+import NotificationIcon from '../../../components/NotificationIcon';
 import { useNotification } from '../../../contexts/NotificationContext';
 
 const CustomerCatalog = () => {
@@ -112,20 +113,26 @@ const CustomerCatalog = () => {
               Product Catalog
             </h1>
             
-            {/* Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L6 5m0 0h18m-8 8l1 1m-2 0l1-1m-4 4a2 2 0 104 0 2 2 0 00-4 0zm-8 0a2 2 0 104 0 2 2 0 00-4 0z" />
-              </svg>
-              {getCartItemCount() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {getCartItemCount()}
-                </span>
-              )}
-            </button>
+            {/* Notification and Cart Icons */}
+            <div className="flex items-center gap-3">
+              {/* Notification Icon */}
+              <NotificationIcon customerId={1} />
+              
+              {/* Cart Button */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors duration-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m.6 0L6 5m0 0h18m-8 8l1 1m-2 0l1-1m-4 4a2 2 0 104 0 2 2 0 00-4 0zm-8 0a2 2 0 104 0 2 2 0 00-4 0z" />
+                </svg>
+                {getCartItemCount() > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {getCartItemCount()}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>

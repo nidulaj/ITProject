@@ -1,4 +1,10 @@
+import { useState } from 'react';
+import axios from 'axios';
+import { useNotification } from '../../../contexts/NotificationContext';
+
 const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, onClearCart, total }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { showSuccess, showError } = useNotification();
   const getImageSrc = (product) => {
     if (product.image) {
       if (typeof product.image === 'string') {
@@ -14,9 +20,53 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
     return null;
   };
 
-  const handleProceedToCheckout = () => {
-    // TODO: Implement checkout functionality
-    alert('Checkout functionality will be implemented soon!');
+  const handleProceedToCheckout = async () => {
+    if (cart.length === 0) {
+      showError('Cart is empty');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      
+      // Prepare order data
+      const orderData = {
+        customer_id: 1001, // Default customer ID - you can modify this as needed
+        items: cart.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      };
+
+      console.log('Creating order:', orderData);
+      
+      // Create order via API
+      const response = await axios.post('http://localhost:5000/api/orders', orderData);
+      
+      if (response.data.message === 'Order placed successfully') {
+        showSuccess(`Order placed successfully! Order ID: #${response.data.order.order_id}`);
+        
+        // Clear cart after successful order
+        onClearCart();
+        
+        // Close cart sidebar
+        onClose();
+      } else {
+        showError('Failed to place order. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error placing order:', error);
+      let errorMessage = 'Failed to place order. Please try again.';
+      
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      }
+      
+      showError(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -135,9 +185,10 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
             <div className="space-y-2">
               <button
                 onClick={handleProceedToCheckout}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                disabled={isProcessing}
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
               >
-                Proceed to Checkout
+                {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
               </button>
               <button
                 onClick={onClearCart}
