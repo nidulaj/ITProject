@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { GoogleOAuthProvider } from "@react-oauth/google"
 import { AuthProvider } from "./components/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 
@@ -13,34 +14,36 @@ const DashboardLayout = ({children}) => <div>{children}</div>
 function App() {
 
   return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/verify2FA" element={<Verify2FA />} />
-            <Route path="/verifyEmail" element={<VerifyEmail />} />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify2FA" element={<Verify2FA />} />
+              <Route path="/verifyEmail" element={<VerifyEmail />} />
 
-            {/* Protected routes with nested layout */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout>
-                    <Dashboard />
-                  </DashboardLayout>
-                </ProtectedRoute>
-              }
-            />
+              {/* Protected routes with nested layout */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <Dashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* 404 fallback */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Suspense>
-      </Router>
-    </AuthProvider>
+              {/* 404 fallback */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   )
 }
 

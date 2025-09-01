@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../../components/AuthContext";
 import { useNavigate , Link } from "react-router-dom";
+import GoogleLoginButton from "../components/GoogleLoginButton"
 
 export default function Login() {
   const { setIsLoggedIn } = useContext(AuthContext);
@@ -70,6 +71,7 @@ export default function Login() {
 
     <div>
       <button type="submit">Login</button>
+      <GoogleLoginButton />
     </div>
     
     <div>
