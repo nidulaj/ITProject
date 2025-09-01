@@ -31,7 +31,7 @@ connectDB();
 
 
 app.use('/api/auth', customerAuthRoute);
-=======
+
 
 app.use('/api/products', productRoutes);
 app.use('/api/orders',orderRoutes);

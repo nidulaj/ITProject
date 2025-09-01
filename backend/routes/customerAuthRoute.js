@@ -12,11 +12,13 @@ const {
   verifyVerificationCode,
   verify2FACode,
   verifyEmail,
-  resend2FACode
+  resend2FACode,
+  googleLogin
 } = require("../controllers/customerAuthController");
 
 router.post("/register", registerCustomer);
 router.post("/login", loginCustomer);
+router.post("/google-login", googleLogin);
 router.put("/profile", authMiddleware, updateUserProfile);
 router.put("/profile/delete", authMiddleware, selfDeleteUserProfile);
 router.post("/refresh",  refreshToken);

@@ -1,4 +1,7 @@
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
+const crypto = require("crypto")
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const {
   createCustomer,
   findUserByEmail,
@@ -9,7 +12,9 @@ const {
   getVerificationDetails,
   deleteVerificationCode,
   emailVerification,
-  findUserById
+  findUserById,
+  findUserByGoogleId,
+  attachGoogleIdToUser
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -50,6 +55,7 @@ const registerCustomer = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
@@ -115,6 +121,91 @@ const loginCustomer = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+const googleLogin = async (req, res) => {
+  console.log("Incoming Google login body:", req.body);
+
+  const {token} = req.body
+
+  if(!token){
+    return res.status(400).json({message: "No token provided"})
+  }
+
+  try{
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+
+    const email = payload.email
+    const googleId = payload.sub
+    const firstName = payload.given_name || ""
+    const lastName = payload.family_name || ""
+    const avatarUrl = payload.picture || null;
+
+    const existingByGoogle = await findUserByGoogleId(googleId);
+
+    if(existingByGoogle){
+      var customer = existingByGoogle
+
+    }else{
+      const existingByEmail = await findUserByEmail(email);
+
+      if(existingByEmail){
+        customer = await attachGoogleIdToUser(existingByEmail.cus_id, googleId);
+
+      }else{
+        const randomPassword = crypto.randomBytes(16).toString("hex")
+      
+        customer = await createCustomer(firstName, lastName, email, null, null, randomPassword)
+        await emailVerification(customer.cus_id)
+        customer = await attachGoogleIdToUser(customer.cus_id, googleId);
+      }
+    }
+
+    if(customer.is_2FA_enabled){
+      const verificationCode = Math.floor(100000 + Math.random() * 900000);
+      await send2FACode(customer.email, verificationCode);
+      await storeVerificationCode(customer.cus_id, verificationCode);
+
+      const tempToken = generateTempToken(customer);
+
+      res.cookie("tempToken", tempToken, {
+        httpOnly: true,
+        secure: false, // set true in production (HTTPS)
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000, // 15 minutes
+      });
+      return res
+        .status(200)
+        .json({ message: "2FA code sent to email", is_2FA_enabled: true });
+    }
+
+    const accessToken = generateAccessToken(customer);
+    const refreshToken = generateRefreshToken(customer);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({message: "Login successful", accessToken, refreshToken})
+  }catch(err){
+    console.error("Google login failed:", err);
+    return res.status(400).json({ message: "Google login failed" });
+  }
+}
 
 const updateUserProfile = async (req, res) => {
   const { id, firstName, lastName, phone, address } = req.body;
@@ -334,5 +425,6 @@ module.exports = {
   verifyVerificationCode,
   verify2FACode,
   verifyEmail,
-  resend2FACode
+  resend2FACode,
+  googleLogin
 };
