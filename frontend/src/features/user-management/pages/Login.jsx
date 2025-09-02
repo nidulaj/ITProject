@@ -44,41 +44,111 @@ export default function Login() {
     }
   };
   return (
-    <div>
-  <h2>Login</h2>
-  <form onSubmit={handleSubmit}>
-    <div>
-      <label htmlFor="email">Email:</label><br />
-      <input
-        type="email"
-        id="email"
-        name="email"
-        required
-        onChange={handleChange}
-      />
-    </div>
+<div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-10 w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-600 text-white font-bold text-xl">
+            SD
+          </div>
+        </div>
 
-    <div>
-      <label htmlFor="password">Password:</label><br />
-      <input
-        type="password"
-        id="password"
-        name="password"
-        required
-        onChange={handleChange}
-      />
-    </div>
+        {/* Heading */}
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+          Welcome Back
+        </h2>
+        <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-8">
+          Sign in to your Smart Dairy account
+        </p>
 
-    <div>
-      <button type="submit">Login</button>
-      <GoogleLoginButton />
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Email
+            </label>
+            <div className="relative mt-1">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                ✉️
+              </span>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                onChange={handleChange}
+                placeholder="your@email.com"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Password
+            </label>
+            <div className="relative mt-1">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                🔒
+              </span>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              />
+              <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 cursor-pointer">
+                👁
+              </span>
+            </div>
+          </div>
+
+          {/* Sign In button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
+          >
+            Sign In
+          </button>
+        </form>
+
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-gray-300 dark:border-gray-700" />
+          <span className="px-2 text-gray-500 dark:text-gray-400 text-sm">
+            Or continue with
+          </span>
+          <hr className="flex-grow border-gray-300 dark:border-gray-700" />
+        </div>
+
+        {/* Google Button */}
+        <GoogleLoginButton className="w-full !m-0 !rounded-lg !py-2 !px-4" />
+
+        {/* Footer Links */}
+        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          Don’t have an account?{" "}
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Sign up
+          </Link>
+        </p>
+        <p className="mt-2 text-center text-sm">
+          <Link to="/" className="text-blue-500 hover:underline">
+            ← Back to Home
+          </Link>
+        </p>
+      </div>
     </div>
-    
-    <div>
-      <Link to="/register">Register</Link>
-    </div>
-  </form>
-</div>
 
   );
 }

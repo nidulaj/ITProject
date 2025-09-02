@@ -35,84 +35,169 @@ export default function Register() {
   };
 
   return (
-    <div>
-  <h2>Register</h2>
-  <form className="register-form" onSubmit={handleSubmit}>
-    <div>
-      <label htmlFor="firstName">First Name:</label><br />
-      <input
-        type="text"
-        id="firstName"
-        name="firstName"
-        required
-        onChange={handleChange}
-      />
-    </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-10 w-full max-w-md">
+        {/* Heading */}
+        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-4">
+          Register
+        </h2>
+        <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
+          Create your Smart Dairy account
+        </p>
 
-    <div>
-      <label htmlFor="lastName">Last Name:</label><br />
-      <input
-        type="text"
-        id="lastName"
-        name="lastName"
-        required
-        onChange={handleChange}
-      />
-    </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* First Name */}
+          <div>
+            <label
+              htmlFor="firstName"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              required
+              onChange={handleChange}
+              placeholder="John"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <label htmlFor="email">Email:</label><br />
-      <input
-        type="email"
-        id="email"
-        name="email"
-        required
-        onChange={handleChange}
-      />
-    </div>
+          {/* Last Name */}
+          <div>
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              required
+              onChange={handleChange}
+              placeholder="Doe"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <label htmlFor="phone">Phone:</label><br />
-      <input
-        type="text"
-        id="phone"
-        name="phone"
-        required
-        onChange={handleChange}
-      />
-    </div>
+          {/* Email */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              onChange={handleChange}
+              placeholder="your@email.com"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <label htmlFor="address">Address:</label><br />
-      <input
-        type="text"
-        id="address"
-        name="address"
-        required
-        onChange={handleChange}
-      />
-    </div>
+          {/* Phone */}
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Phone
+            </label>
+            <input
+              type="text"
+              id="phone"
+              name="phone"
+              required
+              onChange={handleChange}
+              placeholder="+94 7xxxxxxx"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <label htmlFor="password">Password:</label><br />
-      <input
-        type="password"
-        id="password"
-        name="password"
-        required
-        onChange={handleChange}
-      />
-    </div>
+          {/* Address */}
+          <div>
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Address
+            </label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              required
+              onChange={handleChange}
+              placeholder="123 Main St"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <button type="submit">Register</button>
-    </div>
+          {/* Password */}
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
 
-    <div>
-      <Link to="/login">Login</Link>
+          {/* Confirm Password */}
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+              onChange={handleChange}
+              placeholder="Re-enter your password"
+              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Register Button */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
+          >
+            Register
+          </button>
+        </form>
+
+        {/* Footer Link */}
+        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
+      </div>
     </div>
-  </form>
-</div>
 
   );
 }
