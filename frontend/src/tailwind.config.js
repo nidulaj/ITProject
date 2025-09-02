@@ -1,4 +1,3 @@
-// tailwind.config.js
 export default {
   content: [
     "./index.html",
@@ -7,7 +6,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: "#1E40AF", // dark blue
+        brand: "#1E40AF",
       },
       fontFamily: {
         sans: ["Poppins", "ui-sans-serif", "system-ui"],
