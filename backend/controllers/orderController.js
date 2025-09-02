@@ -5,7 +5,8 @@ const {
   getOrderById, 
   updateOrderStatus, 
   updatePaymentStatus,
-  deleteOrder
+  deleteOrder,
+  getOrderItemsByOrderId
 } = require('../models/orderModel');
 
 // Create a new order
@@ -137,7 +138,7 @@ const getSingleOrder = async (req, res) => {
     res.status(200).json({ 
       success: true,
       order: order,
-      items: orderItems
+      orderItems: orderItems
     });
   } catch (error) {
     console.error('Error fetching single order:', error);

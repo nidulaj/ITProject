@@ -206,7 +206,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         <div className="flex flex-col h-full">
           <div className="p-6 mb-4 bg-blue-500">
             <h1 className="text-xl font-bold text-white">Product Management</h1>
-            <p className="text-sm text-blue-100 mt-1">Catalog v1.0</p>
           </div>
 
           <div className="px-4 mb-6">
@@ -228,14 +227,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
                 isActive={true}
               />
               
-              <NavLink 
-                title="Refresh Products" 
-                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>}
-                onClick={fetchProducts}
-              />
-              
+
               <NavLink 
                 title="Orders Dashboard" 
                 icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,17 +246,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
             </div>
           </div>
 
-          <div className="mt-auto p-4">
-            <div className="bg-gray-100 rounded-lg p-3 flex items-center">
-              <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
-                <span className="font-medium">PM</span>
-              </div>
-              <div className="text-sm">
-                <p className="font-medium text-gray-800">Product Manager</p>
-                <p className="text-gray-500 text-xs">Online</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
 
