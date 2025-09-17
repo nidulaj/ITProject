@@ -1,7 +1,28 @@
 import { Link } from "react-router-dom";
-import { User, LogOut } from "lucide-react"; // icons
+import { User, LogOut } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function DashboardHeader() {
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try{
+            const res = await axios.post(
+                "http://localhost:5000/api/auth/logout",
+                {},
+                { withCredentials: true }
+            );
+            navigate("/login");
+            console.log(res.data.message);
+        }catch(err){
+            if (err.response) {
+        console.log(err.response.data.message);
+      } else {
+        console.error(err.message);
+      }
+        }
+    }
   return (
     <header className="w-full bg-white dark:bg-gray-900 shadow-sm">
       {/* Full-width flex container without side margins */}
@@ -56,7 +77,7 @@ export default function DashboardHeader() {
               Hi, User
             </span>
           </div>
-          <button className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm transition">
+          <button className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm transition" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
           </button>

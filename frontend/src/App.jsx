@@ -7,8 +7,9 @@ import ProtectedRoute from "./components/ProtectedRoute"
 const Register = lazy(() => import("./features/user-management/pages/Register"))
 const Login = lazy(() => import("./features/user-management/pages/Login"))
 const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
-const Dashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
+const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 
 const DashboardLayout = ({children}) => <div>{children}</div>
 function App() {
@@ -31,7 +32,18 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      <Dashboard />
+                      <CustomerDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/admin"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AdminDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }

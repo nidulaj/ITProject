@@ -7,7 +7,7 @@ const createCustomer = async (firstName, lastName, email, phone, address, passwo
     return result.rows[0]
 };
 
-const findUserByEmail = async (email) => {
+const findCustomerByEmail = async (email) => {
     const query = `SELECT * FROM "customers" WHERE "email" = $1`;
     const values = [email]
     const result = await pool.query(query, values)
@@ -84,4 +84,4 @@ const attachGoogleIdToUser = async(cusId, googleId) => {
     return result.rows[0];
 }
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser };
+module.exports = { createCustomer, findCustomerByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser };

@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { useNavigate , Link } from "react-router-dom";
+import { useNavigate, Link, Navigate } from "react-router-dom";
 
 export default function Register() {
   const [userData, setUserData] = React.useState({
@@ -11,6 +11,8 @@ export default function Register() {
     address: "",
     password: "",
   });
+
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,6 +27,7 @@ export default function Register() {
         userData
       );
       console.log(res.data.message);
+      navigate("/login");
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
@@ -33,6 +36,19 @@ export default function Register() {
       }
     }
   };
+
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
@@ -60,8 +76,9 @@ export default function Register() {
               id="firstName"
               name="firstName"
               required
-              onChange={handleChange}
+              onChange={handleNameChange}
               placeholder="John"
+              value={userData.firstName}
               className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
@@ -79,8 +96,9 @@ export default function Register() {
               id="lastName"
               name="lastName"
               required
-              onChange={handleChange}
+              onChange={handleNameChange}
               placeholder="Doe"
+              value={userData.lastName}
               className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
@@ -117,8 +135,9 @@ export default function Register() {
               id="phone"
               name="phone"
               required
-              onChange={handleChange}
+              onChange={handlePhoneChange}
               placeholder="+94 7xxxxxxx"
+              value={userData.phone}
               className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
             />
           </div>
@@ -198,6 +217,5 @@ export default function Register() {
         </p>
       </div>
     </div>
-
   );
 }

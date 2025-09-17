@@ -1,12 +1,15 @@
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../../components/AuthContext";
 export default function Verify2FA() {
+  const location = useLocation();
+  const { role, type } = location.state || {};
   const [code, setCode] =  useState();
   const navigate = useNavigate();
   const { setIsLoggedIn } = useContext(AuthContext);
   const [timeLeft, setTimeLeft] = useState(60)
+  const [mode] = useState(type === "staff" ? "staff" : "customer");
   
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -19,14 +22,29 @@ export default function Verify2FA() {
   const handleVerify = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/verify-2fa",
-        { code },
-        { withCredentials: true }
-      );
+      const endpoint =
+        mode === "customer"
+          ? "http://localhost:5000/api/auth/verify-2fa"
+          : "http://localhost:5000/api/staff/auth/verify2FA";
+
+      const res = await axios.post(endpoint, { code }, {
+        withCredentials: true,
+      });
       setIsLoggedIn(true);
-      console.log("verification done");
+
+    if (!role) {
+      // no role → customer
       navigate("/dashboard");
+    } else {
+      // staff with role
+      if (role === "admin") navigate("/dashboard/admin");
+      else if (role === "manager") navigate("/dashboard/manager");
+      else{
+        navigate("/login")
+        setIsLoggedIn(false);
+      };
+    }
+
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
