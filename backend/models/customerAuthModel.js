@@ -84,4 +84,6 @@ const attachGoogleIdToUser = async(cusId, googleId) => {
     return result.rows[0];
 }
 
+
 module.exports = { createCustomer, findCustomerByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser };
+
