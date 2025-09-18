@@ -18,19 +18,22 @@ const {
   send2FACode,
   sendVerificationLink,
   sendResetPasswordLink,
+  sendStaffRegistrationInfo
 } = require("../utils/emailService");
+
+const {generatePassword} = require("../utils/passwordGenerator");
 
 const { createLog } = require("../models/userManagementAuditLogModel");
 
 const registerStaff = async (req, res) => {
-  const { firstName, lastName, email, phone, password, role } = req.body;
+  const { firstName, lastName, email, phone, role } = req.body;
 
   try {
     const existingUser = await findStaffByEmail(email);
     if (existingUser) {
       return res.status(400).json({ message: "Email already in use" });
     }
-
+    const password = generatePassword();
     const staffUser = await createStaff(
       firstName,
       lastName,
@@ -39,6 +42,7 @@ const registerStaff = async (req, res) => {
       password,
       role
     );
+    await sendStaffRegistrationInfo(email,password);
     await createLog(staffUser.staff_code, "New User Registered", req.ip);
     res
       .status(201)

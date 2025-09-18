@@ -1,12 +1,16 @@
-export default function Sidebar({ activeMenu, setActiveMenu }) {
+import { Link, useLocation } from "react-router-dom";
+
+export default function Sidebar() {
+  const location = useLocation();
+
   const menuItems = [
-    { key: "dashboard", label: "Dashboard" },
-    { key: "staffManagement", label: "Staff Management" },
-    { key: "rolesAccess", label: "Roles & Access" },
-    { key: "logsMonitoring", label: "Logs & Monitoring" },
-    { key: "complaints", label: "Complaints" },
-    { key: "chat", label: "Chat" },
-    { key: "profileSecurity", label: "Profile & Security" },
+    { key: "/dashboard/admin", label: "Dashboard" },
+    { key: "/dashboard/admin/staff", label: "Staff Management" },
+    { key: "/dashboard/admin/rolesAccess", label: "Roles & Access" },
+    { key: "/dashboard/admin/logsMonitoring", label: "Logs & Monitoring" },
+    { key: "/dashboard/admin/complaints", label: "Complaints" },
+    { key: "/dashboard/admin/chat", label: "Chat" },
+    { key: "/dashboard/admin/profileSecurity", label: "Profile & Security" },
   ];
 
   return (
@@ -14,17 +18,17 @@ export default function Sidebar({ activeMenu, setActiveMenu }) {
       <div className="p-6 font-bold text-2xl text-blue-600">Smart Dairy</div>
       <nav className="flex-1 px-4 space-y-2">
         {menuItems.map((item) => (
-          <button
+          <Link
             key={item.key}
-            onClick={() => setActiveMenu(item.key)}
-            className={`w-full text-left block px-3 py-2 rounded-lg ${
-              activeMenu === item.key
+            to={item.key}
+            className={`block px-3 py-2 rounded-lg ${
+              location.pathname === item.key
                 ? "bg-blue-600 text-white"
                 : "hover:bg-blue-100 dark:hover:bg-gray-700"
             }`}
           >
             {item.label}
-          </button>
+          </Link>
         ))}
       </nav>
     </aside>
