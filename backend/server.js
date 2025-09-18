@@ -13,8 +13,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
 const recipeRoutes = require("./routes/recipeRoutes");
 const staffAuthRoutes = require("./routes/staffAuthRoutes");
-const userManagementAuditLogRoutes = require("./routes/userManagementAuditLogRoutes");
-
+const userManagementAuditRoutes = require("./routes/userManagementAuditLogRoutes");
+const userRoleRoutes = require("./routes/userRoleRoutes");
 const app = express();
 const cookieParser = require('cookie-parser')
 
@@ -32,7 +32,7 @@ connectDB();
 
 app.use('/api/auth', customerAuthRoute);
 app.use('/api/staff/auth', staffAuthRoutes);
-app.use('/api/user/audit', userManagementAuditLogRoutes);
+app.use('/api/user-roles', userRoleRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders',orderRoutes);
 app.use("/api/recipe", recipeRoutes);
@@ -41,6 +41,7 @@ app.use('/api/special',specialRoutes);
 app.use('/api/final',finalRoutes);
 app.use('/api/store',storeRoutes);
 app.use('/api/discounts', discountRoutes);
+app.use('/api/user-management/audit', userManagementAuditRoutes);
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");

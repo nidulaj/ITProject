@@ -1,7 +1,7 @@
 export default function Sidebar({ activeMenu, setActiveMenu }) {
   const menuItems = [
     { key: "dashboard", label: "Dashboard" },
-    { key: "userManagement", label: "User Management" },
+    { key: "staffManagement", label: "Staff Management" },
     { key: "rolesAccess", label: "Roles & Access" },
     { key: "logsMonitoring", label: "Logs & Monitoring" },
     { key: "complaints", label: "Complaints" },

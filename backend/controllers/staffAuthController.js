@@ -39,7 +39,7 @@ const registerStaff = async (req, res) => {
       password,
       role
     );
-    await createLog(staffUser.staff_code, "Staff Registered");
+    await createLog(staffUser.staff_code, "New User Registered", req.ip);
     res
       .status(201)
       .json({ message: "Staff registered successfully", staffUser });
@@ -55,10 +55,12 @@ const loginStaff = async (req, res) => {
   try {
     const staffUser = await staffLogin(email, password);
     if (!staffUser) {
+      await createLog(staffUser.staff_code, "Failed Login Attempt", req.ip);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     if (!staffUser.is_active) {
+      await createLog(staffUser.staff_code, "Disabled Account Login Attempt", req.ip);
       return res.status(403).json({ message: "Account is disabled" });
     }
 
@@ -102,6 +104,7 @@ const loginStaff = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+    await createLog(staffUser.staff_code, "Logged In", req.ip);
     res.status(200).json({
       message: "Login successful",
       id: staffUser.staff_code,
@@ -123,27 +126,50 @@ const refreshToken = async (req, res) => {
   }
 
   try {
-    const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const newAccessToken = generateAccessTokenStaff(user);
+    const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
+    const staffUser = await findUserById(payload.id);
+    if (!staffUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate new tokens
+    const newAccessToken = generateAccessTokenStaff(staffUser);
+    const newRefreshToken = generateRefreshTokenStaff(staffUser);
+
+    // Reset cookies
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
-      secure: false,
+      secure: false, // change to true in production with HTTPS
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
-    res.status(200).json({
-      message: "Access Tokens refreshed",
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    await createLog(staffUser.staff_code, "Refreshed Access Token", req.ip);
+
+    return res.status(200).json({
+      message: "Tokens refreshed",
       accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     });
   } catch (error) {
     console.error("Error refreshing tokens:", error);
-    res.status(403).json({ message: "Invalid refresh token" });
+    return res.status(403).json({ message: "Invalid refresh token" });
   }
 };
 
-const logout = (req, res) => {
+
+const logout = async (req, res) => {
+  const staffId = req.user.id;
+  const staffUser = await findUserById(staffId);
+  await createLog(staffUser.staff_code, "Logged Out", req.ip);
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logout successful" });
@@ -168,7 +194,7 @@ const verify2FACode = async (req, res) => {
     const user = req.user;
     const accessToken = generateAccessTokenStaff(user);
     const refreshToken = generateRefreshTokenStaff(user);
-
+    const staffUser = await findUserById(staffId);
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false, // set true in production (HTTPS)
@@ -185,7 +211,7 @@ const verify2FACode = async (req, res) => {
 
     res.clearCookie("tempToken");
 
-    console.log("Login successful, tokens set in cookies");
+    await createLog(staffUser.staff_code, "Logged In", req.ip);
     res
       .status(200)
       .json({

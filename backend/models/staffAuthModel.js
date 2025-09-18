@@ -51,10 +51,14 @@ const deleteVerificationCode = async (id) => {
 };
 
 const getAllStaff = async () => {
-    const query = "SELECT * FROM staff";
+    const query = "SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, ur.role_name FROM staff s JOIN user_roles ur ON s.role = ur.role_id";
     const result = await pool.query(query);
     return result.rows;
 };
+
+
+
+
 
 module.exports = {
   createStaff,

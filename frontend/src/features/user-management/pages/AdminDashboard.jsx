@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Slidebar";
 import Header from "../components/Header";
-import UserManagement from "../components/UserManagement";
+import StaffManagement from "../components/StaffManagement";
 import RolesAccess from "../components/RoleAccess";
 import LogsMonitoring from "../components/LogsMonitoring";
 import Complaints from "../components/Complaints";
@@ -13,8 +13,8 @@ export default function AdminDashboard() {
 
   const renderContent = () => {
     switch (activeMenu) {
-      case "userManagement":
-        return <UserManagement />;
+      case "staffManagement":
+        return <StaffManagement />;
       case "rolesAccess":
         return <RolesAccess />;
       case "logsMonitoring":

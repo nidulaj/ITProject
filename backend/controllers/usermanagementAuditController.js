@@ -1,4 +1,4 @@
-const {createLog} = require("../models/userManagementAuditLogModel");
+const {createLog, getAllLogs} = require("../models/userManagementAuditLogModel");
 
 const createAuditLog = async (req, res) => {
   try {
@@ -17,6 +17,17 @@ const createAuditLog = async (req, res) => {
   }
 };
 
+const getAllAuditLogs = async (req, res) => {
+  try {
+    const logs = await getAllLogs();
+    res.status(200).json(logs);
+  } catch (error) {
+    console.error("Error fetching audit logs:", error);
+    res.status(500).json({ success: false, message: "Error fetching audit logs" });
+  }
+};
+
 module.exports = {
-  createAuditLog
+  createAuditLog,
+  getAllAuditLogs
 };

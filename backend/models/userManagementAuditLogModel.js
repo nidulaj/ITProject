@@ -8,6 +8,13 @@ const createLog = async (userId, action, ipAddress) => {
   return result.rows[0];
 };
 
+const getAllLogs = async () => {
+  const query = `SELECT * FROM audit_logs ORDER BY log_id DESC`;
+  const result = await pool.query(query);
+  return result.rows;
+};
+
 module.exports = {
-  createLog
+  createLog,
+  getAllLogs
 };
