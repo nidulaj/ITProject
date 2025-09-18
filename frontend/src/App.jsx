@@ -38,6 +38,7 @@ function App() {
                 }
               />
 
+
               <Route
                 path="/dashboard/admin"
                 element={
@@ -48,6 +49,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
 
               {/* 404 fallback */}
               <Route path="*" element={<Navigate to="/login" replace />} />
