@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
-
+import {useNavigate} from 'react-router-dom';
 export default function StaffManagement() {
   const [staffList, setStaffList] = useState([]);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchStaffList = async () => {
       try {
@@ -37,7 +37,7 @@ export default function StaffManagement() {
           <option>Deactive</option>
         </select>
 
-        <button className="w-32 bg-blue-600 text-white px-4 py-2 rounded-lg">
+        <button className="w-32 bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={() => navigate("add")}>
           Add User
         </button>
       </div>

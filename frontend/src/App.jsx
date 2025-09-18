@@ -40,7 +40,7 @@ function App() {
 
 
               <Route
-                path="/dashboard/admin"
+                path="/dashboard/admin/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
