@@ -4,7 +4,7 @@ const crypto = require("crypto")
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const {
   createCustomer,
-  findUserByEmail,
+  findCustomerByEmail,
   login,
   updateProfile,
   selfDeleteProfile,
@@ -33,7 +33,7 @@ const registerCustomer = async (req, res) => {
   const { firstName, lastName, email, phone, address, password } = req.body;
 
   try {
-    const existingCustomer = await findUserByEmail(email);
+    const existingCustomer = await findCustomerByEmail(email);
 
     if (existingCustomer) {
       return res.status(409).json({ message: "User already exists" });
@@ -93,7 +93,7 @@ const loginCustomer = async (req, res) => {
       });
       return res
         .status(200)
-        .json({ message: "2FA code sent to email", is_2FA_enabled: true });
+        .json({ message: "2FA code sent to email", is_2FA_enabled: true, role: null, type: "customer" });
     }
 
     const accessToken = generateAccessToken(customer);
@@ -115,7 +115,7 @@ const loginCustomer = async (req, res) => {
     console.log("Login successful, tokens set in cookies");
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken });
+      .json({ message: "Login successful", accessToken, refreshToken, role: null });
   } catch (error) {
     console.error("Error logging in customer:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -364,7 +364,7 @@ const verify2FACode = async (req, res) => {
     console.log("Login successful, tokens set in cookies");
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken });
+      .json({ message: "Login successful", accessToken, refreshToken, role: null });
   } catch (error) {
     console.error("Error verifying code:", error);
     res.status(500).json({ message: "Internal server error" });

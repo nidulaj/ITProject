@@ -12,8 +12,8 @@ const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
 const recipeRoutes = require("./routes/recipeRoutes");
-
-
+const staffAuthRoutes = require("./routes/staffAuthRoutes");
+const userManagementAuditLogRoutes = require("./routes/userManagementAuditLogRoutes");
 
 const app = express();
 const cookieParser = require('cookie-parser')
@@ -26,11 +26,16 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
-
+app.set("trust proxy", true);
 connectDB();
 
 
 app.use('/api/auth', customerAuthRoute);
+
+app.use('/api/staff/auth', staffAuthRoutes);
+app.use('/api/user/audit', userManagementAuditLogRoutes);
+
+
 
 
 app.use('/api/products', productRoutes);
