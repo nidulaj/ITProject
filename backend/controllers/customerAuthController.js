@@ -29,6 +29,8 @@ const {
   sendResetPasswordLink,
 } = require("../utils/emailService");
 
+const {createLog} = require("../models/userManagementAuditLogModel");
+
 const registerCustomer = async (req, res) => {
   const { firstName, lastName, email, phone, address, password } = req.body;
 
@@ -47,6 +49,7 @@ const registerCustomer = async (req, res) => {
       address,
       password
     );
+    await createLog(customer.customer_code, "New User Registered", req.ip);
     res
       .status(201)
       .json({ message: "Customer registered successfully", customer });
@@ -63,10 +66,12 @@ const loginCustomer = async (req, res) => {
   try {
     const customer = await login(email, password);
     if (!customer) {
+      await createLog(customer.customer_code, "Failed Login Attempt", req.ip);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     if (!customer.is_active) {
+      await createLog(customer.customer_code, "Disabled Account Login Attempt", req.ip);
       return res.status(403).json({ message: "Account is disabled" });
     }
 
@@ -112,7 +117,7 @@ const loginCustomer = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-    console.log("Login successful, tokens set in cookies");
+    await createLog(customer.customer_code, "Logged In", req.ip);
     res
       .status(200)
       .json({ message: "Login successful", accessToken, refreshToken, role: null });
@@ -199,7 +204,7 @@ const googleLogin = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
+    await createLog(customer.customer_code, "Logged In with Google", req.ip);
     return res.status(200).json({message: "Login successful", accessToken, refreshToken})
   }catch(err){
     console.error("Google login failed:", err);
@@ -222,7 +227,7 @@ const updateUserProfile = async (req, res) => {
     if (!updatedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
-
+    await createLog(updatedCustomer.customer_code, "Updated Profile", req.ip);
     res.status(200).json({
       message: "Customer profile updated successfully",
       customer: updatedCustomer,
@@ -263,14 +268,14 @@ const refreshToken = async (req, res) => {
   try {
     const user = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
     const newAccessToken = generateAccessToken(user);
-
+    const customer = await findUserById(user.id);
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
-
+    await createLog(customer.customer_code, "Refreshed Access Token", req.ip);
     res.status(200).json({
       message: "Access Tokens refreshed",
       accessToken: newAccessToken,
@@ -281,7 +286,9 @@ const refreshToken = async (req, res) => {
   }
 };
 
-const logout = (req, res) => {
+const logout = async (req, res) => {
+  const customer = await findUserById(req.user.id);
+  await createLog(customer.customer_code, "Logged Out", req.ip);
   res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logout successful" });
@@ -361,7 +368,7 @@ const verify2FACode = async (req, res) => {
 
     res.clearCookie("tempToken");
 
-    console.log("Login successful, tokens set in cookies");
+    await createLog(customer.customer_code, "Logged In", req.ip);
     res
       .status(200)
       .json({ message: "Login successful", accessToken, refreshToken, role: null });
@@ -379,14 +386,14 @@ const verifyEmail = async (req, res) => {
   console.log("Email verification token valid for user:", user);
 
   const customerId = user.id;
+  const customer = await findUserById(customerId);
 
   console.log("Calling emailVerification with customerId:", customerId);
 
   const newStatus = await emailVerification(customerId);
 
-  console.log("Email verified, updated user:", newStatus);
-
   res.redirect("http://localhost:5173/verifyEmail");
+  await createLog(customer.customer_code, "Email Verified", req.ip);
 } catch (err) {
   console.error("Error in verifyEmail:", err);
   res.status(400).json({ message: "Invalid or expired token" });
