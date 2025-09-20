@@ -11,7 +11,8 @@ const {
   logout,
   verify2FACode,
   resend2FACode,
-  getStaffList
+  getStaffList,
+  getStaffInfoByRole
 } = require("../controllers/staffAuthController");
 
 router.post("/register", registerStaff);
@@ -21,5 +22,5 @@ router.post("/logout", staffAuthMiddleware, logout);
 router.post("/verify2FA", staffTempMiddleware, verify2FACode);
 router.post("/resend2FA", staffTempMiddleware, resend2FACode);
 router.get("/staffList", staffAuthMiddleware, getStaffList);
-
+router.get("/staffInfo/:roleId", staffAuthMiddleware, getStaffInfoByRole);
 module.exports = router;

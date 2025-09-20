@@ -8,6 +8,7 @@ const {
   deleteVerificationCode,
   findUserById,
   getAllStaff,
+  getStaffByRole
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -260,6 +261,18 @@ const getStaffList = async (req, res) => {
   }
 };
 
+const getStaffInfoByRole = async (req, res) => {
+  const { roleId } = req.params;
+
+  try {
+    const staffMembers = await getStaffByRole(roleId);
+    res.status(200).json(staffMembers);
+  } catch (error) {
+    console.error("Error fetching staff by role:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -268,4 +281,5 @@ module.exports = {
   verify2FACode,
   resend2FACode,
   getStaffList,
+  getStaffInfoByRole
 };
