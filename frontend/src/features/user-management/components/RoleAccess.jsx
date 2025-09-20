@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
+import { useNavigate } from "react-router-dom";
+
 export default function RolesAccess() {
   const [userRoles, setUserRoles] = useState([]);
-  const [newRole, setNewRole] = useState({ role_name: "",
-  description: ""})
+  const [newRole, setNewRole] = useState({ role_name: "", description: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserRoles = async () => {
@@ -28,20 +30,34 @@ export default function RolesAccess() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
+    try {
       const res = await authFetch({
-      method: "post",
-      url: "http://localhost:5000/api/user-roles/createRole",
-      data: newRole,
-    });
-    if (res.status === 201) {
-      setUserRoles((prev) => [...prev, res.data]);
-      setNewRole({ role_name: "", description: "" });
+        method: "post",
+        url: "http://localhost:5000/api/user-roles/createRole",
+        data: newRole,
+      });
+      if (res.status === 201) {
+        setUserRoles((prev) => [...prev, res.data]);
+        setNewRole({ role_name: "", description: "" });
+      }
+    } catch (error) {
+      console.error("Error creating role:", error);
     }
-  } catch (error) {
-    console.error("Error creating role:", error);
-  }
-};
+  };
+
+  const handleDelete = async (roleId) => {
+    try {
+      await authFetch({
+        method: "delete",
+        url: "http://localhost:5000/api/user-roles/deleteRole",
+        data: { roleId },
+      });
+      setUserRoles((prev) => prev.filter((role) => role.role_id !== roleId));
+    } catch (error) {
+      console.error("Error deleting role:", error);
+    }
+  };
+
   return (
     <>
       <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
@@ -64,22 +80,38 @@ export default function RolesAccess() {
               <th className="p-2 text-left">Role Name</th>
               <th className="p-2 text-left">Description</th>
               <th className="p-2 text-left">Created Date</th>
+              <th className="p-2 text-left">User Count</th>
               <th className="p-2 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
             {userRoles.map((role) => (
-              <tr key={role.role_id} className="border-t">
+              <tr
+                key={role.role_id}
+                onClick={() => navigate(`${role.role_id}`)}
+                className="border-t cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
                 <td className="p-2">{role.role_id}</td>
                 <td className="p-2">{role.role_name}</td>
                 <td className="p-2">{role.description}</td>
                 <td className="p-2">{new Date(role.created_at).toLocaleString()}</td>
+                <td className="p-2">{role.staff_count}</td>
                 <td className="p-2 space-x-2">
-                  <button className="px-2 py-1 bg-yellow-500 text-white rounded">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-2 py-1 bg-yellow-500 text-white rounded"
+                  >
                     Edit
                   </button>
-                  <button className="px-2 py-1 bg-red-600 text-white rounded">
-                    Disable
+                  <button
+                    className="px-2 py-1 bg-red-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={role.staff_count > 0}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(role.role_id);
+                    }}
+                  >
+                    Remove
                   </button>
                 </td>
               </tr>
