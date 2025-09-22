@@ -1,19 +1,26 @@
+
 const Payment = require("../models/paymentModel");
 
 // Add a new payment
 const addPayment = async (req, res) => {
   try {
-    const { customer_name, amount, payment_status, payment_date } = req.body;
+    const { customer_name, amount, payment_date } = req.body;
+    const payment_proof = req.file ? req.file.filename : null;
 
-    if (!customer_name || !amount || !payment_status || !payment_date) {
-      return res.status(400).json({ message: "All fields are required" });
+    // ✅ payment_status is not required from frontend anymore
+    if (!customer_name || !amount || !payment_date) {
+      return res.status(400).json({ message: "Customer name, amount, and payment date are required" });
     }
+
+    // ✅ Default payment_status to "pending"
+    const payment_status = "pending";
 
     const payment = await Payment.createPayment(
       customer_name,
       amount,
       payment_status,
-      payment_date
+      payment_date,
+      payment_proof
     );
 
     res.status(201).json({ message: "Payment added successfully", payment });
@@ -32,24 +39,26 @@ const getPayments = async (req, res) => {
   }
 };
 
-// Delete a payment
-const removePayment = async (req, res) => {
+const approvePayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const payment = await Payment.deletePayment(id);
+    const updated = await Payment.updatePaymentStatus(id, "completed");
 
-    if (!payment) {
+    if (!updated) {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    res.status(200).json({ message: "Payment deleted successfully", payment });
+    res.status(200).json({ message: "Payment status updated to completed", payment: updated });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting payment", error: error.message });
+    res.status(500).json({ message: "Error updating status", error: error.message });
   }
 };
+
 
 module.exports = {
   addPayment,
   getPayments,
-  removePayment,
+  approvePayment,
 };
+
+

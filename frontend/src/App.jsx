@@ -1,4 +1,4 @@
-import { useState } from 'react'
+/*import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import DiscountPage from './features/financial-management/pages/DiscountPage'
@@ -12,4 +12,38 @@ function App() {
   )
 }
 
-export default App
+export default App*/
+
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Pages
+import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
+import DiscountPage from "./features/financial-management/pages/DiscountPage";
+import PaymentPage from "./features/financial-management/pages/PaymentPage";
+import PaymentFormPage from "./features/financial-management/pages/PaymentFormPage";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        
+        <Route path="/" element={<FinanceDashboard />} />
+
+        
+        <Route path="/discounts" element={<DiscountPage />} />
+
+      
+        <Route path="/payments" element={<PaymentPage />} />
+
+      
+        <Route path="/payment-form" element={<PaymentFormPage />} />
+
+
+
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
