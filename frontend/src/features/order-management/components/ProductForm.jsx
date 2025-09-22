@@ -127,9 +127,10 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
   };
 
   return (
-    <div className="left-panel">
-      <h2 className="panel-title">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-      <form onSubmit={handleSubmit} className="product-form">
+    <div className="left-panel shadow-2xl transform perspective-1000 flex-shrink-0">
+      <div className="p-6 pb-4">
+        <h2 className="panel-title drop-shadow-lg">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+        <form onSubmit={handleSubmit} className="product-form">
         <div className="form-group">
           <label htmlFor="name" className="form-label">Product Name:</label>
           <input
@@ -140,7 +141,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             onChange={handleInputChange}
             placeholder="Enter product name"
             required
-            className="form-input"
+            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           />
         </div>
 
@@ -154,7 +155,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             placeholder="Enter product description"
             rows="3"
             required
-            className="form-input form-textarea"
+            className="form-input form-textarea shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           ></textarea>
         </div>
 
@@ -170,7 +171,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             step="0.01"
             min="0"
             required
-            className="form-input"
+            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           />
         </div>
 
@@ -185,7 +186,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             placeholder="Enter stock quantity"
             min="0"
             required
-            className="form-input"
+            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           />
         </div>
 
@@ -199,7 +200,7 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
             onChange={handleInputChange}
             placeholder="Enter category"
             required
-            className="form-input"
+            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           />
         </div>
 
@@ -234,16 +235,17 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
         )}
 
         <div className="form-buttons">
-          <button type="submit" disabled={loading} className="btn-primary">
+          <button type="submit" disabled={loading} className="btn-primary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
             {loading ? 'Processing...' : (editingProduct ? 'Update Product' : 'Add Product')}
           </button>
           {editingProduct && (
-            <button type="button" onClick={onCancelEdit} className="btn-secondary">
+            <button type="button" onClick={onCancelEdit} className="btn-secondary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
               Cancel
             </button>
           )}
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNotification } from '../../../contexts/NotificationContext';
+import { useCustomer } from '../../../contexts/CustomerContext';
 
 const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, onClearCart, total }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { showSuccess, showError } = useNotification();
+  const { currentCustomer } = useCustomer();
   const getImageSrc = (product) => {
     if (product.image) {
       if (typeof product.image === 'string') {
@@ -31,7 +33,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       
       // Prepare order data
       const orderData = {
-        customer_id: 1001, // Default customer ID - you can modify this as needed
+        customer_id: currentCustomer?.id || 1, // Use current customer ID
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
@@ -45,13 +47,14 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       const response = await axios.post('http://localhost:5000/api/orders', orderData);
       
       if (response.data.message === 'Order placed successfully') {
-        showSuccess(`Order placed successfully! Order ID: #${response.data.order.order_id}`);
-        
         // Clear cart after successful order
         onClearCart();
         
         // Close cart sidebar
         onClose();
+        
+        // Show success message
+        showSuccess('Order placed successfully!');
       } else {
         showError('Failed to place order. Please try again.');
       }
@@ -80,10 +83,10 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       )}
       
       {/* Sidebar */}
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-50 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-all duration-300 ease-in-out z-50 perspective-1000 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
+          <h2 className="text-lg font-semibold text-blue-800 drop-shadow-sm">
             Shopping Cart ({cart.length})
           </h2>
           <button
@@ -186,13 +189,13 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
               <button
                 onClick={handleProceedToCheckout}
                 disabled={isProcessing}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 {isProcessing ? 'Processing...' : 'Proceed to Checkout'}
               </button>
               <button
                 onClick={onClearCart}
-                className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Clear Cart
               </button>

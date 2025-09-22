@@ -2,192 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom components for product catalog */
-@layer components {
-  .product-catalog-container {
-    @apply flex min-h-screen font-sans bg-gray-50;
+/* Custom animations and 3D effects */
+@layer utilities {
+  /* 3D Effects for Order Management Dashboard */
+  .perspective-1000 {
+    perspective: 1000px;
   }
-
-  .left-panel {
-    @apply w-96 bg-white p-6 shadow-lg fixed h-screen overflow-y-auto;
+  
+  .rotate-x-1 {
+    transform: rotateX(1deg);
   }
-
-  .right-panel {
-    @apply flex-1 ml-96 p-6 bg-gray-50;
+  
+  .rotate-y-2 {
+    transform: rotateY(2deg);
   }
-
-  .panel-title {
-    @apply mt-0 text-gray-800 text-2xl mb-6 border-b-2 border-blue-500 pb-2;
+  
+  .hover\:rotate-y-2:hover {
+    transform: rotateY(2deg);
   }
-
-  .product-form {
-    @apply flex flex-col gap-4;
+  
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
   }
-
-  .form-group {
-    @apply flex flex-col;
+  
+  .hover\:scale-110:hover {
+    transform: scale(1.1);
   }
-
-  .form-label {
-    @apply mb-1.5 font-semibold text-gray-600 text-sm;
+  
+  .hover\:scale-\[1\.01\]:hover {
+    transform: scale(1.01);
   }
-
-  .form-input {
-    @apply p-3 border-2 border-gray-300 rounded-md text-sm transition-colors duration-200 bg-white text-gray-900;
+  
+  .hover\:scale-\[1\.02\]:hover {
+    transform: scale(1.02);
   }
-
-  .form-input:focus {
-    @apply outline-none border-blue-500;
+  
+  /* Enhanced 3D card effects */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
   }
-
-  .form-textarea {
-    @apply resize-y min-h-20;
+  
+  .card-3d:hover {
+    transform: translateY(-8px) rotateX(5deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
-
-  .form-buttons {
-    @apply flex gap-3 mt-2;
+  
+  /* Glass morphism effect */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
   }
-
-  .btn-primary {
-    @apply px-6 py-3 border-0 rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white flex-1;
+  
+  /* Notification animations */
+  .notification-enter {
+    animation: slideInDown 0.3s ease-out;
   }
-
-  .btn-secondary {
-    @apply px-6 py-3 border-0 rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 bg-gray-500 hover:bg-gray-600 text-white;
+  
+  .notification-exit {
+    animation: slideOutUp 0.3s ease-in;
   }
-
-  .products-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-4;
-  }
-
-  .customer-product-grid {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
-  }
-
-  .product-card {
-    @apply bg-white rounded-xl p-0 shadow-md border border-gray-200 transition-all duration-200 overflow-hidden flex flex-col hover:transform hover:-translate-y-1 hover:shadow-lg;
-  }
-
-  .product-image {
-    @apply w-full h-48 overflow-hidden relative;
-  }
-
-  .product-image img {
-    @apply w-full h-full object-cover transition-transform duration-200;
-  }
-
-  .product-card:hover .product-image img {
-    @apply transform scale-105;
-  }
-
-  .image-placeholder {
-    @apply w-full h-48 bg-gray-100 flex flex-col items-center justify-center text-gray-500 border-b border-gray-200;
-  }
-
-  .image-placeholder-icon {
-    @apply text-5xl mb-2;
-  }
-
-  .image-placeholder-text {
-    @apply text-xs;
-  }
-
-  .product-info {
-    @apply p-5 flex-1 flex flex-col;
-  }
-
-  .product-title {
-    @apply m-0 mb-3 text-gray-800 text-lg font-semibold;
-  }
-
-  .product-description {
-    @apply text-gray-600 mb-4 leading-relaxed text-sm flex-1;
-  }
-
-  .product-details {
-    @apply flex flex-col gap-2 mb-4;
-  }
-
-  .product-detail-item {
-    @apply text-sm px-2 py-1 rounded;
-  }
-
-  .price-tag {
-    @apply bg-blue-100 text-blue-800 font-semibold text-base;
-  }
-
-  .stock-tag {
-    @apply bg-blue-200 text-blue-800;
-  }
-
-  .category-tag {
-    @apply bg-blue-100 text-blue-800;
-  }
-
-  .card-buttons {
-    @apply flex gap-2;
-  }
-
-  .card-btn {
-    @apply flex-1 px-4 py-2 border-0 rounded-md text-sm font-medium cursor-pointer transition-colors duration-200;
-  }
-
-  .edit-btn {
-    @apply bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white;
-  }
-
-  .delete-btn {
-    @apply bg-gray-500 hover:bg-gray-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white;
-  }
-
-  .loading {
-    @apply text-center p-5 text-gray-600 italic;
-  }
-
-  .no-products {
-    @apply text-center p-10 text-gray-600 italic col-span-full bg-white rounded-xl border-2 border-dashed border-gray-300;
-  }
-
-  .file-input {
-    @apply p-2 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 cursor-pointer hover:border-blue-500 hover:bg-blue-50 text-gray-900;
-  }
-
-  .file-help {
-    @apply text-gray-600 text-xs mt-1 block;
-  }
-
-  .image-preview-container {
-    @apply flex flex-col;
-  }
-
-  .image-preview {
-    @apply relative inline-block mt-2 border-2 border-gray-300 rounded-lg overflow-hidden max-w-48;
-  }
-
-  .image-preview img {
-    @apply w-full h-36 object-cover block;
-  }
-
-  .remove-image-btn {
-    @apply absolute top-2 right-2 bg-blue-500 bg-opacity-80 hover:bg-blue-600 text-white border-0 rounded-full w-6 h-6 text-base font-bold cursor-pointer flex items-center justify-center transition-colors duration-200;
-  }
-
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .product-catalog-container {
-      @apply flex-col;
+  
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
     }
-    
-    .left-panel {
-      @apply w-full relative h-auto;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    .right-panel {
-      @apply ml-0;
+  }
+  
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    .products-grid {
-      @apply grid-cols-1;
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
     }
+  }
+  
+  /* Notification badge pulse */
+  .notification-badge {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+  
+  /* Crisp icon rendering */
+  .stat-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    shape-rendering: geometricPrecision;
+  }
+  
+  .stat-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    shape-rendering: geometricPrecision;
   }
 }

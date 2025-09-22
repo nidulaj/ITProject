@@ -89,22 +89,7 @@ const OrderManagement = () => {
           )
         );
         
-        // Create notification for the customer
-        try {
-          const notificationMessage = `Your order #${String(orderId).padStart(3, '0')} status has been updated to "${newStatus}".`;
-          
-          await axios.post('http://localhost:5000/api/notifications', {
-            customer_id: currentOrder.customer_id,
-            order_id: orderId,
-            notification: notificationMessage,
-            notification_type: 'order_update'
-          });
-          
-          console.log(`Notification sent to customer ${currentOrder.customer_id} for order ${orderId}`);
-        } catch (notificationError) {
-          console.error('Error creating notification:', notificationError);
-          // Don't let notification errors prevent the status update
-        }
+        // Notification is automatically created by the backend when order status is updated
         
         console.log(`Order ${orderId} status updated to ${newStatus}`);
       } else {

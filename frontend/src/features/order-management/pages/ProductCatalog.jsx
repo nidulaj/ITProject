@@ -187,7 +187,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
     return (
       <button
         onClick={onClick}
-        className={`w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'}`}
+        className={`w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${isActive ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:text-blue-800 hover:shadow-md'}`}
       >
         <div className="text-xl">{icon}</div>
         <span className="font-medium">{title}</span>
@@ -200,19 +200,19 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="product-catalog-container">
       {/* Left sidebar navigation */}
-      <div className="w-64 bg-white shadow-lg fixed h-full">
+      <div className="w-64 bg-white shadow-2xl fixed h-full transform perspective-1000">
         <div className="flex flex-col h-full">
-          <div className="p-6 mb-4 bg-blue-500">
-            <h1 className="text-xl font-bold text-white">Product Management</h1>
+          <div className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform rotate-x-1">
+            <h1 className="text-xl font-bold text-white drop-shadow-lg">Product Management</h1>
           </div>
 
           <div className="px-4 mb-6">
-            <div className="py-3 px-4 mb-6 bg-blue-100 rounded-lg">
+            <div className="py-3 px-4 mb-6 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Total Products</span>
-                <span className="bg-blue-200 text-blue-800 text-xs font-medium rounded-full px-2 py-0.5">
+                <span className="text-sm font-medium text-gray-700 drop-shadow-sm">Total Products</span>
+                <span className="bg-gradient-to-r from-blue-200 to-blue-300 text-blue-900 text-xs font-medium rounded-full px-2 py-0.5 shadow-md">
                   {products.length}
                 </span>
               </div>
@@ -251,8 +251,8 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       </div>
 
       {/* Main content */}
-      <div className="ml-64 w-full min-h-screen p-6">
-        <div className="catalog-content">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
+        <div className="catalog-content flex gap-6">
           <ProductForm
             editingProduct={editingProduct}
             loading={loading}

@@ -27,7 +27,7 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
   };
 
   return (
-    <div className="product-card">
+    <div className="product-card card-3d">
       {getImageSrc() ? (
         <div className="product-image">
           <img 
@@ -63,14 +63,14 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
       <div className="card-buttons">
         <button 
           onClick={() => onEdit(product)}
-          className="card-btn edit-btn"
+          className="card-btn edit-btn shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
           disabled={loading}
         >
           Edit
         </button>
         <button 
           onClick={() => onDelete(product.product_id)}
-          className="card-btn delete-btn"
+          className="card-btn delete-btn shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
           disabled={loading}
         >
           Delete

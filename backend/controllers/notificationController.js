@@ -1,4 +1,4 @@
-const { 
+const {
   createNotification,
   getNotificationsByCustomer,
   getUnreadNotificationsCount,
@@ -12,30 +12,31 @@ const createNotificationController = async (req, res) => {
   try {
     const { customer_id, order_id, notification, notification_type } = req.body;
     
-    console.log('Creating notification:', { customer_id, order_id, notification, notification_type });
-    
-    if (!customer_id || !order_id || !notification) {
-      return res.status(400).json({ 
+    if (!customer_id || !notification) {
+      return res.status(400).json({
         success: false,
-        error: 'Customer ID, Order ID, and notification message are required' 
+        error: 'Customer ID and notification message are required'
       });
     }
-    
-    const newNotification = await createNotification(customer_id, order_id, notification, notification_type);
-    
-    console.log('Notification created successfully:', newNotification);
-    
-    res.status(201).json({ 
+
+    const newNotification = await createNotification(
+      customer_id, 
+      order_id, 
+      notification, 
+      notification_type || 'order_update'
+    );
+
+    res.status(201).json({
       success: true,
       message: 'Notification created successfully',
       notification: newNotification
     });
   } catch (error) {
     console.error('Error creating notification:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to create notification',
-      details: error.message 
+      details: error.message
     });
   }
 };
@@ -45,58 +46,55 @@ const getCustomerNotifications = async (req, res) => {
   try {
     const { customer_id } = req.params;
     
-    console.log(`Fetching notifications for customer ID: ${customer_id}`);
-    
     if (!customer_id) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Customer ID is required' 
+        error: 'Customer ID is required'
       });
     }
 
     const notifications = await getNotificationsByCustomer(customer_id);
-    
-    console.log(`Retrieved ${notifications.length} notifications for customer ${customer_id}`);
-    
-    res.status(200).json({ 
+    const unreadCount = await getUnreadNotificationsCount(customer_id);
+
+    res.status(200).json({
       success: true,
       notifications: notifications,
-      count: notifications.length
+      unreadCount: unreadCount
     });
   } catch (error) {
     console.error('Error fetching customer notifications:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to fetch notifications',
-      details: error.message 
+      details: error.message
     });
   }
 };
 
-// Get unread notifications count
+// Get unread count for a customer
 const getUnreadCount = async (req, res) => {
   try {
     const { customer_id } = req.params;
     
     if (!customer_id) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Customer ID is required' 
+        error: 'Customer ID is required'
       });
     }
 
-    const count = await getUnreadNotificationsCount(customer_id);
-    
-    res.status(200).json({ 
+    const unreadCount = await getUnreadNotificationsCount(customer_id);
+
+    res.status(200).json({
       success: true,
-      unread_count: count
+      unread_count: unreadCount
     });
   } catch (error) {
-    console.error('Error getting unread count:', error);
-    res.status(500).json({ 
+    console.error('Error fetching unread count:', error);
+    res.status(500).json({
       success: false,
-      error: 'Failed to get unread count',
-      details: error.message 
+      error: 'Failed to fetch unread count',
+      details: error.message
     });
   }
 };
@@ -106,63 +104,63 @@ const markAsRead = async (req, res) => {
   try {
     const { notification_id } = req.params;
     const { customer_id } = req.body;
-    
+
     if (!notification_id || !customer_id) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Notification ID and Customer ID are required' 
+        error: 'Notification ID and Customer ID are required'
       });
     }
 
-    const notification = await markNotificationAsRead(notification_id, customer_id);
-    
-    if (!notification) {
-      return res.status(404).json({ 
+    const updatedNotification = await markNotificationAsRead(notification_id, customer_id);
+
+    if (!updatedNotification) {
+      return res.status(404).json({
         success: false,
-        error: 'Notification not found' 
+        error: 'Notification not found'
       });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
       message: 'Notification marked as read',
-      notification: notification
+      notification: updatedNotification
     });
   } catch (error) {
     console.error('Error marking notification as read:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to mark notification as read',
-      details: error.message 
+      details: error.message
     });
   }
 };
 
-// Mark all notifications as read
+// Mark all notifications as read for a customer
 const markAllAsRead = async (req, res) => {
   try {
     const { customer_id } = req.params;
-    
+
     if (!customer_id) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Customer ID is required' 
+        error: 'Customer ID is required'
       });
     }
 
-    const notifications = await markAllNotificationsAsRead(customer_id);
-    
-    res.status(200).json({ 
+    const updatedNotifications = await markAllNotificationsAsRead(customer_id);
+
+    res.status(200).json({
       success: true,
       message: 'All notifications marked as read',
-      updated_count: notifications.length
+      updatedCount: updatedNotifications.length
     });
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to mark all notifications as read',
-      details: error.message 
+      details: error.message
     });
   }
 };
@@ -172,34 +170,34 @@ const deleteNotificationController = async (req, res) => {
   try {
     const { notification_id } = req.params;
     const { customer_id } = req.body;
-    
+
     if (!notification_id || !customer_id) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Notification ID and Customer ID are required' 
+        error: 'Notification ID and Customer ID are required'
       });
     }
 
-    const notification = await deleteNotification(notification_id, customer_id);
-    
-    if (!notification) {
-      return res.status(404).json({ 
+    const deletedNotification = await deleteNotification(notification_id, customer_id);
+
+    if (!deletedNotification) {
+      return res.status(404).json({
         success: false,
-        error: 'Notification not found' 
+        error: 'Notification not found'
       });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
       message: 'Notification deleted successfully',
-      notification: notification
+      notification: deletedNotification
     });
   } catch (error) {
     console.error('Error deleting notification:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: 'Failed to delete notification',
-      details: error.message 
+      details: error.message
     });
   }
 };

@@ -4,6 +4,7 @@ import CustomerProductCard from '../components/CustomerProductCard';
 import CartSidebar from '../components/CartSidebar';
 import NotificationIcon from '../../../components/NotificationIcon';
 import { useNotification } from '../../../contexts/NotificationContext';
+import { useCustomer } from '../../../contexts/CustomerContext';
 
 const CustomerCatalog = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,7 @@ const CustomerCatalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { showSuccess, showError } = useNotification();
+  const { currentCustomer, setCustomer } = useCustomer();
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
 
@@ -104,19 +106,38 @@ const CustomerCatalog = () => {
   const categories = ['all', ...new Set(products.map(product => product.category).filter(Boolean))];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-lg border-b border-blue-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 drop-shadow-lg">
               Product Catalog
             </h1>
             
-            {/* Notification and Cart Icons */}
-            <div className="flex items-center gap-3">
+            {/* Customer Selection and Controls */}
+            <div className="flex items-center gap-4">
+              {/* Customer Selection */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">Customer:</label>
+                <select 
+                  value={currentCustomer?.id || 1} 
+                  onChange={(e) => {
+                    const customerId = parseInt(e.target.value);
+                    const customerName = e.target.selectedOptions[0].text;
+                    setCustomer({ id: customerId, name: customerName });
+                  }}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={1}>Customer 1 (Default Customer)</option>
+                  <option value={1001}>Customer 1001 (Test Customer)</option>
+                </select>
+              </div>
+              
+              {/* Notification and Cart Icons */}
+              <div className="flex items-center gap-3">
               {/* Notification Icon */}
-              <NotificationIcon customerId={1} />
+              <NotificationIcon customerId={currentCustomer?.id || 1} />
               
 
               {/* Cart Button */}
@@ -133,6 +154,7 @@ const CustomerCatalog = () => {
                   </span>
                 )}
               </button>
+              </div>
             </div>
           </div>
         </div>
@@ -154,7 +176,7 @@ const CustomerCatalog = () => {
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
               />
             </div>
           </div>
@@ -163,13 +185,13 @@ const CustomerCatalog = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="md:w-48 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            className="md:w-48 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
           >
-            <option value="all">All Categories</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Clothing">Clothing</option>
-            <option value="Books">Books</option>
-            <option value="Home & Kitchen">Home & Kitchen</option>
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category === 'all' ? 'All Categories' : category}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -187,7 +209,7 @@ const CustomerCatalog = () => {
               <div className="text-gray-600">No products found</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredProducts.map(product => (
                 <CustomerProductCard
                   key={product.product_id}

@@ -8,11 +8,15 @@
   }
 
   .left-panel {
-    @apply w-96 bg-white p-6 shadow-lg;
+    @apply w-96 bg-white shadow-lg border border-gray-200 rounded-lg h-fit;
   }
 
   .right-panel {
     @apply flex-1 p-6 bg-gray-50;
+  }
+
+  .catalog-content {
+    @apply flex gap-6;
   }
 
   .left-panel h2 {
@@ -50,7 +54,7 @@
   }
 
   .form-buttons {
-    @apply flex gap-3 mt-2;
+    @apply flex gap-3 mt-2 mb-2;
   }
 
   .form-buttons button {

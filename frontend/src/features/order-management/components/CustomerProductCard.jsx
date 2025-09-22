@@ -34,7 +34,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
   const isOutOfStock = product.stock_quantity === 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-lg hover:transform hover:-translate-y-1">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:transform hover:-translate-y-2 hover:scale-105 card-3d">
       {/* Product Image */}
       <div className="relative h-40 overflow-hidden">
         {getImageSrc() ? (
@@ -106,7 +106,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
             <button
               onClick={decreaseQuantity}
               disabled={quantity <= 1}
-              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110"
             >
               −
             </button>
@@ -116,7 +116,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
             <button
               onClick={increaseQuantity}
               disabled={quantity >= product.stock_quantity}
-              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110"
             >
               +
             </button>
@@ -127,7 +127,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock || quantity > product.stock_quantity}
-          className="w-full py-2 px-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors duration-200"
+          className="w-full py-2 px-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
         >
           {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
         </button>

@@ -2,8 +2,8 @@ import ProductCard from './ProductCard';
 
 const ProductGrid = ({ products, loading, onEditProduct, onDeleteProduct }) => {
   return (
-    <div className="right-panel">
-      <h2 className="panel-title">Product Catalog ({products.length} products)</h2>
+    <div className="right-panel shadow-2xl transform perspective-1000 flex-1">
+      <h2 className="panel-title drop-shadow-lg">Product Catalog ({products.length} products)</h2>
       {loading && <div className="loading">Loading...</div>}
       <div className="products-grid">
         {products.length === 0 ? (

@@ -9,6 +9,9 @@ const {
   getOrderItemsByOrderId
 } = require('../models/orderModel');
 
+const { createNotification } = require('../models/notificationModel');
+
+
 // Create a new order
 const createOrderController = async (req, res) => {
   try {
@@ -172,6 +175,29 @@ const updateOrderStatusController = async (req, res) => {
         success: false,
         error: 'Order not found' 
       });
+    }
+
+    // Create notification for the customer
+    try {
+      console.log(`🔔 Creating notification for order ${order_id} with status: ${order_status}`);
+      console.log(`🔔 Customer ID: ${updatedOrder.customer_id}`);
+      
+      const notificationMessage = `Order #${String(order_id).padStart(3, '0')} is ${order_status.toLowerCase()}.`;
+      console.log(`🔔 Notification message: ${notificationMessage}`);
+      
+      const notification = await createNotification(
+        updatedOrder.customer_id,
+        order_id,
+        notificationMessage,
+        'order_update'
+      );
+      
+      console.log(`✅ Notification created successfully:`, notification);
+      console.log(`📧 Notification sent to customer ${updatedOrder.customer_id} for order ${order_id}: ${notificationMessage}`);
+    } catch (notificationError) {
+      console.error('❌ Error creating notification:', notificationError);
+      console.error('❌ Full error details:', notificationError);
+      // Don't fail the order update if notification fails
     }
 
     console.log(`Order status updated successfully: ${updatedOrder.order_id}`);

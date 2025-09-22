@@ -138,20 +138,7 @@ const OrderManagementDashboard = () => {
           )
         );
         
-        try {
-          const notificationMessage = `Your order #${String(orderId).padStart(3, '0')} status has been updated to "${newStatus}".`;
-          
-          await axios.post('http://localhost:5000/api/notifications', {
-            customer_id: currentOrder.customer_id,
-            order_id: orderId,
-            notification: notificationMessage,
-            notification_type: 'order_update'
-          });
-          
-          console.log(`Notification sent to customer ${currentOrder.customer_id} for order ${orderId}`);
-        } catch (notificationError) {
-          console.error('Error creating notification:', notificationError);
-        }
+        // Notification is automatically created by the backend when order status is updated
         
         console.log(`Order ${orderId} status updated to ${newStatus}`);
       } else {
@@ -207,41 +194,42 @@ const OrderManagementDashboard = () => {
 
   const StatCard = ({ title, value, subtitle, status, icon, color = 'blue' }) => {
     const colorClasses = {
-      blue: 'from-blue-100 to-blue-200',
-      primary: 'from-blue-500 to-blue-600',
-      gray: 'from-gray-100 to-gray-200',
+      blue: 'from-blue-200 to-blue-300',
+      primary: 'from-blue-600 to-blue-700',
+      gray: 'from-gray-200 to-gray-300',
       white: 'from-white to-gray-50',
-      light: 'from-blue-50 to-blue-100',
-      green: 'from-green-100 to-green-200',
-      yellow: 'from-yellow-100 to-yellow-200',
-      red: 'from-red-100 to-red-200',
-      purple: 'from-purple-100 to-purple-200'
+      light: 'from-blue-100 to-blue-200',
+      green: 'from-green-200 to-green-300',
+      yellow: 'from-yellow-200 to-yellow-300',
+      red: 'from-red-200 to-red-300',
+      purple: 'from-purple-200 to-purple-300'
     };
 
     const statusClasses = {
-      'Low': 'bg-yellow-100 text-yellow-800',
-      'Average': 'bg-blue-100 text-blue-800',
-      'Good': 'bg-green-100 text-green-800',
-      'High': 'bg-red-100 text-red-800',
-      'Normal': 'bg-gray-100 text-gray-800'
+      'Low': 'bg-yellow-200 text-yellow-900',
+      'Average': 'bg-blue-200 text-blue-900',
+      'Good': 'bg-green-200 text-green-900',
+      'High': 'bg-red-200 text-red-900',
+      'Normal': 'bg-gray-200 text-gray-900',
+      'Warning': 'bg-yellow-200 text-yellow-900'
     };
 
     return (
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
+      <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 transform perspective-1000 hover:rotate-y-2 card-3d">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-            <p className="text-3xl font-bold text-gray-900 mb-2">{value}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1 drop-shadow-sm">{title}</p>
+            <p className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-md">{value}</p>
             <p className="text-sm text-gray-500 mb-3">{subtitle}</p>
             {status && (
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full shadow-md ${
                 statusClasses[status] || statusClasses['Normal']
               }`}>
                 {status}
               </span>
             )}
           </div>
-          <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClasses[color]} text-white`}>
+          <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClasses[color]} text-white shadow-lg transform hover:scale-110 transition-transform duration-200 flex items-center justify-center stat-icon border border-white border-opacity-20`}>
             {icon}
           </div>
         </div>
@@ -253,7 +241,7 @@ const OrderManagementDashboard = () => {
     return (
       <button
         onClick={onClick}
-        className={`w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 ${isActive ? 'bg-blue-500 text-white' : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'}`}
+        className={`w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${isActive ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:text-blue-800 hover:shadow-md'}`}
       >
         <div className="text-xl">{icon}</div>
         <span className="font-medium">{title}</span>
@@ -309,10 +297,10 @@ const OrderManagementDashboard = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left sidebar navigation */}
-      <div className="w-64 bg-white shadow-lg fixed h-full">
+      <div className="w-64 bg-white shadow-2xl fixed h-full transform perspective-1000">
         <div className="flex flex-col h-full">
-          <div className="p-6 mb-4 bg-blue-500">
-            <h1 className="text-xl font-bold text-white">Order Management</h1>
+          <div className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform rotate-x-1">
+            <h1 className="text-xl font-bold text-white drop-shadow-lg">Order Management</h1>
           </div>
 
           <nav className="flex-1 px-2 py-4 space-y-1">
@@ -342,13 +330,6 @@ const OrderManagementDashboard = () => {
               onClick={() => handleQuickAction('export')}
             />
             
-            <NavLink 
-              title="Filter Orders" 
-              icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
-              </svg>}
-              onClick={() => handleQuickAction('filter')}
-            />
           </nav>
 
 
@@ -356,12 +337,11 @@ const OrderManagementDashboard = () => {
       </div>
 
       {/* Main content */}
-      <div className="bg-gray-50 ml-64 w-full min-h-screen p-6">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
 
         {/* Header for main content */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
-          <p className="text-gray-600">Monitor and manage all customer orders</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-lg">Order Management Dashboard</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard
@@ -371,8 +351,8 @@ const OrderManagementDashboard = () => {
             status="Good"
             color="primary"
             icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             }
           />
@@ -385,8 +365,8 @@ const OrderManagementDashboard = () => {
             status={stats.pendingPayments > 0 ? "Warning" : "Good"}
             color="yellow"
             icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             }
           />
@@ -398,8 +378,8 @@ const OrderManagementDashboard = () => {
             status="Good"
             color="purple"
             icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
             }
           />
@@ -411,17 +391,17 @@ const OrderManagementDashboard = () => {
             status="Good"
             color="green"
             icon={
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             }
           />
         </div>
 
         {/* Recent Orders Table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-xl font-semibold text-gray-800">Recent Orders</h2>
+        <div className="bg-white rounded-xl shadow-lg border border-blue-200 transform perspective-1000 hover:shadow-xl transition-all duration-300">
+          <div className="px-6 py-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
+            <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
           </div>
           
           {loading ? (
@@ -463,21 +443,21 @@ const OrderManagementDashboard = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-100">
+              <table className="min-w-full divide-y divide-blue-200">
+                <thead className="bg-gradient-to-r from-blue-100 to-blue-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Order ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Payment</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {orders.slice(0, 10).map((order, index) => (
-                    <tr key={order.order_id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tbody className="bg-white divide-y divide-blue-100">
+                  {orders.map((order, index) => (
+                    <tr key={order.order_id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 hover:shadow-md transition-all duration-200 transform hover:scale-[1.01]`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         #{String(order.order_id).padStart(3, '0')}
                       </td>
@@ -517,7 +497,7 @@ const OrderManagementDashboard = () => {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => handleViewOrderDetails(order)}
-                            className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 p-1 rounded transition-colors duration-200"
+                            className="text-blue-600 hover:text-blue-900 hover:bg-blue-100 p-2 rounded-lg transition-all duration-200 transform hover:scale-110 hover:shadow-md border border-blue-200 hover:border-blue-300"
                             title="View Order Details"
                           >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -559,7 +539,7 @@ const OrderManagementDashboard = () => {
         {/* Order Details Modal */}
         {showOrderDetails && selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transform perspective-1000 hover:scale-[1.02] transition-all duration-300">
               <div className="flex justify-between items-center border-b border-gray-200 px-6 py-4">
                 <h3 className="text-xl font-bold text-gray-900">
                   Order #{String(selectedOrder.order_id).padStart(3, '0')} Details

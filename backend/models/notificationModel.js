@@ -18,7 +18,7 @@ const createNotification = async (customer_id, order_id, notification, notificat
 const getNotificationsByCustomer = async (customer_id) => {
   try {
     const result = await pool.query(
-      'SELECT n.*, o.order_id, o.total_price FROM notifications n LEFT JOIN orders o ON n.order_id = o.order_id WHERE n.customer_id = $1 ORDER BY n.created_at DESC',
+      'SELECT * FROM notifications WHERE customer_id = $1 ORDER BY created_at DESC',
       [customer_id]
     );
     return result.rows;
@@ -92,3 +92,5 @@ module.exports = {
   markAllNotificationsAsRead,
   deleteNotification
 };
+
+

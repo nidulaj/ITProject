@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { 
+const {
   createNotificationController,
   getCustomerNotifications,
   getUnreadCount,
@@ -9,13 +9,13 @@ const {
   deleteNotificationController
 } = require('../controllers/notificationController');
 
-// Create new notification
+// Create a new notification
 router.post('/', createNotificationController);
 
 // Get notifications for a customer
 router.get('/customer/:customer_id', getCustomerNotifications);
 
-// Get unread notifications count for a customer
+// Get unread count for a customer
 router.get('/customer/:customer_id/unread-count', getUnreadCount);
 
 // Mark notification as read
