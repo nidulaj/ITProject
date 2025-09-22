@@ -7,9 +7,16 @@ const createCustomer = async (firstName, lastName, email, phone, address, passwo
     return result.rows[0]
 };
 
-const findUserByEmail = async (email) => {
+const findCustomerByEmail = async (email) => {
     const query = `SELECT * FROM "customers" WHERE "email" = $1`;
     const values = [email]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+};
+
+const findUserById = async (id) => {
+    const query = `SELECT * FROM "customers" WHERE "cus_id" = $1`;
+    const values = [id]
     const result = await pool.query(query, values)
     return result.rows[0]
 };
@@ -56,4 +63,27 @@ const deleteVerificationCode = async (id) => {
     return result.rows[0];
 };
 
-module.exports = { createCustomer, findUserByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode };
+const emailVerification =  async (id) => {
+    const query = 'UPDATE "customers" SET is_email_verified = true WHERE cus_id=$1 RETURNING *'
+    const values = [id]
+    const result = await pool.query(query, values)
+    return result.rows[0]
+}
+
+const findUserByGoogleId = async (googleId) => {
+    const query = `SELECT * FROM "customers" WHERE "google_id" = $1`;
+    const values = [googleId];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+};
+
+const attachGoogleIdToUser = async(cusId, googleId) => {
+    const query = "UPDATE customers SET google_id = $1, is_email_verified = true WHERE cus_id = $2 RETURNING *";
+    const values = [googleId, cusId];
+    const result = await pool.query(query, values);
+    return result.rows[0];
+}
+
+
+module.exports = { createCustomer, findCustomerByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser };
+

@@ -35,6 +35,18 @@ const sendResetPasswordLink = async (email,resetLink) => {
     })
 }
 
+const sendStaffRegistrationInfo = async (email,password) => {
+    await transporter.sendMail({
+        from: `"Smart Dairy" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Your Staff Registration",
+        html: `<p>Your account has been created successfully.</p>
+               <p>Use this email and password to log in:</p>
+               <p>Email: ${email}</p>
+               <p>Password: ${password}</p>`,
+    })
+}
+
 const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   try {
     await transporter.sendMail({
@@ -48,4 +60,5 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   }
 };
 
-module.exports = {send2FACode, sendVerificationLink, sendResetPasswordLink, sendOrderStatusEmail}
+
+module.exports = {send2FACode, sendVerificationLink, sendResetPasswordLink, sendStaffRegistrationInfo, sendOrderStatusEmail}

@@ -1,24 +1,75 @@
-import { useState } from "react";
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import RecipePage from "./features/production-management/pages/RecipePage";
-import RequestIngredientsPage from "./features/production-management/pages/RequestIngredientsPage";
-import Dashboard from "./features/production-management/pages/Dashboard";
-import ReturnsCustomer from "./features/production-management/pages/ReturnsCustomer";
-import CustomizedOrderPage from "./features/production-management/pages/CustomizedOrderPage";
-import YogurtLandingPage from "./features/production-management/pages/YogurtLandingPage";
+import React, { lazy, Suspense } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { GoogleOAuthProvider } from "@react-oauth/google"
+import { AuthProvider } from "./components/AuthContext"
+import ProtectedRoute from "./components/ProtectedRoute"
+
+
+const Register = lazy(() => import("./features/user-management/pages/Register"))
+const Login = lazy(() => import("./features/user-management/pages/Login"))
+const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
+const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
+const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
+const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
+
+const DashboardLayout = ({ children }) => <div>{children}</div>
 
 function App() {
-
   return (
-    <>
-      {/* <ReturnsCustomer/>
-      <CustomizedOrderPage/> */}
-      <Dashboard/>
-      <YogurtLandingPage/>
-    </>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify2FA" element={<Verify2FA />} />
+              <Route path="/verifyEmail" element={<VerifyEmail />} />
+
+              {/* User Dashboards */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/admin/*"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AdminDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+                  
+              <Route
+                path="/dashboard/production/*"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ProductionDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 fallback */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   )
 }
 
 export default App
-

@@ -17,17 +17,30 @@ const reqIngredientsRoutes = require('./routes/reqIngredientsRoutes');  //Rashmi
 const productionRoutes = require('./routes/productionRoutes'); //Rashmika
 const returnsRoute = require("./routes/returns");  //Rashmika
 const customizedOrdersRoute = require("./routes/customizedOrders"); //Rashmika
-
+const recipeRoutes = require("./routes/recipeRoutes");
+const staffAuthRoutes = require("./routes/staffAuthRoutes");
+const userManagementAuditRoutes = require("./routes/userManagementAuditLogRoutes");
+const userRoleRoutes = require("./routes/userRoleRoutes");
 const app = express();
 const cookieParser = require('cookie-parser')
 
-app.use(cors());
+
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true,              
+}));
+
 app.use(express.json());
 app.use(cookieParser());
-
+app.set("trust proxy", true);
 connectDB();
 
-app.use('/auth/customer', customerAuthRoute);
+require('./utils/scheduledJobs');
+
+
+app.use('/api/auth', customerAuthRoute);
+app.use('/api/staff/auth', staffAuthRoutes);
+app.use('/api/user-roles', userRoleRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders',orderRoutes);
 app.use("/api/recipe", recipeRoutes);  //Rashmika
@@ -40,6 +53,8 @@ app.use('/api/req_ingredients', reqIngredientsRoutes);  //Rashmika
 app.use('/api/productions', productionRoutes);  //Rashmika
 app.use("/api/returns", returnsRoute);  //Rahmika
 app.use("/api/customized_orders", customizedOrdersRoute); //Rahmika
+app.use('/api/user-management/audit', userManagementAuditRoutes);
+
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");
