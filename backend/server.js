@@ -1,5 +1,6 @@
 const express = require('express');
 require('dotenv').config();
+
 const cors = require('cors');
 const {connectDB} = require('./db/dbConnect');
 
@@ -11,9 +12,11 @@ const storeRoutes=require('./routes/storeRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
-const recipeRoutes = require("./routes/recipeRoutes");
-
-
+const recipeRoutes = require("./routes/recipeRoutes");  //Rashmika
+const reqIngredientsRoutes = require('./routes/reqIngredientsRoutes');  //Rashmika
+const productionRoutes = require('./routes/productionRoutes'); //Rashmika
+const returnsRoute = require("./routes/returns");  //Rashmika
+const customizedOrdersRoute = require("./routes/customizedOrders"); //Rashmika
 
 const app = express();
 const cookieParser = require('cookie-parser')
@@ -27,12 +30,16 @@ connectDB();
 app.use('/auth/customer', customerAuthRoute);
 app.use('/api/products', productRoutes);
 app.use('/api/orders',orderRoutes);
-app.use("/api/recipe", recipeRoutes);
+app.use("/api/recipe", recipeRoutes);  //Rashmika
 app.use('/api/ingredient', ingredientRoutes);
 app.use('/api/special',specialRoutes);
 app.use('/api/final',finalRoutes);
 app.use('/api/store',storeRoutes);
 app.use('/api/discounts', discountRoutes);
+app.use('/api/req_ingredients', reqIngredientsRoutes);  //Rashmika
+app.use('/api/productions', productionRoutes);  //Rashmika
+app.use("/api/returns", returnsRoute);  //Rahmika
+app.use("/api/customized_orders", customizedOrdersRoute); //Rahmika
 
 app.listen(5000, () => {
   console.log("Server started on http://localhost:5000");
