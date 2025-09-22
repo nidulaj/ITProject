@@ -11,6 +11,7 @@ import RecipeForm from '../components/RecipeForm';
 import RequestIngredientsForm from '../components/RequestIngredientsForm';
 import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon } from 'lucide-react';
 import CustomOrderTable from '../components/CustomOrderTable';
+import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const API = 'http://localhost:5000';
 
@@ -73,7 +74,12 @@ const ProductionDashboard = () => {
   // Only slim fields for dashboard: ID, Recipe No, Quantity, Status
   const fetchRequestsSlim = async () => {
     try {
-      const res = await axios.get(`${API}/api/req_ingredients`);
+
+      const res = await authFetch({
+          method: "get",
+          url: `${API}/api/req_ingredients`,
+        });
+
       const rows = res?.data?.data || [];
       const slim = rows.map(r => ({
         'Request ID': r.req_id,
