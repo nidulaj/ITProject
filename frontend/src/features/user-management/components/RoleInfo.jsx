@@ -1,14 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
-
+import { useNavigate } from "react-router-dom";
 export default function RoleInfo() {
   const { roleId } = useParams();
   const [role, setRole] = useState(null);
   const [staffMembers, setStaffMembers] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
-
-  // 👇 One state for both role_name & description
+  const navigate = useNavigate();
   const [editForm, setEditForm] = useState({
     role_name: "",
     description: "",
@@ -20,7 +19,7 @@ export default function RoleInfo() {
       const res = await authFetch({
         method: "put",
         url: `http://localhost:5000/api/user-roles/updateRole/${roleId}`,
-        data: editForm, // send object with role_name & description
+        data: editForm,
       });
       setRole(res.data);
       setIsEditOpen(false);
@@ -114,8 +113,8 @@ export default function RoleInfo() {
         </h3>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {staffMembers.map((staff) => (
-            <div
-              key={staff.id}
+            <div onClick= {() => navigate(`/dashboard/admin/staff/${staff.staff_id}`)}
+              key={staff.staff_id}
               className="p-4 bg-gray-100 dark:bg-gray-700 rounded-xl shadow hover:shadow-lg transition cursor-pointer"
             >
               <h4 className="text-lg font-bold text-gray-900 dark:text-white">

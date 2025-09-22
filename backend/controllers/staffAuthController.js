@@ -8,7 +8,12 @@ const {
   deleteVerificationCode,
   findUserById,
   getAllStaff,
-  getStaffByRole
+  getStaffByRole,
+  getStaffById,
+  changeRole,
+  changeAccountStatus,
+  change2FA,
+  updateStaffDetailsByAdmin
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -60,7 +65,8 @@ const loginStaff = async (req, res) => {
   try {
     const staffUser = await staffLogin(email, password);
     if (!staffUser) {
-      await createLog(staffUser.staff_code, "Failed Login Attempt", req.ip);
+      const triedUser = await findStaffByEmail(email);
+      await createLog(triedUser.staff_code, "Failed Login Attempt", req.ip);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -95,7 +101,6 @@ const loginStaff = async (req, res) => {
 
     const accessToken = generateAccessTokenStaff(staffUser);
     const refreshToken = generateRefreshTokenStaff(staffUser);
-
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,
@@ -156,8 +161,6 @@ const refreshToken = async (req, res) => {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
-    await createLog(staffUser.staff_code, "Refreshed Access Token", req.ip);
 
     return res.status(200).json({
       message: "Tokens refreshed",
@@ -273,6 +276,72 @@ const getStaffInfoByRole = async (req, res) => {
   }
 };
 
+const getStaffDetailsById = async (req, res) => {
+  const { staffId } = req.params;
+  try {
+    const staffDetails = await getStaffById(staffId);
+    res.status(200).json(staffDetails);
+  } catch (error) {
+    console.error("Error fetching staff details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const changeUserRole = async (req, res) => {
+  const { staffId } = req.params;
+  const { roleId } = req.body;
+  try {
+    const updatedRole = await changeRole(roleId, staffId);
+    if (!updatedRole) {
+      return res.status(404).json({ error: "Role not found" });
+    }
+    res.status(200).json(updatedRole);
+  } catch (error) {
+    console.error("Error updating role:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const changeAccountActivation = async (req, res) => {
+  const { staffId } = req.params;
+  const { isActive, deactivationPeriod } = req.body; 
+  console.log(deactivationPeriod);
+
+  try {
+    const updatedStaff = await changeAccountStatus(staffId, isActive, deactivationPeriod);
+    res.status(200).json(updatedStaff);
+  } catch (error) {
+    console.error("Error changing account activation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const change2FASetting = async (req, res) => {
+  const { staffId } = req.params;
+  const { is2FAEnabled } = req.body;
+
+  try {
+    const updatedStaff = await change2FA(staffId, is2FAEnabled);
+    res.status(200).json(updatedStaff);
+  } catch (error) {
+    console.error("Error changing 2FA setting:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const changeStaffDetailsByAdmin = async (req, res) => {
+  const { staffId } = req.params;
+  const { first_name, last_name, phone } = req.body;
+
+  try {
+    const updatedStaff = await updateStaffDetailsByAdmin(staffId, { first_name, last_name, phone });
+    res.status(200).json(updatedStaff);
+  } catch (error) {
+    console.error("Error updating staff details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -281,5 +350,10 @@ module.exports = {
   verify2FACode,
   resend2FACode,
   getStaffList,
-  getStaffInfoByRole
+  getStaffInfoByRole,
+  getStaffDetailsById,
+  changeUserRole,
+  changeAccountActivation,
+  change2FASetting,
+  changeStaffDetailsByAdmin
 };

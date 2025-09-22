@@ -29,6 +29,8 @@ app.use(cookieParser());
 app.set("trust proxy", true);
 connectDB();
 
+require('./utils/scheduledJobs');
+
 
 app.use('/api/auth', customerAuthRoute);
 app.use('/api/staff/auth', staffAuthRoutes);

@@ -9,6 +9,7 @@ import Chat from "../components/Chat";
 import ProfileSecurity from "../components/ProfileSecurity";
 import AddStaff from "../components/AddStaff";
 import RoleInfo from "../components/RoleInfo";
+import StaffUserInfo from "../components/staffUserInfo";
 
 export default function AdminDashboard() {
   return (
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
           <Route path="/" element={<h2 className="text-lg font-bold">Welcome to Admin Dashboard</h2>} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="staff/add" element={<AddStaff />} />
+          <Route path="staff/:staffId" element={<StaffUserInfo />} />
           <Route path="rolesAccess" element={<RolesAccess />} />
           <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
           <Route path="logsMonitoring" element={<LogsMonitoring />} />
