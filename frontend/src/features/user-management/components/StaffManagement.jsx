@@ -55,7 +55,7 @@ export default function StaffManagement() {
         </thead>
         <tbody>
           {staffList.map((user) => (
-            <tr key={user.staff_id} className="border-t">
+            <tr key={user.staff_id} onClick={() => navigate(`${user.staff_id}`)} className="border-t">
               <td className="p-2">{user.staff_code}</td>
               <td className="p-2">
                 {user.first_name} {user.last_name}

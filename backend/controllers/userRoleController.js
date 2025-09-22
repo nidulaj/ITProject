@@ -65,10 +65,12 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+
+
 module.exports = {
   addRole,
   getAllUserRoles,
   deleteUserRole,
   getUserRoleInfoById,
-  updateUserRole
+  updateUserRole,
 };
