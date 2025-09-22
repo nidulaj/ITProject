@@ -47,4 +47,18 @@ const sendStaffRegistrationInfo = async (email,password) => {
     })
 }
 
-module.exports = {send2FACode, sendVerificationLink, sendResetPasswordLink, sendStaffRegistrationInfo}
+const sendOrderStatusEmail = async (userEmail, orderId, status) => {
+  try {
+    await transporter.sendMail({
+      from: `"Smart Dairy" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: `Your Order #${orderId} Status Update`,
+      text: `Dear Customer,\n\nYour Customized order status has been updated to: ${status}.\n\nThank you for shopping with us!\nPubudu Yoghurt`
+    });
+  } catch (err) {
+    console.error('Error sending email:', err);
+  }
+};
+
+
+module.exports = {send2FACode, sendVerificationLink, sendResetPasswordLink, sendStaffRegistrationInfo, sendOrderStatusEmail}
