@@ -13,7 +13,8 @@ const {
   changeRole,
   changeAccountStatus,
   change2FA,
-  updateStaffDetailsByAdmin
+  updateStaffDetailsByAdmin,
+  removeUser
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -342,6 +343,18 @@ const changeStaffDetailsByAdmin = async (req, res) => {
   }
 };
 
+const removeStaffAccount = async (req, res) => {
+  const { staffId } = req.params;
+
+  try {
+    const removedUser = await removeUser(staffId);
+    res.status(200).json({ message: "Staff member removed successfully", removedUser });
+  } catch (error) {
+    console.error("Error removing staff member:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -355,5 +368,6 @@ module.exports = {
   changeUserRole,
   changeAccountActivation,
   change2FASetting,
-  changeStaffDetailsByAdmin
+  changeStaffDetailsByAdmin,
+  removeStaffAccount
 };
