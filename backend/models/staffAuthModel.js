@@ -75,7 +75,7 @@ const getStaffByRole = async (roleId) => {
 };
 
 const getStaffById = async (id) => {
-  const query = `SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, s.is_email_verified, s.is_phone_verified, s."is_2FA_enabled", s.created_at, s.updated_at, ur.role_name
+  const query = `SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, s.is_email_verified, s.is_phone_verified, s."is_2FA_enabled", s.created_at, s.updated_at, s.deactivated_until, ur.role_name
                FROM staff s JOIN user_roles ur ON s.role = ur.role_id
                WHERE s.staff_id = $1`;
   const values = [id];
