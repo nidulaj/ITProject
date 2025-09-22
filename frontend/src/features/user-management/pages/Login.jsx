@@ -43,7 +43,7 @@ export default function Login() {
           navigate("/dashboard");
         } else {
           if (role === 1) navigate("/dashboard/admin");
-          else if (role === "manager") navigate("/dashboard/manager");
+          else if (role === 12) navigate("/dashboard/production");
           else {
             navigate("/login");
             setIsLoggedIn(false);

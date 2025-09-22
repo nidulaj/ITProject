@@ -14,7 +14,7 @@ import CustomOrderTable from '../components/CustomOrderTable';
 
 const API = 'http://localhost:5000';
 
-const Dashboard = () => {
+const ProductionDashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
@@ -508,4 +508,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default ProductionDashboard;
