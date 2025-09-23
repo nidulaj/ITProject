@@ -1,28 +1,83 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { authFetch } from "../utils/authFetchStaff";
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+
 export default function StaffManagement() {
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [staffList, setStaffList] = useState([]);
+  const [userRoles, setUserRoles] = useState([]);
+  const [userData, setUserData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    role: "",
+  });
+
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // fetch staff list from backend
+  const fetchStaffList = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/staff/auth/staffList",
+      });
+      setStaffList(res.data);
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+       const res = await authFetch({
+        method: "post",
+        url: "http://localhost:5000/api/staff/auth/register",
+        data: userData,
+      });
+      setIsAddUserOpen(false);
+      setStaffList((prev) => [...prev, res.data]);
+
+      setUserData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        role: "",
+      });
+    } catch (error) {
+      console.error("Error adding staff:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchStaffList = async () => {
+    fetchStaffList();
+
+    const fetchUserRoles = async () => {
       try {
         const res = await authFetch({
           method: "get",
-          url: "http://localhost:5000/api/staff/auth/staffList",
+          url: "http://localhost:5000/api/user-roles/getAllRoles",
         });
-        setStaffList(res.data);
+        setUserRoles(res.data);
       } catch (error) {
-        console.error("Error fetching staff list:", error);
+        console.error("Error fetching user roles:", error);
       }
     };
 
-    fetchStaffList();
+    fetchUserRoles();
   }, []);
 
+
   return (
-  
-    <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <section className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 relative z-0">
       <h2 className="text-lg font-bold mb-4">Staff Management</h2>
       <div className="flex mb-4 space-x-2">
         <input
@@ -37,7 +92,10 @@ export default function StaffManagement() {
           <option>Deactive</option>
         </select>
 
-        <button className="w-32 bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={() => navigate("add")}>
+        <button
+          className="w-32 bg-blue-600 text-white px-4 py-2 rounded-lg"
+          onClick={() => setIsAddUserOpen(true)}
+        >
           Add User
         </button>
       </div>
@@ -49,13 +107,17 @@ export default function StaffManagement() {
             <th className="p-2 text-left">Email</th>
             <th className="p-2 text-left">Phone</th>
             <th className="p-2 text-left">Role</th>
-            <th className="p-2 text-left">Statues</th>
+            <th className="p-2 text-left">Status</th>
             <th className="p-2 text-left">Action</th>
           </tr>
         </thead>
         <tbody>
           {staffList.map((user) => (
-            <tr key={user.staff_id} onClick={() => navigate(`${user.staff_id}`)} className="border-t">
+            <tr
+              key={user.staff_id}
+              onClick={() => navigate(`${user.staff_id}`)}
+              className="border-t"
+            >
               <td className="p-2">{user.staff_code}</td>
               <td className="p-2">
                 {user.first_name} {user.last_name}
@@ -88,7 +150,80 @@ export default function StaffManagement() {
           ))}
         </tbody>
       </table>
+
+      {/* Add User Popup */}
+      {isAddUserOpen && (
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
+          <div
+            className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 relative"
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsAddUserOpen(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            >
+              ✖
+            </button>
+
+            <h2 className="text-lg font-bold mb-4 text-center">
+              Add New Staff User
+            </h2>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <input
+                onChange={handleChange}
+                value={userData.firstName}
+                type="text"
+                name="firstName"
+                placeholder="First Name"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700"
+              />
+              <input
+                onChange={handleChange}
+                value={userData.lastName}
+                type="text"
+                name="lastName"
+                placeholder="Last Name"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700"
+              />
+              <input
+                onChange={handleChange}
+                value={userData.email}
+                type="email"
+                name="email"
+                placeholder="Email"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700"
+              />
+              <input
+                onChange={handleChange}
+                value={userData.phone}
+                type="text"
+                name="phone"
+                placeholder="Phone"
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700"
+              />
+              <select
+                name="role"
+                value={userData.role}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700"
+              >
+                <option value="">Select Role</option>
+                {userRoles.map((role) => (
+                  <option key={role.role_id} value={role.role_id}>
+                    {role.role_name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg"
+              >
+                Add New Staff
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
-   
   );
 }

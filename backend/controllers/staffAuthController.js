@@ -53,7 +53,7 @@ const registerStaff = async (req, res) => {
     await createLog(staffUser.staff_code, "New User Registered", req.ip);
     res
       .status(201)
-      .json({ message: "Staff registered successfully", staffUser });
+      .json(staffUser);
   } catch (error) {
     console.error("Error creating staff:", error);
     res.status(500).json({ message: "Internal server error" });

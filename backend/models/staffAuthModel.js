@@ -9,9 +9,11 @@ const createStaff = async (
   role
 ) => {
   const query = `INSERT INTO staff (first_name, last_name, email, phone, password, role)
-                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
+                 VALUES ($1, $2, $3, $4, $5, $6) returning staff_id`;
   const values = [firstName, lastName, email, phone, password, role];
-  const result = await pool.query(query, values);
+  const returnQuery =  "SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, ur.role_name FROM staff s JOIN user_roles ur ON s.role = ur.role_id WHERE s.staff_id = $1";
+  const insertResult = await pool.query(query, values);
+  const result = await pool.query(returnQuery, [insertResult.rows[0].staff_id]);
   return result.rows[0];
 };
 

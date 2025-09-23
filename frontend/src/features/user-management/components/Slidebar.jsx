@@ -6,6 +6,7 @@ export default function Sidebar() {
   const menuItems = [
     { key: "/dashboard/admin", label: "Dashboard" },
     { key: "/dashboard/admin/staff", label: "Staff Management" },
+    { key: "/dashboard/admin/customers", label: "Customer Management" },
     { key: "/dashboard/admin/rolesAccess", label: "Roles & Access" },
     { key: "/dashboard/admin/logsMonitoring", label: "Logs & Monitoring" },
     { key: "/dashboard/admin/complaints", label: "Complaints" },
