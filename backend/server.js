@@ -13,7 +13,6 @@ const storeRoutes=require('./routes/storeRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
-const recipeRoutes = require("./routes/recipeRoutes");
 const notificationRoutes = require('./routes/notificationRoutes');
 const recipeRoutes = require("./routes/recipeRoutes");  //Rashmika
 const reqIngredientsRoutes = require('./routes/reqIngredientsRoutes');  //Rashmika

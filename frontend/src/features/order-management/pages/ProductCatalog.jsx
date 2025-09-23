@@ -3,7 +3,7 @@ import axios from 'axios';
 import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
 import { useNotification } from '../../../contexts/NotificationContext';
-import './ProductCatalog.css';
+//import './ProductCatalog.css';
 
 const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
