@@ -12,7 +12,7 @@ const CustomerDashboard = lazy(() => import("./features/user-management/pages/Da
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
-
+const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard")) 
 
 
 
@@ -70,7 +70,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-
+                      <OrderDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
