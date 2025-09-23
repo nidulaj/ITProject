@@ -13,6 +13,9 @@ const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEm
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 
+
+
+
 const DashboardLayout = ({ children }) => <div>{children}</div>
 
 function App() {
@@ -57,6 +60,39 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <ProductionDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/order"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/finance"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/inventory"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
