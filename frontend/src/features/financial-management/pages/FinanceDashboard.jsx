@@ -9,9 +9,8 @@ const FinanceDashboard = () => {
         Finance Dashboard
       </h1>
 
-      <p className="text-gray-600 mb-8">
-        Welcome to the financial management dashboard. Choose a section below
-        to manage discounts or payments.
+      <p className="text-gray-600 mb-8 font-bold">
+        Welcome to the financial management dashboard
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

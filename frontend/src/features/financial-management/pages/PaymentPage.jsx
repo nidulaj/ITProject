@@ -241,7 +241,7 @@ const PaymentPage = () => {
                       onClick={() =>
                         updateStatus(payment.payment_id, "Declined")
                       }
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg shadow"
                     >
                       Reject
                     </button>
@@ -251,7 +251,7 @@ const PaymentPage = () => {
                     className={`px-4 py-2 rounded-lg shadow text-white ${
                       payment.payment_status.toLowerCase() === "completed"
                         ? "bg-green-600"
-                        : "bg-gray-600"
+                        : "bg-red-600"
                     }`}
                   >
                     {payment.payment_status.charAt(0).toUpperCase() +
