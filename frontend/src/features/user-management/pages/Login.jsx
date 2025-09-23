@@ -44,6 +44,9 @@ export default function Login() {
         } else {
           if (role === 1) navigate("/dashboard/admin");
           else if (role === 12) navigate("/dashboard/production");
+          else if (role === 9) navigate("/dashboard/order");
+          else if (role === 11) navigate("/dashboard/inventory");
+          else if (role === 13) navigate("/dashboard/finance");
           else {
             navigate("/login");
             setIsLoggedIn(false);
