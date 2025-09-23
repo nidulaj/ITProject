@@ -1,18 +1,15 @@
-
 const Payment = require("../models/paymentModel");
+const { pool } = require("../db/dbConnect");
 
-// Add a new payment
 const addPayment = async (req, res) => {
   try {
     const { customer_name, amount, payment_date } = req.body;
     const payment_proof = req.file ? req.file.filename : null;
 
-    // ✅ payment_status is not required from frontend anymore
     if (!customer_name || !amount || !payment_date) {
       return res.status(400).json({ message: "Customer name, amount, and payment date are required" });
     }
 
-    // ✅ Default payment_status to "pending"
     const payment_status = "pending";
 
     const payment = await Payment.createPayment(
@@ -29,7 +26,7 @@ const addPayment = async (req, res) => {
   }
 };
 
-// View all payments
+
 const getPayments = async (req, res) => {
   try {
     const payments = await Payment.getAllPayments();
@@ -39,18 +36,32 @@ const getPayments = async (req, res) => {
   }
 };
 
-const approvePayment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await Payment.updatePaymentStatus(id, "completed");
 
-    if (!updated) {
-      return res.status(404).json({ message: "Payment not found" });
+const updatePaymentStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  console.log("Incoming status update request:");
+  console.log("Payment ID:", id);
+  console.log("New Status:", status);
+
+
+  try {
+    const result = await pool.query(
+      `UPDATE payments SET payment_status = $1 WHERE payment_id = $2 RETURNING *`,
+      [status, Number(id)]
+    );
+
+    console.log("Postgres result:", result.rows);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Payment not found." });
     }
 
-    res.status(200).json({ message: "Payment status updated to completed", payment: updated });
+    res.status(200).json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ message: "Error updating status", error: error.message });
+    console.error("Error updating payment status:", error);
+    res.status(500).json({ message: "Failed to update payment status." });
   }
 };
 
@@ -58,7 +69,7 @@ const approvePayment = async (req, res) => {
 module.exports = {
   addPayment,
   getPayments,
-  approvePayment,
+  updatePaymentStatus,
 };
 
 

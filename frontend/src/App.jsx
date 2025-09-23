@@ -17,7 +17,6 @@ export default App*/
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Pages
 import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
 import DiscountPage from "./features/financial-management/pages/DiscountPage";
 import PaymentPage from "./features/financial-management/pages/PaymentPage";
