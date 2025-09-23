@@ -1,19 +1,37 @@
 const express = require('express');
-const router = express.Router()
-const { placeOrder, getCustomerOrders, changeOrderStatus, changePaymentStatus } = require('../controllers/orderController');
+const router = express.Router();
+const { 
+  createOrderController,
+  getOrders, 
+  getCustomerOrders, 
+  getSingleOrder, 
+  updateOrderStatusController, 
+  updatePaymentStatusController,
+  deleteOrderController
+} = require('../controllers/orderController');
 
+// Create new order
+router.post('/', createOrderController);
 
+// Get all orders
+router.get('/', getOrders);
 
-// Route to place an order
-router.post('/', placeOrder);
+// Get all orders (alternative endpoint)
+router.get('/all', getOrders);
 
-// Route to get orders by customer
-router.get('/:customer_id', getCustomerOrders);
+// Get orders by customer ID
+router.get('/customer/:customer_id', getCustomerOrders);
 
-// Route to update order status (for order handling staff)
-router.put('/status', changeOrderStatus);
+// Get single order by ID
+router.get('/:order_id', getSingleOrder);
 
-// Route to update payment status (for financial manager)
-router.put('/payment', changePaymentStatus);
+// Update order status
+router.put('/:order_id/status', updateOrderStatusController);
+
+// Update payment status
+router.put('/:order_id/payment', updatePaymentStatusController);
+
+// Delete order
+router.delete('/:order_id', deleteOrderController);
 
 module.exports = router;
