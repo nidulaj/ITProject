@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
 import { useNotification } from '../../../contexts/NotificationContext';
-//import './ProductCatalog.css';
+import { authFetch } from '../../user-management/utils/authFetchStaff';
+import './ProductCatalog.css';
 
 const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
@@ -21,10 +21,13 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(API_BASE_URL);
-      console.log('API Response:', response.data);
-      console.log('Products received:', response.data.products);
-      setProducts(response.data.products || []);
+      const res = await authFetch({
+        method: 'get',
+        url: API_BASE_URL
+      });
+      console.log('API Response:', res.data);
+      console.log('Products received:', res.data.products);
+      setProducts(res.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
       showError('Failed to fetch products');
@@ -58,13 +61,16 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         hasImage: !!formData.image
       });
       
-      const response = await axios.post(API_BASE_URL, productData, {
+      const res = await authFetch({
+        method: 'post',
+        url: API_BASE_URL,
+        data: productData,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      console.log('Product added successfully:', response.data);
+      console.log('Product added successfully:', res.data);
       
       // Refresh products list to get the new product with ID
       await fetchProducts();
@@ -113,13 +119,16 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         hasImage: !!formData.image
       });
       
-      const response = await axios.put(`${API_BASE_URL}/${editingProduct.product_id}`, productData, {
+      const res = await authFetch({
+        method: 'put',
+        url: `${API_BASE_URL}/${editingProduct.product_id}`,
+        data: productData,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      console.log('Product updated successfully:', response.data);
+      console.log('Product updated successfully:', res.data);
       
       // Refresh products list to get updated data with image
       await fetchProducts();
@@ -156,8 +165,11 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       setLoading(true);
       console.log('Deleting product with ID:', productId);
       
-      const response = await axios.delete(`${API_BASE_URL}/${productId}`);
-      console.log('Product deleted successfully:', response.data);
+      const res = await authFetch({
+        method: 'delete',
+        url: `${API_BASE_URL}/${productId}`
+      });
+      console.log('Product deleted successfully:', res.data);
       
       setProducts(prev => prev.filter(product => product.product_id !== productId));
       showSuccess('Product deleted successfully!');

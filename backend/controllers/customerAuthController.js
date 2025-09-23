@@ -15,7 +15,7 @@ const {
   findUserById,
   findUserByGoogleId,
   attachGoogleIdToUser,
-  getAllCustomers
+  getAllCustomers,
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -157,7 +157,7 @@ const googleLogin = async (req, res) => {
       var customer = existingByGoogle
 
     }else{
-      const existingByEmail = await findUserByEmail(email);
+      const existingByEmail = await findCustomerByEmail(email);
 
       if(existingByEmail){
         customer = await attachGoogleIdToUser(existingByEmail.cus_id, googleId);

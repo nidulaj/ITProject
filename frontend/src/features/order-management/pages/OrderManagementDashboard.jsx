@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const OrderManagementDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -48,14 +48,17 @@ const OrderManagementDashboard = () => {
       setError(null);
       console.log('Fetching orders from API...');
       
-      const response = await axios.get(`${API_BASE_URL}/all`);
-      console.log('API Response:', response.data);
+      const res = await authFetch({
+        method: 'get',
+        url: `${API_BASE_URL}/all`
+      });
+      console.log('API Response:', res.data);
       
-      if (response.data.success) {
-        setOrders(response.data.orders || []);
-        console.log(`Loaded ${response.data.orders?.length || 0} orders`);
+      if (res.data.success) {
+        setOrders(res.data.orders || []);
+        console.log(`Loaded ${res.data.orders?.length || 0} orders`);
       } else {
-        setError(`Server error: ${response.data.error || 'Unknown error'}`);
+        setError(`Server error: ${res.data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -80,13 +83,16 @@ const OrderManagementDashboard = () => {
       
       console.log(`Fetching details for order ${order.order_id}`);
       
-      const response = await axios.get(`${API_BASE_URL}/${order.order_id}`);
+      const res = await authFetch({
+        method: 'get',
+        url: `${API_BASE_URL}/${order.order_id}`
+      });
       
-      if (response.data.success) {
-        setOrderItems(response.data.orderItems || []);
-        console.log('Order items:', response.data.orderItems);
+      if (res.data.success) {
+        setOrderItems(res.data.orderItems || []);
+        console.log('Order items:', res.data.orderItems);
       } else {
-        console.error('Failed to fetch order items:', response.data.error);
+        console.error('Failed to fetch order items:', res.data.error);
       }
     } catch (error) {
       console.error('Error fetching order details:', error);
@@ -125,11 +131,15 @@ const OrderManagementDashboard = () => {
         return;
       }
       
-      const response = await axios.put(`${API_BASE_URL}/${orderId}/status`, {
-        order_status: newStatus
+      const res = await authFetch({
+        method: 'put',
+        url: `${API_BASE_URL}/${orderId}/status`,
+        data: {
+          order_status: newStatus
+        }
       });
       
-      if (response.data.success) {
+      if (res.data.success) {
         setOrders(prevOrders => 
           prevOrders.map(order => 
             order.order_id === orderId 
@@ -157,9 +167,12 @@ const OrderManagementDashboard = () => {
     try {
       console.log(`Deleting order ${orderId}`);
       
-      const response = await axios.delete(`${API_BASE_URL}/${orderId}`);
+      const res = await authFetch({
+        method: 'delete',
+        url: `${API_BASE_URL}/${orderId}`
+      });
       
-      if (response.data.success) {
+      if (res.data.success) {
         setOrders(prevOrders => 
           prevOrders.filter(order => order.order_id !== orderId)
         );
