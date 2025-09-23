@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS public.customers
     verification_code integer,
     verification_code_expires timestamp without time zone,
     google_id text COLLATE pg_catalog."default",
+    deactivated_until timestamp without time zone,
     CONSTRAINT customers_pkey PRIMARY KEY (cus_id),
     CONSTRAINT customer_email_unique UNIQUE (email)
 )
