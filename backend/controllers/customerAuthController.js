@@ -16,7 +16,6 @@ const {
   findUserByGoogleId,
   attachGoogleIdToUser,
   getAllCustomers,
-  findCustomerByEmail
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
