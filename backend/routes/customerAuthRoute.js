@@ -13,7 +13,8 @@ const {
   verify2FACode,
   verifyEmail,
   resend2FACode,
-  googleLogin
+  googleLogin,
+  getAllCustomerDetails
 } = require("../controllers/customerAuthController");
 
 router.post("/register", registerCustomer);
@@ -28,5 +29,7 @@ router.post("/verify-code", authMiddleware, verifyVerificationCode);
 router.post("/verify-2fa", tempMiddleware, verify2FACode);
 router.get("/verify-email", verifyEmail);
 router.post("/resend-2fa", tempMiddleware, resend2FACode);
+
+router.get("/allCustomers", authMiddleware, getAllCustomerDetails);
 
 module.exports = router;
