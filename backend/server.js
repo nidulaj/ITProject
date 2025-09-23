@@ -13,7 +13,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const customerAuthRoute = require('./routes/customerAuthRoute')
 const recipeRoutes = require("./routes/recipeRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-
+const financeRoutes = require("./routes/financeRoutes");
 const path = require("path");
 
 
@@ -36,6 +36,7 @@ app.use('/api/final',finalRoutes);
 app.use('/api/store',storeRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/finance", financeRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.listen(5000, () => {

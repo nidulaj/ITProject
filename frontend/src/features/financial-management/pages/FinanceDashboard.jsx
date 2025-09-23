@@ -1,18 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DashboardCard from "../components/DashboardCard";
-import { Tag, CreditCard } from "lucide-react";
+import StatCard from "../components/StatCard"; // New stat card component
+import { Banknote, Clock, CheckCircle, Percent, Tag, CreditCard } from "lucide-react";
+import axios from "axios";
 
 const FinanceDashboard = () => {
+  const [stats, setStats] = useState({
+    pending_payments: 0,
+    completed_payments: 0,
+    total_discounts: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/finance/stats");
+        setStats(res.data);
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
-    <div className="p-8">
-      <h1 className= "text-2xl font-bold text-blue-600 text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-8">
+      <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
         Finance Dashboard
       </h1>
 
-      <p className="text-gray-600 mb-8 font-bold">
-        Welcome to the financial management dashboard
-      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
 
+        <StatCard
+          title="Pending Payments"
+          value={stats.pending_payments}
+          icon={<Clock />}
+          color="text-yellow-500"
+        />
+        <StatCard
+          title="Completed Payments"
+          value={stats.completed_payments}
+          icon={<CheckCircle />}
+          color="text-emerald-600"
+        />
+        <StatCard
+          title="Total Discounts"
+          value={stats.total_discounts}
+          icon={<Percent />}
+          color="text-green-500"
+        />
+      </div>
+
+      {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DashboardCard
           title="Manage Discounts"
@@ -20,7 +60,6 @@ const FinanceDashboard = () => {
           route="/discounts"
           icon={<Tag />}
         />
-
         <DashboardCard
           title="Manage Payments"
           description="Record and monitor all customer payments."
@@ -33,3 +72,4 @@ const FinanceDashboard = () => {
 };
 
 export default FinanceDashboard;
+

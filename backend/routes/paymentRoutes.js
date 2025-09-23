@@ -21,5 +21,8 @@ router.get("/", paymentController.getPayments);
 
 router.put("/status/:id", paymentController.updatePaymentStatus);
 
+
+
+
 module.exports = router;
 
