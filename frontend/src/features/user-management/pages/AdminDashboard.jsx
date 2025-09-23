@@ -7,7 +7,6 @@ import LogsMonitoring from "../components/LogsMonitoring";
 import Complaints from "../components/Complaints";
 import Chat from "../components/Chat";
 import ProfileSecurity from "../components/ProfileSecurity";
-import AddStaff from "../components/AddStaff";
 import RoleInfo from "../components/RoleInfo";
 import StaffUserInfo from "../components/staffUserInfo";
 import CustomerManagement from "../components/customerManagement";
@@ -23,7 +22,6 @@ export default function AdminDashboard() {
           <Route path="/" element={<h2 className="text-lg font-bold">Welcome to Admin Dashboard</h2>} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="customers" element={<CustomerManagement />} />
-          <Route path="staff/add" element={<AddStaff />} />
           <Route path="staff/:staffId" element={<StaffUserInfo />} />
           <Route path="rolesAccess" element={<RolesAccess />} />
           <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
