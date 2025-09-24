@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+/*import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
 import DiscountPage from "./features/financial-management/pages/DiscountPage";
@@ -28,6 +28,40 @@ function App() {
   );
 }
 
+export default App;*/
+
+
+/*import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/*" element={<FinanceDashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;*/
+
+
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/*" element={<FinanceDashboard />} />
+      </Routes>
+    </Router>
+  );
+}
+
 export default App;
+
+
 
 

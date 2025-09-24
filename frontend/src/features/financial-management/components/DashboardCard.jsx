@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 
 const DashboardCard = ({ title, description, route, icon }) => {
   const navigate = useNavigate();
+  
+
 
   return (
       <div
@@ -23,8 +25,6 @@ const DashboardCard = ({ title, description, route, icon }) => {
 };
 
 export default DashboardCard;
-
-
 
 
 
