@@ -1,14 +1,12 @@
-// backend/middleware/uploadMiddleware.js
-
 const multer = require("multer");
 const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads"); // Save to /uploads folder
+    cb(null, "uploads");
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Save as unique name
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 

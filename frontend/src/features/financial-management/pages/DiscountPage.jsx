@@ -25,6 +25,7 @@ const DiscountPage = () => {
     try {
       await axios.delete(`http://localhost:5000/api/discounts/${id}`);
       setDiscounts((prev) => prev.filter((d) => d.discount_id !== id));
+
     } catch (err) {
       console.error("Error deleting discount:", err);
     }
