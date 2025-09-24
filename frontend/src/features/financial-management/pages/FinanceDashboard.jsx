@@ -53,7 +53,7 @@ const FinanceDashboard = () => {
         />
       </div>
 
-      {/* Action Cards */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <DashboardCard
           title="Manage Discounts"
@@ -73,4 +73,10 @@ const FinanceDashboard = () => {
 };
 
 export default FinanceDashboard;
+
+
+
+
+
+
 
