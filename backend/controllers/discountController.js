@@ -1,6 +1,6 @@
 const { createDiscount, getAllDiscounts, updateDiscount, deleteDiscount } = require('../models/discountModel');
 
-// Create a new discount
+
 const createDiscountController = async (req, res) => {
   try {
     const { discount_name, discount_type, value, eligibility_criteria, valid_from, valid_to } = req.body;
@@ -12,7 +12,7 @@ const createDiscountController = async (req, res) => {
   }
 };
 
-// Get all discounts
+
 const getAllDiscountsController = async (req, res) => {
   try {
     const discounts = await getAllDiscounts();
@@ -22,7 +22,7 @@ const getAllDiscountsController = async (req, res) => {
   }
 };
 
-// Update a discount
+
 const updateDiscountController = async (req, res) => {
   try {
     const { discount_id } = req.params;
@@ -39,7 +39,7 @@ const updateDiscountController = async (req, res) => {
   }
 };
 
-// Delete a discount
+
 const deleteDiscountController = async (req, res) => {
   try {
     const { discount_id } = req.params;
@@ -53,36 +53,33 @@ const deleteDiscountController = async (req, res) => {
   }
 };
 
-// ---------------- Discount Logic ----------------
 
-// Check if discount is currently active (for seasonal offers)
+
 function isDiscountActive(discount) {
   const today = new Date();
   return today >= new Date(discount.valid_from) && today <= new Date(discount.valid_to);
 }
 
-// Check eligibility based on criteria
+
 function isEligible(totalPrice, discount) {
   const criteria = discount.eligibility_criteria;
 
-  if (!criteria) return true; // No criteria → eligible by default
+  if (!criteria) return true; 
 
   if (criteria === "seasonal") {
-    // Seasonal offers are handled by isDiscountActive
     return true;
   }
 
-  // Total price thresholds
+  
   if (criteria.startsWith("totalPrice>")) {
     const minPrice = parseFloat(criteria.split(">")[1]);
     return totalPrice >= minPrice;
   }
 
-  // Default to eligible if unknown criteria
   return true;
 }
 
-// Apply discount based on type
+
 function applyDiscount(totalPrice, discount) {
   if (discount.discount_type === "Percentage") {
     return totalPrice - (totalPrice * (discount.value / 100));
@@ -92,18 +89,17 @@ function applyDiscount(totalPrice, discount) {
   return totalPrice;
 }
 
-// Calculate the best discount among eligible discounts
+
 function calculateBestDiscount(totalPrice, discounts) {
   let bestPrice = totalPrice;
   let bestDiscount = null;
 
   discounts.forEach(discount => {
-    // For seasonal offers, check the date validity
     if (discount.eligibility_criteria === "seasonal" && !isDiscountActive(discount)) {
-      return; // skip if seasonal and not active
+      return;
     }
 
-    // Check total price / other eligibility
+    
     if (isEligible(totalPrice, discount)) {
       const discountedPrice = applyDiscount(totalPrice, discount);
       if (discountedPrice < bestPrice) {
@@ -120,9 +116,7 @@ function calculateBestDiscount(totalPrice, discounts) {
   };
 }
 
-// ---------------- Controllers ----------------
 
-// Apply best discount
 const applyBestDiscount = async (req, res) => {
   try {
     const { totalPrice } = req.body;
@@ -146,9 +140,6 @@ module.exports = {
   getAllDiscountsController,
   updateDiscountController,
   deleteDiscountController,
-  applyBestDiscount //changed
+  applyBestDiscount
 };
-
-
-
 

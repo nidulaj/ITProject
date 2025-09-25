@@ -13,7 +13,10 @@ const CustomerCatalog = lazy(() => import("./features/order-management/pages/Cus
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
-const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard")) 
+const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
+const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
+
 
 
 
@@ -89,11 +92,11 @@ function App() {
               />
 
               <Route
-                path="/dashboard/finance"
+                path="/dashboard/finance/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      
+                      <FinanceDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -104,7 +107,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      
+                      <InventryDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -120,4 +123,7 @@ function App() {
   )
 }
 
-export default App
+export default App;
+
+
+

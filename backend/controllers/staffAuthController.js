@@ -355,6 +355,20 @@ const removeStaffAccount = async (req, res) => {
   }
 };
 
+const getUserInfo = async (req, res) => {
+  const staffId = req.user.id;
+  console.log(req.user.id)
+
+  try {
+    const userInfo = await getStaffById(staffId);
+    console.log(userInfo);
+    res.status(200).json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -369,5 +383,6 @@ module.exports = {
   changeAccountActivation,
   change2FASetting,
   changeStaffDetailsByAdmin,
-  removeStaffAccount
+  removeStaffAccount,
+  getUserInfo
 };
