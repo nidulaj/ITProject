@@ -19,7 +19,6 @@ const FinanceDashboard = lazy(() => import ("./features/financial-management/pag
 
 
 
-
 const DashboardLayout = ({ children }) => <div>{children}</div>
 
 function App() {
@@ -34,6 +33,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify2FA" element={<Verify2FA />} />
               <Route path="/verifyEmail" element={<VerifyEmail />} />
+              
 
               {/* User Dashboards */}
               <Route

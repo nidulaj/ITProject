@@ -74,18 +74,17 @@ const ProductionDashboard = () => {
   // Only slim fields for dashboard: ID, Recipe No, Quantity, Status
   const fetchRequestsSlim = async () => {
     try {
-
       const res = await authFetch({
-          method: "get",
-          url: `${API}/api/req_ingredients`,
-        });
+        method: 'get',
+        url: `${API}/api/req_ingredients`,
+      });
 
       const rows = res?.data?.data || [];
-      const slim = rows.map(r => ({
+      const slim = rows.map((r) => ({
         'Request ID': r.req_id,
         'Recipe No': r.recipe_no,
-        'Quantity': r.quantity,
-        'Status': r.status,
+        Quantity: r.quantity,
+        Status: r.status,
       }));
       setReqRows(slim);
     } catch (err) {
@@ -102,23 +101,25 @@ const ProductionDashboard = () => {
       const res = await axios.get(`${API}/api/returns`);
       const rows = res?.data?.data || [];
 
-      const mapped = rows.map(r => ({
+      const mapped = rows.map((r) => ({
         'Return ID': r.id,
-        'Product': r.product,
-        'Customer': r.customer,
-        'Phone': r.phone || '—',
-        'Reason': r.reason,
-        'Image': r.image_url
-                              ? (<a
-                                  href={r.image_url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  view
-                                </a>)
-                              : '—',
-        'Status': r.status,
+        Product: r.product,
+        Customer: r.customer,
+        Phone: r.phone || '—',
+        Reason: r.reason,
+        Image: r.image_url ? (
+          <a
+            href={r.image_url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            view
+          </a>
+        ) : (
+          '—'
+        ),
+        Status: r.status,
         __raw: r,
       }));
 
@@ -135,10 +136,8 @@ const ProductionDashboard = () => {
   const pmSetReturnStatus = async (id, status) => {
     try {
       await axios.patch(`${API}/api/returns/${id}/status`, { status });
-      setReturnsData(prev =>
-        prev.map(r =>
-          r['Return ID'] === id ? { ...r, 'Status': status } : r
-        )
+      setReturnsData((prev) =>
+        prev.map((r) => (r['Return ID'] === id ? { ...r, Status: status } : r))
       );
     } catch (e) {
       alert(e?.response?.data?.error || e.message || 'Failed to update status');
@@ -152,7 +151,7 @@ const ProductionDashboard = () => {
       setPendingCOError('');
       const res = await axios.get(`${API}/api/customized_orders`);
       const all = res?.data?.data || [];
-      const pending = all.filter(o => (o.status || '').toLowerCase() === 'pending');
+      const pending = all.filter((o) => (o.status || '').toLowerCase() === 'pending');
       setPendingCO(pending);
     } catch (e) {
       console.error('Failed to load customized orders', e);
@@ -167,7 +166,7 @@ const ProductionDashboard = () => {
     try {
       await axios.patch(`${API}/api/customized_orders/${id}/status`, { status });
       // remove from pending list immediately (accepted/rejected)
-      setPendingCO(list => list.filter(x => x.id !== id));
+      setPendingCO((list) => list.filter((x) => x.id !== id));
     } catch (e) {
       alert(e?.response?.data?.error || e.message || 'Failed to update status');
     }
@@ -175,8 +174,8 @@ const ProductionDashboard = () => {
 
   // --- Stats cards derived from productions ---
   const buildStats = (rows = []) => {
-    const active = rows.filter(p => (p.status || '').toLowerCase() === 'in production').length;
-    const completed = rows.filter(p => (p.status || '').toLowerCase() === 'completed').length;
+    const active = rows.filter((p) => (p.status || '').toLowerCase() === 'in production').length;
+    const completed = rows.filter((p) => (p.status || '').toLowerCase() === 'completed').length;
 
     return [
       { title: 'Normal Yogurt Stock', value: '1,247', subtitle: 'Current Stock', status: 'Good', icon: Package },
@@ -186,12 +185,18 @@ const ProductionDashboard = () => {
     ];
   };
 
-  const openModal = (type) => { setModalType(type); setShowModal(true); };
-  const closeModal = () => { setShowModal(false); setModalType(''); };
+  const openModal = (type) => {
+    setModalType(type);
+    setShowModal(true);
+  };
+  const closeModal = () => {
+    setShowModal(false);
+    setModalType('');
+  };
 
   // Map productions → dashboard table rows
   const mapProductionsForDashboard = (rows) =>
-    (rows || []).map(p => ({
+    (rows || []).map((p) => ({
       id: p.id,
       batch_id: p.batch_id,
       recipe_no: p.recipe_no,
@@ -206,15 +211,15 @@ const ProductionDashboard = () => {
 
   // Build rows with Accept/Reject actions for PM
   const buildReturnsRowsWithActions = (rows) =>
-    (rows || []).map(r => {
+    (rows || []).map((r) => {
       const base = {
         'Return ID': r['Return ID'],
-        'Product': r['Product'],
-        'Customer': r['Customer'],
-        'Phone': r['Phone'],
-        'Reason': r['Reason'],
-        'Image': r['Image'],
-        'Status': r['Status'],
+        Product: r['Product'],
+        Customer: r['Customer'],
+        Phone: r['Phone'],
+        Reason: r['Reason'],
+        Image: r['Image'],
+        Status: r['Status'],
       };
 
       const id = r['Return ID'];
@@ -241,13 +246,16 @@ const ProductionDashboard = () => {
         </div>
       );
 
-      return { ...base, 'Actions': actionsEl };
+      return { ...base, Actions: actionsEl };
     });
 
-  // Customized Orders (pending) table for the bell modal
-  const coCols = ['ID', 'Customer', 'Fruit', 'Topping', 'Bottom', 'Qty', 'Order Date', 'Status', 'Actions'];
+  // ===== Manager-side: Pending Customized Orders =====
+  // Include Order No in columns
+  const coCols = ['ID', 'Order No', 'Customer', 'Fruit', 'Topping', 'Bottom', 'Qty', 'Order Date', 'Status', 'Actions'];
+
+  // Build rows including order_no
   const buildPendingCORows = (rows) =>
-    (rows || []).map(o => {
+    (rows || []).map((o) => {
       const status = (o.status || '').toLowerCase();
       const actionsEl = (
         <div className="flex items-center justify-center gap-2">
@@ -271,6 +279,7 @@ const ProductionDashboard = () => {
       );
       return {
         ID: o.id,
+        'Order No': o.order_no, // <<< NEW
         Customer: o.customer_name,
         Fruit: o.fruit,
         Topping: o.topping,
@@ -290,7 +299,9 @@ const ProductionDashboard = () => {
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {buildStats(productions).map((stat, i) => <StatCard key={i} {...stat} />)}
+          {buildStats(productions).map((stat, i) => (
+            <StatCard key={i} {...stat} />
+          ))}
         </div>
 
         {/* Quick Actions */}
@@ -310,20 +321,10 @@ const ProductionDashboard = () => {
         </div>
 
         {/* Ongoing Productions (real) — actions hidden */}
-        <ProductionTable
-          title="Ongoing Productions"
-          data={prodRows}
-          columns={dashProdCols}
-          actions={false}
-        />
+        <ProductionTable title="Ongoing Productions" data={prodRows} columns={dashProdCols} actions={false} />
 
         {/* Ingredient Requests (real, slim) — actions hidden */}
-        <ProductionTable
-          title="Ingredient Requests"
-          data={reqRows}
-          columns={['Request ID', 'Recipe No', 'Quantity', 'Status']}
-          actions={false}
-        />
+        <ProductionTable title="Ingredient Requests" data={reqRows} columns={['Request ID', 'Recipe No', 'Quantity', 'Status']} actions={false} />
 
         {/* Returns (Production Manager) – mini card with Accept/Reject */}
         <ProductionTable
@@ -339,7 +340,7 @@ const ProductionDashboard = () => {
 
   // Productions tab table
   const mapProductionsToRows = (rows) =>
-    (rows || []).map(p => ({
+    (rows || []).map((p) => ({
       id: p.id,
       batch_id: p.batch_id,
       recipe_no: p.recipe_no,
@@ -361,11 +362,25 @@ const ProductionDashboard = () => {
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">Production Management</h2>
               <div className="space-x-3">
-                <ActionButton variant="outline" icon={RotateCcw} onClick={() => { fetchProductions(); fetchRequestsSlim(); fetchReturns(); fetchPendingCustomOrders(); }} className="justify-center">
+                <ActionButton
+                  variant="outline"
+                  icon={RotateCcw}
+                  onClick={() => {
+                    fetchProductions();
+                    fetchRequestsSlim();
+                    fetchReturns();
+                    fetchPendingCustomOrders();
+                  }}
+                  className="justify-center"
+                >
                   {prodLoading ? 'Refreshing…' : 'Refresh'}
                 </ActionButton>
-                <ActionButton icon={Plus} onClick={() => openModal('normal_batch')}>New Normal Batch</ActionButton>
-                <ActionButton variant="secondary" icon={Plus} onClick={() => openModal('custom_batch')}>New Custom Batch</ActionButton>
+                <ActionButton icon={Plus} onClick={() => openModal('normal_batch')}>
+                  New Normal Batch
+                </ActionButton>
+                <ActionButton variant="secondary" icon={Plus} onClick={() => openModal('custom_batch')}>
+                  New Custom Batch
+                </ActionButton>
               </div>
             </div>
 
@@ -396,64 +411,56 @@ const ProductionDashboard = () => {
           </div>
         );
 
-        case 'order': {
-  // reuse the same rows/columns used by the notification modal
-  const notifRows = buildPendingCORows(pendingCO);
-  const coCols = ['ID', 'Customer', 'Fruit', 'Topping', 'Bottom', 'Qty', 'Order Date', 'Status', 'Actions'];
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
-        <div className="space-x-3">
-          <ActionButton
-            variant="outline"
-            icon={RotateCcw}
-            onClick={fetchPendingCustomOrders}
-            className="justify-center"
-          >
-            {pendingCOLoading ? 'Refreshing…' : 'Refresh'}
-          </ActionButton>
-        </div>
-      </div>
-
-      {pendingCOError && <div className="text-sm text-red-600">{pendingCOError}</div>}
-
-      <ProductionTable
-        title={`Pending Customized Orders${pendingCOLoading ? ' – Loading…' : ''}`}
-        data={notifRows}
-        columns={coCols}
-        actions={false}
-      />
-    </div>
-  );
-}
-
-
-        case 'returns': {
-          const fullReturns = buildReturnsRowsWithActions(returnsData);
-          return (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Returns & Refunds</h2>
-                <div className="space-x-3">
-                  <ActionButton variant="outline" icon={RotateCcw} onClick={fetchReturns} className="justify-center">
-                    {returnsLoading ? 'Refreshing…' : 'Refresh'}
-                  </ActionButton>
-                </div>
+      case 'order': {
+        // reuse the same rows/columns used by the notification modal
+        const notifRows = buildPendingCORows(pendingCO);
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Order Management</h2>
+              <div className="space-x-3">
+                <ActionButton variant="outline" icon={RotateCcw} onClick={fetchPendingCustomOrders} className="justify-center">
+                  {pendingCOLoading ? 'Refreshing…' : 'Refresh'}
+                </ActionButton>
               </div>
-
-              {returnsError && <div className="text-sm text-red-600">{returnsError}</div>}
-
-              <ProductionTable
-                title="All Returns (Production Manager)"
-                data={fullReturns}
-                columns={['Return ID','Product','Customer','Phone','Reason','Image','Status','Actions']}
-                actions={false}
-              />
             </div>
-          );
-        }
+
+            {pendingCOError && <div className="text-sm text-red-600">{pendingCOError}</div>}
+
+            <ProductionTable
+              title={`Pending Customized Orders${pendingCOLoading ? ' – Loading…' : ''}`}
+              data={notifRows}
+              columns={coCols}
+              actions={false}
+            />
+          </div>
+        );
+      }
+
+      case 'returns': {
+        const fullReturns = buildReturnsRowsWithActions(returnsData);
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Returns & Refunds</h2>
+              <div className="space-x-3">
+                <ActionButton variant="outline" icon={RotateCcw} onClick={fetchReturns} className="justify-center">
+                  {returnsLoading ? 'Refreshing…' : 'Refresh'}
+                </ActionButton>
+              </div>
+            </div>
+
+            {returnsError && <div className="text-sm text-red-600">{returnsError}</div>}
+
+            <ProductionTable
+              title="All Returns (Production Manager)"
+              data={fullReturns}
+              columns={['Return ID', 'Product', 'Customer', 'Phone', 'Reason', 'Image', 'Status', 'Actions']}
+              actions={false}
+            />
+          </div>
+        );
+      }
 
       default:
         return renderDashboardContent();
@@ -467,24 +474,25 @@ const ProductionDashboard = () => {
     <div className="flex h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          pendingCount={pendingCO.length}
-          onOpenNotifications={() => setNotifOpen(true)}
-        />
-        <main className="flex-1 overflow-y-auto p-6">
-          {renderContent()}
-        </main>
+        <Header pendingCount={pendingCO.length} onOpenNotifications={() => setNotifOpen(true)} />
+        <main className="flex-1 overflow-y-auto p-6">{renderContent()}</main>
       </div>
 
       {/* Modals */}
       <Modal
         isOpen={showModal}
-        onClose={() => { setShowModal(false); setModalType(''); }}
+        onClose={() => {
+          setShowModal(false);
+          setModalType('');
+        }}
         title={
-          modalType === 'normal_batch' ? 'Create Normal Yogurt Batch' :
-          modalType === 'custom_batch' ? 'Create Custom Batch' :
-          modalType === 'ingredient_request' ? 'New Ingredient Request' :
-          'Modal'
+          modalType === 'normal_batch'
+            ? 'Create Normal Yogurt Batch'
+            : modalType === 'custom_batch'
+            ? 'Create Custom Batch'
+            : modalType === 'ingredient_request'
+            ? 'New Ingredient Request'
+            : 'Modal'
         }
         size="medium"
       >
@@ -492,16 +500,9 @@ const ProductionDashboard = () => {
       </Modal>
 
       {/* Notifications Modal: Pending Customized Orders */}
-      <Modal
-        isOpen={notifOpen}
-        onClose={() => setNotifOpen(false)}
-        title="Pending Customized Orders"
-        size="large"
-      >
+      <Modal isOpen={notifOpen} onClose={() => setNotifOpen(false)} title="Pending Customized Orders" size="large">
         {pendingCOError && (
-          <div className="mb-3 p-2 rounded border border-red-300 bg-red-50 text-red-700">
-            {pendingCOError}
-          </div>
+          <div className="mb-3 p-2 rounded border border-red-300 bg-red-50 text-red-700">{pendingCOError}</div>
         )}
         <ProductionTable
           title={`Pending Customized Orders${pendingCOLoading ? ' – Loading…' : ''}`}
