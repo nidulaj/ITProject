@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { authFetch } from "../utils/authFetchStaff";
+import { useNavigate } from "react-router-dom";
 
 export default function staffUserInfo() {
   const { staffId } = useParams();
@@ -20,6 +21,8 @@ export default function staffUserInfo() {
     phone: "",
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -31,7 +34,7 @@ export default function staffUserInfo() {
 
         setAccountStatus({
           isActive: res.data.is_active,
-          deactivationPeriod: res.data.deactivation_period || null,
+          deactivationPeriod: res.data.deactivated_until || null,
         });
 
         setEditForm({
@@ -142,7 +145,19 @@ export default function staffUserInfo() {
     } catch (error) {
       console.error("Error editing staff details:", error);
     }
-  }
+  };
+
+  const handleRemoveUser = async () => {
+    try {
+      const res = await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/staff/auth/removeStaff/${staffId}`,
+      });
+      navigate("/dashboard/admin/staff");
+    } catch (error) {
+      console.error("Error removing staff member:", error);
+    }
+  };
 
   if (!staff) {
     return <div className="p-6">Loading staff details...</div>;
@@ -179,20 +194,41 @@ export default function staffUserInfo() {
             <span className="font-semibold">Role:</span> {staff.role_name}
             <button
               onClick={() => setIsEditRoleOpen(true)}
-              className="ml-2 text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg shadow transition"
+              disabled={!staff.is_active && staff.deactivated_until === null}
+              className={`ml-2 text-sm px-3 py-1 rounded-lg shadow transition text-white
+    ${
+      !staff.is_active && staff.deactivated_until === null
+        ? "bg-indigo-600 hover:bg-indigo-700 cursor-not-allowed"
+        : "bg-indigo-600 hover:bg-indigo-700"
+    }
+  `}
             >
               Change
             </button>
           </p>
           <button
             onClick={() => setIsEditOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition mt-4 mr-4"
+            className={`px-4 py-2 rounded-lg shadow transition mt-4 mr-4 text-white 
+    ${
+      !staff.is_active && staff.deactivated_until === null
+        ? "bg-blue-600 hover:bg-blue-700 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }
+  `}
           >
             ✏️ Edit Details
           </button>
+
           <button
-            onClick={() => alert("Remove role (frontend only)")}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition mt-4"
+            onClick={handleRemoveUser}
+            disabled={!staff.is_active && staff.deactivated_until === null}
+            className={`px-4 py-2 rounded-lg text-white 
+    ${
+      !staff.is_active && staff.deactivated_until === null
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-red-600 hover:bg-red-700"
+    }
+  `}
           >
             🗑️ Remove User
           </button>
@@ -246,6 +282,13 @@ export default function staffUserInfo() {
               </span>
             </label>
           </div>
+          {/* Show when disabled temporarily */}
+          {!accountStatus.isActive && staff.deactivated_until && (
+            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+              Account will be active on:{" "}
+              {new Date(staff.deactivated_until).toLocaleString()}
+            </p>
+          )}
         </div>
       </div>
 
@@ -296,14 +339,30 @@ export default function staffUserInfo() {
           {/* 2FA Enabled */}
           <div className="flex items-center gap-2">
             <span>2FA Enabled</span>
-            <label className="flex items-center cursor-pointer">
+            <label
+              className={`flex items-center ${
+                !staff.is_active && staff.deactivated_until === null
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer"
+              }`}
+            >
               <input
                 type="checkbox"
                 className="sr-only peer"
                 checked={staff.is_2FA_enabled || false}
                 onChange={handle2FAChange}
+                disabled={!staff.is_active && staff.deactivated_until === null} // 🔒 disable when removed
               />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+              <div
+                className={`w-11 h-6 rounded-full relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+      after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
+      peer-checked:after:translate-x-full
+      ${
+        !staff.is_active && staff.deactivated_until === null
+          ? "bg-gray-300" // 🔒 disabled look
+          : "bg-gray-200 peer-checked:bg-green-500"
+      }`}
+              ></div>
             </label>
           </div>
         </div>
@@ -367,10 +426,7 @@ export default function staffUserInfo() {
               Edit Staff Details
             </h2>
 
-            <form
-              onSubmit={handleEditStaffDetails}
-              className="space-y-3"
-            >
+            <form onSubmit={handleEditStaffDetails} className="space-y-3">
               {/* First Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -380,7 +436,10 @@ export default function staffUserInfo() {
                   type="text"
                   value={editForm.first_name}
                   onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, first_name: e.target.value }))
+                    setEditForm((prev) => ({
+                      ...prev,
+                      first_name: e.target.value,
+                    }))
                   }
                   className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
                 />
@@ -395,7 +454,10 @@ export default function staffUserInfo() {
                   type="text"
                   value={editForm.last_name}
                   onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, last_name: e.target.value }))
+                    setEditForm((prev) => ({
+                      ...prev,
+                      last_name: e.target.value,
+                    }))
                   }
                   className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
                 />

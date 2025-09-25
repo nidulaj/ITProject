@@ -1,7 +1,8 @@
 import { authFetch } from "../utils/authFetchStaff";
-import React from "react";
+import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
-export default function Header() {
+import { User } from "lucide-react";
+export default function Header({ userInfo }) {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
@@ -18,11 +19,29 @@ export default function Header() {
     }
   };
   return (
-    <header className="flex justify-between items-center bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
-      <h1 className="text-xl font-bold">Admin Dashboard</h1>
-      <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onClick={handleLogout}>
-        Logout
-      </button>
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          Admin Dashboard
+        </h1>
+
+        <div className="flex items-center space-x-4">
+          {/* User Profile */}
+          <button onClick={() => navigate("userProfile")} className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+            <div className="bg-gray-300 dark:bg-gray-700 rounded-full p-2">
+              <User size={16} />
+            </div>
+            <span className="text-sm font-medium">Hi {userInfo?.first_name}</span>
+          </button>
+
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
     </header>
   );
 }

@@ -14,7 +14,8 @@ const {
   emailVerification,
   findUserById,
   findUserByGoogleId,
-  attachGoogleIdToUser
+  attachGoogleIdToUser,
+  getAllCustomers,
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -156,7 +157,7 @@ const googleLogin = async (req, res) => {
       var customer = existingByGoogle
 
     }else{
-      const existingByEmail = await findUserByEmail(email);
+      const existingByEmail = await findCustomerByEmail(email);
 
       if(existingByEmail){
         customer = await attachGoogleIdToUser(existingByEmail.cus_id, googleId);
@@ -421,6 +422,16 @@ const resend2FACode = async (req, res) => {
   }
 };
 
+const getAllCustomerDetails = async (req, res) => {
+  try {
+      const customers = await getAllCustomers();
+      res.status(200).json(customers);
+  } catch (error) {
+      console.error("Error fetching customer details:", error);
+      res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerCustomer,
   loginCustomer,
@@ -433,5 +444,6 @@ module.exports = {
   verify2FACode,
   verifyEmail,
   resend2FACode,
-  googleLogin
+  googleLogin,
+  getAllCustomerDetails
 };

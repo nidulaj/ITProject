@@ -84,6 +84,12 @@ const attachGoogleIdToUser = async(cusId, googleId) => {
     return result.rows[0];
 }
 
+const getAllCustomers = async () => {
+    const query = `SELECT * FROM "customers" ORDER BY "cus_id"`;
+    const result = await pool.query(query);
+    return result.rows;
+};
 
-module.exports = { createCustomer, findCustomerByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser };
+
+module.exports = { createCustomer, findCustomerByEmail, login, updateProfile, selfDeleteProfile, storeVerificationCode, getVerificationDetails, deleteVerificationCode, emailVerification, findUserById, findUserByGoogleId, attachGoogleIdToUser, getAllCustomers };
 

@@ -13,7 +13,8 @@ const {
   changeRole,
   changeAccountStatus,
   change2FA,
-  updateStaffDetailsByAdmin
+  updateStaffDetails,
+  removeUser
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -52,7 +53,7 @@ const registerStaff = async (req, res) => {
     await createLog(staffUser.staff_code, "New User Registered", req.ip);
     res
       .status(201)
-      .json({ message: "Staff registered successfully", staffUser });
+      .json(staffUser);
   } catch (error) {
     console.error("Error creating staff:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -334,11 +335,50 @@ const changeStaffDetailsByAdmin = async (req, res) => {
   const { first_name, last_name, phone } = req.body;
 
   try {
-    const updatedStaff = await updateStaffDetailsByAdmin(staffId, { first_name, last_name, phone });
+    const updatedStaff = await updateStaffDetails(staffId, { first_name, last_name, phone });
     res.status(200).json(updatedStaff);
   } catch (error) {
     console.error("Error updating staff details:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const removeStaffAccount = async (req, res) => {
+  const { staffId } = req.params;
+
+  try {
+    const removedUser = await removeUser(staffId);
+    res.status(200).json({ message: "Staff member removed successfully", removedUser });
+  } catch (error) {
+    console.error("Error removing staff member:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getUserInfo = async (req, res) => {
+  const staffId = req.user.id;
+  console.log(req.user.id)
+
+  try {
+    const userInfo = await getStaffById(staffId);
+    console.log(userInfo);
+    res.status(200).json(userInfo);
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateUserDetails = async (req, res) => {
+  const staffId = req.user.id;
+  const { first_name, last_name, phone } = req.body;
+
+  try {
+    const updatedUser = await updateStaffDetails(staffId, { first_name, last_name, phone });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -355,5 +395,8 @@ module.exports = {
   changeUserRole,
   changeAccountActivation,
   change2FASetting,
-  changeStaffDetailsByAdmin
+  changeStaffDetailsByAdmin,
+  removeStaffAccount,
+  getUserInfo,
+  updateUserDetails,
 };
