@@ -14,18 +14,22 @@ router.put('/:id', updateFinalDetails);
 router.delete('/:id', deleteFinalProductDetails);
 module.exports = router;*/
 
+const {
+  staffAuthMiddleware
+} = require("../middlewares/staffAuthMiddleware");
+
 const express = require('express');
 const router = express.Router();
 const { addFinalProduct,getFinalProduct ,updateFinalDetails,deleteFinalProductDetails} = require('../controllers/finalController');
 // POST /api/ingredient → Create a new ingredient
-router.post('/', addFinalProduct);
+router.post('/',staffAuthMiddleware, addFinalProduct);
 
 // GET /api/ingredient → Fetch all ingredients
-router.get('/', getFinalProduct);
+router.get('/', staffAuthMiddleware,getFinalProduct);
 
 // Route to update a product
-router.put('/:id', updateFinalDetails);
+router.put('/:id',staffAuthMiddleware, updateFinalDetails);
 
 // Route to delete a product
-router.delete('/:id', deleteFinalProductDetails);
+router.delete('/:id',staffAuthMiddleware, deleteFinalProductDetails);
 module.exports = router;

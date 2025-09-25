@@ -23,17 +23,20 @@ module.exports = router;
 const express = require('express');
 const router = express.Router();
 const { addSpecialIngredient,getSpecialIngredients ,updateSpecialIngredientDetails,deleteSpecialIngredientDetails} = require('../controllers/specialController');
+const {
+  staffAuthMiddleware
+} = require("../middlewares/staffAuthMiddleware");
 // POST /api/ingredient → Create a new ingredient
-router.post('/', addSpecialIngredient);
+router.post('/',staffAuthMiddleware, addSpecialIngredient);
 
 // GET /api/ingredient → Fetch all ingredients
-router.get('/', getSpecialIngredients);
+router.get('/', staffAuthMiddleware,getSpecialIngredients);
 
 // Route to update a product
-router.put('/:id', updateSpecialIngredientDetails);
+router.put('/:id', staffAuthMiddleware,updateSpecialIngredientDetails);
 
 // Route to delete a product
-router.delete('/:id', deleteSpecialIngredientDetails);
+router.delete('/:id',staffAuthMiddleware, deleteSpecialIngredientDetails);
 
 
 
