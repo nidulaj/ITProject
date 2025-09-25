@@ -13,7 +13,7 @@ const {
   changeRole,
   changeAccountStatus,
   change2FA,
-  updateStaffDetailsByAdmin,
+  updateStaffDetails,
   removeUser
 } = require("../models/staffAuthModel");
 const {
@@ -335,7 +335,7 @@ const changeStaffDetailsByAdmin = async (req, res) => {
   const { first_name, last_name, phone } = req.body;
 
   try {
-    const updatedStaff = await updateStaffDetailsByAdmin(staffId, { first_name, last_name, phone });
+    const updatedStaff = await updateStaffDetails(staffId, { first_name, last_name, phone });
     res.status(200).json(updatedStaff);
   } catch (error) {
     console.error("Error updating staff details:", error);
@@ -369,6 +369,19 @@ const getUserInfo = async (req, res) => {
   }
 };
 
+const updateUserDetails = async (req, res) => {
+  const staffId = req.user.id;
+  const { first_name, last_name, phone } = req.body;
+
+  try {
+    const updatedUser = await updateStaffDetails(staffId, { first_name, last_name, phone });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -384,5 +397,6 @@ module.exports = {
   change2FASetting,
   changeStaffDetailsByAdmin,
   removeStaffAccount,
-  getUserInfo
+  getUserInfo,
+  updateUserDetails,
 };

@@ -116,7 +116,7 @@ const change2FA = async (staffId, isEnabled) => {
   return result;
 };
 
-const updateStaffDetailsByAdmin = async (staffId, details) => {
+const updateStaffDetails = async (staffId, details) => {
   const query = `UPDATE staff 
                  SET first_name = $1, last_name = $2, phone = $3
                  WHERE staff_id = $4`;
@@ -147,6 +147,6 @@ module.exports = {
   changeRole,
   changeAccountStatus,
   change2FA,
-  updateStaffDetailsByAdmin,
+  updateStaffDetails,
   removeUser
 };
