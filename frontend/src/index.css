@@ -1,4 +1,115 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-
+/* Custom animations and 3D effects */
+@layer utilities {
+  /* 3D Effects for Order Management Dashboard */
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .rotate-x-1 {
+    transform: rotateX(1deg);
+  }
+  
+  .rotate-y-2 {
+    transform: rotateY(2deg);
+  }
+  
+  .hover\:rotate-y-2:hover {
+    transform: rotateY(2deg);
+  }
+  
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+  
+  .hover\:scale-110:hover {
+    transform: scale(1.1);
+  }
+  
+  .hover\:scale-\[1\.01\]:hover {
+    transform: scale(1.01);
+  }
+  
+  .hover\:scale-\[1\.02\]:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Enhanced 3D card effects */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+  }
+  
+  .card-3d:hover {
+    transform: translateY(-8px) rotateX(5deg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Glass morphism effect */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  
+  /* Notification animations */
+  .notification-enter {
+    animation: slideInDown 0.3s ease-out;
+  }
+  
+  .notification-exit {
+    animation: slideOutUp 0.3s ease-in;
+  }
+  
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+  
+  /* Notification badge pulse */
+  .notification-badge {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+  
+  /* Crisp icon rendering */
+  .stat-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    shape-rendering: geometricPrecision;
+  }
+  
+  .stat-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    shape-rendering: geometricPrecision;
+  }
+}
 

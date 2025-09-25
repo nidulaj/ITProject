@@ -1,52 +1,117 @@
-/*import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { lazy, Suspense } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { GoogleOAuthProvider } from "@react-oauth/google"
+import { AuthProvider } from "./components/AuthContext"
+import ProtectedRoute from "./components/ProtectedRoute"
 
-import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
-import DiscountPage from "./features/financial-management/pages/DiscountPage";
-import PaymentPage from "./features/financial-management/pages/PaymentPage";
-import PaymentFormPage from "./features/financial-management/pages/PaymentFormPage";
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        
-        <Route path="/" element={<FinanceDashboard />} />
-
-        
-        <Route path="/discounts" element={<DiscountPage />} />
-
-      
-        <Route path="/payments" element={<PaymentPage />} />
-
-      
-        <Route path="/payment-form" element={<PaymentFormPage />} />
+const Register = lazy(() => import("./features/user-management/pages/Register"))
+const Login = lazy(() => import("./features/user-management/pages/Login"))
+const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
+const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
+const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
+const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
+const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
+const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
 
 
 
-      </Routes>
-    </Router>
-  );
-}
 
-export default App;*/
-
-
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import FinanceDashboard from "./features/financial-management/pages/FinanceDashboard";
+const DashboardLayout = ({ children }) => <div>{children}</div>
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/*" element={<FinanceDashboard />} />
-      </Routes>
-    </Router>
-  );
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify2FA" element={<Verify2FA />} />
+              <Route path="/verifyEmail" element={<VerifyEmail />} />
+
+              {/* User Dashboards */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/admin/*"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <AdminDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+                  
+              <Route
+                path="/dashboard/production"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <ProductionDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/order"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <OrderDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/finance"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <FinanceDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/inventory"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <InventryDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 fallback */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </GoogleOAuthProvider>
+  )
 }
 
 export default App;
-
 
 
 
