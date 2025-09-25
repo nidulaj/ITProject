@@ -67,13 +67,13 @@ const FinanceDashboard = () => {
                 <DashboardCard
                   title="Manage Discounts"
                   description="Create, view, and manage discount policies."
-                  route="/discounts"
+                  route="discounts"
                   icon={<Tag />}
                 />
                 <DashboardCard
                   title="Manage Payments"
                   description="Record and monitor all customer payments."
-                  route="/payments"
+                  route="payments"
                   icon={<CreditCard />}
                 />
               </div>

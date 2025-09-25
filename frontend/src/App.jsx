@@ -80,7 +80,7 @@ function App() {
               />
 
               <Route
-                path="/dashboard/finance"
+                path="/dashboard/finance/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
