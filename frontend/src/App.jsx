@@ -9,6 +9,7 @@ const Register = lazy(() => import("./features/user-management/pages/Register"))
 const Login = lazy(() => import("./features/user-management/pages/Login"))
 const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
 const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"))
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
@@ -38,6 +39,17 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <CustomerDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerCatalog />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
