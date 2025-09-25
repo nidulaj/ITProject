@@ -27,7 +27,7 @@ export default function Header({ userInfo }) {
 
         <div className="flex items-center space-x-4">
           {/* User Profile */}
-          <button onClick={() => navigate("/userProfile")} className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <button onClick={() => navigate("userProfile")} className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
             <div className="bg-gray-300 dark:bg-gray-700 rounded-full p-2">
               <User size={16} />
             </div>
