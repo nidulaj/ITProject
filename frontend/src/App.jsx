@@ -12,6 +12,7 @@ const CustomerDashboard = lazy(() => import("./features/user-management/pages/Da
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
+const YogurtLandingPage = lazy(() => import("./features/production-management/pages/YogurtLandingPage"))
 
 const DashboardLayout = ({ children }) => <div>{children}</div>
 
@@ -27,6 +28,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify2FA" element={<Verify2FA />} />
               <Route path="/verifyEmail" element={<VerifyEmail />} />
+              <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} />
 
               {/* User Dashboards */}
               <Route
