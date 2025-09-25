@@ -72,18 +72,19 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={onClose}
-        ></div>
-      )}
+      {/* Backdrop overlay */}
+      <div 
+        className="fixed inset-0 z-40"
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
+        onClick={onClose}
+      />
       
       {/* Sidebar */}
-      <div className={`fixed top-0 right-0 h-full w-96 bg-white shadow-2xl transform transition-all duration-300 ease-in-out z-50 perspective-1000 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className="fixed top-0 right-0 h-full w-96 bg-white shadow-2xl z-50">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
           <h2 className="text-lg font-semibold text-blue-800 drop-shadow-sm">
