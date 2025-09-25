@@ -18,7 +18,8 @@ const {
   changeAccountActivation,
   change2FASetting,
   changeStaffDetailsByAdmin,
-  removeStaffAccount
+  removeStaffAccount,
+  getUserInfo
 } = require("../controllers/staffAuthController");
 
 router.post("/register", registerStaff);
@@ -35,5 +36,6 @@ router.put("/changeAccountStatus/:staffId", staffAuthMiddleware, changeAccountAc
 router.put("/change2FA/:staffId", staffAuthMiddleware, change2FASetting);
 router.put("/changeStaffDetails/:staffId", staffAuthMiddleware, changeStaffDetailsByAdmin);
 router.put("/removeStaff/:staffId", staffAuthMiddleware, removeStaffAccount);
+router.get("/userInfo", staffAuthMiddleware, getUserInfo);
 
 module.exports = router;

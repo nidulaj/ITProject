@@ -120,3 +120,5 @@ const deleteProductDetails = async (req, res) => {
 module.exports = { addProduct, getProducts,updateProductDetails,deleteProductDetails };
 
 
+
+

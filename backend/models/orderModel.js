@@ -1,7 +1,7 @@
 const { pool } = require('../db/dbConnect');
 
 // Create a new order
-const createOrder = async (customer_id, total_price, items) => {
+const createOrder = async (cus_id, total_price, items) => {
   const client = await pool.connect();
   
   try {
@@ -9,8 +9,8 @@ const createOrder = async (customer_id, total_price, items) => {
     
     // Create the order
     const orderResult = await client.query(
-      'INSERT INTO orders (customer_id, total_price, order_status, payment_status, order_date) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-      [customer_id, total_price, 'pending', 'pending']
+      'INSERT INTO orders (cus_id, total_price, order_status, payment_status, order_date) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
+      [cus_id, total_price, 'pending', 'pending']
     );
     
     const order = orderResult.rows[0];
@@ -56,11 +56,11 @@ const getAllOrders = async () => {
 };
 
 // Get orders by customer ID
-const getOrdersByCustomer = async (customer_id) => {
+const getOrdersByCustomer = async (cus_id) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM orders WHERE customer_id = $1 ORDER BY order_date DESC',
-      [customer_id]
+      'SELECT * FROM orders WHERE cus_id = $1 ORDER BY order_date DESC',
+      [cus_id]
     );
     return result.rows;
   } catch (error) {

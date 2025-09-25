@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const OrderDetails = ({ orderId: propOrderId }) => {
   const [order, setOrder] = useState(null);
@@ -37,11 +37,14 @@ const OrderDetails = ({ orderId: propOrderId }) => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get(`${API_BASE_URL}/${orderId}`);
+      const res = await authFetch({
+        method: 'get',
+        url: `${API_BASE_URL}/${orderId}`
+      });
       
-      if (response.data.success) {
-        setOrder(response.data.order);
-        setItems(response.data.items || []);
+      if (res.data.success) {
+        setOrder(res.data.order);
+        setItems(res.data.items || []);
       } else {
         setError('Failed to fetch order details');
       }
@@ -169,7 +172,7 @@ const OrderDetails = ({ orderId: propOrderId }) => {
                 
                 <div>
                   <p className="text-sm text-gray-500">Customer ID</p>
-                  <p className="font-medium">#{String(order.customer_id).padStart(3, '0')}</p>
+                  <p className="font-medium">#{String(order.cus_id).padStart(3, '0')}</p>
                 </div>
                 
                 <div>
