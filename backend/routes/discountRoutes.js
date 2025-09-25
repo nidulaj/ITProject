@@ -8,11 +8,11 @@ const {
   applyBestDiscount
 } = require('../controllers/discountController');
 
-// Routes
-router.post('/', createDiscountController);            // Create a discount
-router.get('/', getAllDiscountsController);           // Get all discounts
-router.put('/:discount_id', updateDiscountController); // Update a discount
-router.delete('/:discount_id', deleteDiscountController); // Delete a discount
+
+router.post('/', createDiscountController);            
+router.get('/', getAllDiscountsController);            
+router.put('/:discount_id', updateDiscountController); 
+router.delete('/:discount_id', deleteDiscountController); 
 router.post("/apply", applyBestDiscount);
 
 module.exports = router;

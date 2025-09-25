@@ -14,7 +14,7 @@ const AdminDashboard = lazy(() => import("./features/user-management/pages/Admin
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
-
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
 
 
 
@@ -84,7 +84,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      
+                      <FinanceDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -111,4 +111,7 @@ function App() {
   )
 }
 
-export default App
+export default App;
+
+
+
