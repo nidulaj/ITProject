@@ -3,7 +3,6 @@ import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const API_BASE_URL = 'http://localhost:5000/api/orders';
@@ -15,7 +14,6 @@ const OrderManagement = () => {
 
   const fetchOrders = async () => {
     try {
-      setLoading(true);
       setError(null);
       console.log('Fetching orders from API...');
       
@@ -46,8 +44,6 @@ const OrderManagement = () => {
       } else {
         setError(`Request error: ${error.message}`);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -171,21 +167,6 @@ const OrderManagement = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Order Management</h1>
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-gray-600 text-lg">Loading orders...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

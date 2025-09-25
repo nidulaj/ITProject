@@ -1,4 +1,4 @@
-const ProductCard = ({ product, onEdit, onDelete, loading }) => {
+const ProductCard = ({ product, onEdit, onDelete }) => {
   // Debug logging to check product data
   console.log('ProductCard received product:', product);
   console.log('Product name:', product.name);
@@ -64,14 +64,12 @@ const ProductCard = ({ product, onEdit, onDelete, loading }) => {
         <button 
           onClick={() => onEdit(product)}
           className="card-btn edit-btn shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-          disabled={loading}
         >
           Edit
         </button>
         <button 
           onClick={() => onDelete(product.product_id)}
           className="card-btn delete-btn shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-          disabled={loading}
         >
           Delete
         </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, onCancelEdit }) => {
+const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEdit }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -235,8 +235,8 @@ const ProductForm = ({ editingProduct, loading, onAddProduct, onUpdateProduct, o
         )}
 
         <div className="form-buttons">
-          <button type="submit" disabled={loading} className="btn-primary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-            {loading ? 'Processing...' : (editingProduct ? 'Update Product' : 'Add Product')}
+          <button type="submit" className="btn-primary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            {editingProduct ? 'Update Product' : 'Add Product'}
           </button>
           {editingProduct && (
             <button type="button" onClick={onCancelEdit} className="btn-secondary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
