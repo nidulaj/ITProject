@@ -69,3 +69,6 @@ const deleteIngredientDetails = async (req, res) => {
 
 
 module.exports = { addIngredient,getIngredients ,updateIngredientDetails,deleteIngredientDetails};
+
+
+  

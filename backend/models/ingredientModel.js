@@ -71,3 +71,8 @@ const deleteIngredient = async (ingredient_id) => {
 
 
 module.exports = { createIngredient ,getAllIngredients,updateIngredient,deleteIngredient};
+
+
+ 
+
+ 
