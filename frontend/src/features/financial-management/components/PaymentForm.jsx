@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+/*import React, { useState } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
@@ -102,11 +102,11 @@ const PaymentForm = () => {
   );
 };
 
-export default PaymentForm;
+export default PaymentForm;*/
 
 
 
-/*import React, { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
@@ -211,7 +211,7 @@ const PaymentForm = ({ onUpdateStats }) => {
   );
 };
 
-export default PaymentForm;*/
+export default PaymentForm;
 
 
 

@@ -1,4 +1,4 @@
-import React from "react";
+/*import React from "react";
 import PaymentForm from "../components/PaymentForm";
 
 const PaymentFormPage = () => {
@@ -9,11 +9,11 @@ const PaymentFormPage = () => {
   );
 };
 
-export default PaymentFormPage;
+export default PaymentFormPage;*/
 
 
 
-/*import React from "react";
+import React from "react";
 import PaymentForm from "../components/PaymentForm";
 
 const PaymentFormPage = ({ onUpdateStats }) => {
@@ -24,4 +24,4 @@ const PaymentFormPage = ({ onUpdateStats }) => {
   );
 };
 
-export default PaymentFormPage;*/
+export default PaymentFormPage;
