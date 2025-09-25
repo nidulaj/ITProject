@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const router = express.Router();
 const { addIngredient, getIngredients, updateIngredientDetails,deleteIngredientDetails} = require('../controllers/ingredientsController');
 // POST /api/ingredient → Create a new ingredient
@@ -16,5 +16,26 @@ router.delete('/:id', deleteIngredientDetails);
 
 
 
-module.exports = router;
+module.exports = router;*/
+const express = require('express');
+const router = express.Router();
+const {
+  addIngredient,
+  getIngredients,
+  updateIngredientDetails,
+  deleteIngredientDetails,
+} = require('../controllers/ingredientsController');
 
+// Create
+router.post('/', addIngredient);
+
+// Read all
+router.get('/', getIngredients);
+
+// Update
+router.put('/:id', updateIngredientDetails);
+
+// Delete
+router.delete('/:id', deleteIngredientDetails);
+
+module.exports = router;

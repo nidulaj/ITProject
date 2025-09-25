@@ -9,12 +9,13 @@ const Register = lazy(() => import("./features/user-management/pages/Register"))
 const Login = lazy(() => import("./features/user-management/pages/Login"))
 const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
 const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"))
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
-
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
 
 
 
@@ -41,6 +42,17 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <CustomerDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/products"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <CustomerCatalog />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -80,11 +92,11 @@ function App() {
               />
 
               <Route
-                path="/dashboard/finance"
+                path="/dashboard/finance/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
-                      
+                      <FinanceDashboard />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -111,4 +123,7 @@ function App() {
   )
 }
 
-export default App
+export default App;
+
+
+

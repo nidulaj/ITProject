@@ -115,25 +115,8 @@ const CustomerCatalog = () => {
               Product Catalog
             </h1>
             
-            {/* Customer Selection and Controls */}
+            {/* Controls */}
             <div className="flex items-center gap-4">
-              {/* Customer Selection */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Customer:</label>
-                <select 
-                  value={currentCustomer?.id || 1} 
-                  onChange={(e) => {
-                    const customerId = parseInt(e.target.value);
-                    const customerName = e.target.selectedOptions[0].text;
-                    setCustomer({ id: customerId, name: customerName });
-                  }}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={1}>Customer 1 (Default Customer)</option>
-                  <option value={1001}>Customer 1001 (Test Customer)</option>
-                </select>
-              </div>
-              
               {/* Notification and Cart Icons */}
               <div className="flex items-center gap-3">
               {/* Notification Icon */}
