@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const ZoneManager = () => {
   const [form, setForm] = useState({ zone_name: "", capacity: "" });
@@ -10,7 +11,11 @@ const ZoneManager = () => {
   // Fetch zones from backend
   const fetchZones = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/store");
+      //const res = await axios.get("http://localhost:5000/api/store");
+      const res = await authFetch({
+                        method: "get",
+                        url: "http://localhost:5000/api/store",
+                      });
       setZones(res.data.zone || []);
     } catch (err) {
       console.error("Error fetching zones:", err);
@@ -26,7 +31,12 @@ const ZoneManager = () => {
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/store", form);
+      //await axios.post("http://localhost:5000/api/store", form);
+          const res = await authFetch({
+                               method: "post",
+                               url: "http://localhost:5000/api/store",
+                               data: form,
+                             });
       alert("Zone added successfully!");
       setForm({ zone_name: "", capacity: "" });
       fetchZones();
@@ -48,11 +58,16 @@ const ZoneManager = () => {
       return alert("Capacity cannot be smaller than used capacity!");
     }
     try {
-      await axios.put(`http://localhost:5000/api/store/${editingZone.storage_zone_id}`, {
+     const res = await authFetch({
+      method: "put",
+      url: `http://localhost:5000/api/store/${editingZone.storage_zone_id}`,
+      data: {
         zone_name: form.zone_name,
         capacity: form.capacity,
-        used_capacity: editingZone.used_capacity
-      });
+        used_capacity: editingZone.used_capacity,
+      },
+    });
+
       alert("Zone updated successfully!");
       setShowModal(false);
       setEditingZone(null);
@@ -66,7 +81,11 @@ const ZoneManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this zone?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/store/${id}`);
+      //await axios.delete(`http://localhost:5000/api/store/${id}`);
+      const res = await authFetch({
+                            method: "delete",
+                            url: `http://localhost:5000/api/store/${id}`,
+                            });
       alert("Zone deleted successfully!");
       fetchZones();
     } catch (err) {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
+
 
 const SpecialIngredientManager = () => {
   const [form, setForm] = useState({
@@ -23,7 +25,14 @@ const SpecialIngredientManager = () => {
 
   const fetchSpecialIngredients = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/special");
+      // const res = await axios.get("http://localhost:5000/api/special");
+
+           const res = await authFetch({
+            method: "get",
+            url: "http://localhost:5000/api/special",
+          });
+
+
       if (res.data.specialIngredient) {
         setSpecialIngredients(res.data.specialIngredient);
       } else {
@@ -46,7 +55,14 @@ const SpecialIngredientManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/special", form);
+      //await axios.post("http://localhost:5000/api/special", form);
+
+      const res = await authFetch({
+                    method: "post",
+                    url: "http://localhost:5000/api/special",
+                    data: form,
+                  });
+
       alert("Special ingredient added!");
       setForm({ name: "", quantity: "", expiry_date: "", storage_zone_id: "" });
       fetchSpecialIngredients();
@@ -59,7 +75,13 @@ const SpecialIngredientManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/special/${id}`);
+        //await axios.delete(`http://localhost:5000/api/special/${id}`);
+
+         const res = await authFetch({
+                method: "delete",
+                url: `http://localhost:5000/api/special/${id}`,
+                });
+        
         alert("Special ingredient deleted!");
         fetchSpecialIngredients();
       } catch (err) {
@@ -83,10 +105,19 @@ const SpecialIngredientManager = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/special/${editId}`, {
-        special_id: editId,
-        ...editForm,
-      });
+      // await axios.put(`http://localhost:5000/api/special/${editId}`, {
+      //   special_id: editId,
+      //   ...editForm,
+      // });
+      const res = await authFetch({
+              method: "put",
+              url: `http://localhost:5000/api/special/${editId}`,
+              data: {
+              special_id: editId,
+              ...editForm,
+              },
+            });
+
       alert("Special ingredient updated!");
       setShowEditModal(false);
       setEditId(null);

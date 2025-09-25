@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 import IngredientForm from "../components/IngredientForm";
 import SpecialIngredientForm from "../components/SpecialIngredientForm";
 import FinalProductForm from "../components/FinalProductForm";
 import ZoneForm from "../components/ZoneForm";
 import profilePic from "../../../assets/profile.jpg";
+import Header from "../components/Header";
+import UserProfile from "../../user-management/components/UserProfile";   // ✅ import your profile component
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -14,11 +16,30 @@ const Dashboard = () => {
     finalProducts: 0,
     availableSpaces: 0,
   });
+  const [userInfo, setUserInfo] = useState(null);
 
-  // Fetch summary data from backend
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const res = await authFetch({
+          method: "get",
+          url: `http://localhost:5000/api/staff/auth/userInfo`,
+        });
+        setUserInfo(res.data);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    fetchUserInfo();
+  }, []);
+
+  // Fetch dashboard summary
   const fetchSummary = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/dashboard/summary"); // update URL if needed
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/dashboard/summary",
+      });
       setSummary(res.data);
     } catch (err) {
       console.error("Error fetching dashboard summary:", err);
@@ -27,8 +48,6 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchSummary();
-
-    // Optional: refresh every 10 seconds for real-time
     const interval = setInterval(fetchSummary, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -39,6 +58,7 @@ const Dashboard = () => {
     { name: "Special Ingredients", gradient: "from-blue-500 to-cyan-500" },
     { name: "Final Products", gradient: "from-blue-500 to-cyan-500" },
     { name: "Storage Zones", gradient: "from-blue-500 to-cyan-500" },
+    { name: "User Profile", gradient: "from-blue-500 to-cyan-500" }, // ✅ new tab
   ];
 
   const renderForm = () => {
@@ -49,7 +69,7 @@ const Dashboard = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6 rounded-2xl shadow-md">
-                <h3 className="text-lg font-semibold"> Ingredients</h3>
+                <h3 className="text-lg font-semibold">Ingredients</h3>
                 <p className="text-3xl font-bold mt-2">{summary.ingredients}</p>
               </div>
               <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6 rounded-2xl shadow-md">
@@ -143,16 +163,12 @@ const Dashboard = () => {
             </div>
           </div>
         );
-      case "Ingredients":
-        return <IngredientForm />;
-      case "Special Ingredients":
-        return <SpecialIngredientForm />;
-      case "Final Products":
-        return <FinalProductForm />;
-      case "Storage Zones":
-        return <ZoneForm />;
-      default:
-        return <IngredientForm />;
+      case "Ingredients":         return <IngredientForm />;
+      case "Special Ingredients": return <SpecialIngredientForm />;
+      case "Final Products":      return <FinalProductForm />;
+      case "Storage Zones":       return <ZoneForm />;
+      case "User Profile":        return <UserProfile userInfo={userInfo} />; // ✅ render profile
+      default:                    return <IngredientForm />;
     }
   };
 
@@ -181,6 +197,8 @@ const Dashboard = () => {
       </aside>
 
       <main className="flex-1 bg-white p-8 overflow-y-auto">
+        {/* pass setActiveTab so Header can change tab */}
+        <Header userInfo={userInfo} setActiveTab={setActiveTab} />
         <div className="rounded-2xl shadow-md border border-gray-200 p-6 min-h-screen">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">{activeTab}</h2>
           {renderForm()}

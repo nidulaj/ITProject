@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const IngredientManager = () => {
   const [form, setForm] = useState({
@@ -26,8 +27,13 @@ const IngredientManager = () => {
   const [editError, setEditError] = useState("");
 
   const fetchIngredients = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/ingredient");
+      
+    //   const res = await axios.get("http://localhost:5000/api/ingredient");
+     try {
+          const res = await authFetch({
+            method: "get",
+            url: "http://localhost:5000/api/ingredient",
+          });
       if (Array.isArray(res.data)) setIngredients(res.data);
       else if (res.data.ingredients) setIngredients(res.data.ingredients);
       else setIngredients([]);
@@ -58,7 +64,13 @@ const IngredientManager = () => {
     setError("");
 
     try {
-      await axios.post("http://localhost:5000/api/ingredient", form);
+      //await axios.post("http://localhost:5000/api/ingredient", form);
+      const res = await authFetch({
+              method: "post",
+              url: "http://localhost:5000/api/ingredient",
+              data: form,
+            });
+
       alert("Ingredient added!");
       setForm({ name: "", quantity: "", expiry_date: "", storage_zone_id: "" });
       fetchIngredients();
@@ -71,7 +83,12 @@ const IngredientManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/ingredient/${id}`);
+        //await axios.delete(`http://localhost:5000/api/ingredient/${id}`);
+        const res = await authFetch({
+        method: "delete",
+        url: `http://localhost:5000/api/ingredient/${id}`,
+        });
+
         alert("Ingredient deleted!");
         fetchIngredients();
       } catch (err) {
@@ -105,10 +122,15 @@ const IngredientManager = () => {
     setEditError("");
 
     try {
-      await axios.put(`http://localhost:5000/api/ingredient/${editId}`, {
+          const res = await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/ingredient/${editId}`,
+        data: {
         ingredient_id: editId,
         ...editForm,
+        },
       });
+
       alert("Ingredient updated!");
       setShowEditModal(false);
       setEditId(null);
