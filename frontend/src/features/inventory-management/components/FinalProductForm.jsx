@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const TableFinalProductForm = () => {
   const [form, setForm] = useState({
@@ -16,7 +17,12 @@ const TableFinalProductForm = () => {
   // Fetch all products
   const fetchFinalProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/final");
+      //const res = await axios.get("http://localhost:5000/api/final");
+      const res = await authFetch({
+                  method: "get",
+                  url: "http://localhost:5000/api/final",
+                });
+
       setFinalProducts(res.data.finalProduct || []);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -33,7 +39,14 @@ const TableFinalProductForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/final", form);
+     // await axios.post("http://localhost:5000/api/final", form);
+
+     const res = await authFetch({
+                         method: "post",
+                         url: "http://localhost:5000/api/final",
+                         data: form,
+                       });
+
       alert("Product added successfully!");
       setForm({ pname: "", batch_no: "", quantity: "", expiry_date: "", storage_zone_id: "" });
       fetchFinalProducts();
@@ -53,14 +66,19 @@ const TableFinalProductForm = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/final/${editProduct.fproduct_id}`, {
-        fproduct_id: editProduct.fproduct_id,
-        pname: editProduct.pname,
-        batch_no: editProduct.batch_no,
-        quantity: editProduct.quantity,
-        expiry_date: editProduct.expiry_date,
-        storage_zone_id: editProduct.storage_zone_id,
-      });
+    const res = await authFetch({
+    method: "put",
+    url: `http://localhost:5000/api/final/${editProduct.fproduct_id}`,
+    data: {
+    fproduct_id: editProduct.fproduct_id,
+    pname: editProduct.pname,
+    batch_no: editProduct.batch_no,
+    quantity: editProduct.quantity,
+    expiry_date: editProduct.expiry_date,
+    storage_zone_id: editProduct.storage_zone_id,
+  },
+});
+
       alert("Product updated successfully!");
       setEditProduct(null);
       fetchFinalProducts();
@@ -73,7 +91,11 @@ const TableFinalProductForm = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/final/${id}`);
+      //await axios.delete(`http://localhost:5000/api/final/${id}`);
+      const res = await authFetch({
+                      method: "delete",
+                      url: `http://localhost:5000/api/final/${id}`,
+                      });
       alert("Product deleted successfully!");
       fetchFinalProducts();
     } catch (err) {

@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { GoogleOAuthProvider } from "@react-oauth/google"
 import { AuthProvider } from "./components/AuthContext"
+import { NotificationProvider } from "./contexts/NotificationContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 
@@ -14,9 +15,9 @@ const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEm
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
+const ProductCatalog = lazy(() => import ("./features/order-management/pages/ProductCatalogFixed"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
-
 
 
 
@@ -34,6 +35,7 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify2FA" element={<Verify2FA />} />
               <Route path="/verifyEmail" element={<VerifyEmail />} />
+              
 
               {/* User Dashboards */}
               <Route
@@ -87,6 +89,19 @@ function App() {
                     <DashboardLayout>
                       <OrderDashboard />
                     </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/products"
+                element={
+                  <ProtectedRoute>
+                    <NotificationProvider>
+                      <DashboardLayout>
+                        <ProductCatalog />
+                      </DashboardLayout>
+                    </NotificationProvider>
                   </ProtectedRoute>
                 }
               />

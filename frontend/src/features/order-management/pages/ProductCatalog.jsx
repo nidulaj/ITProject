@@ -8,7 +8,6 @@ import './ProductCatalog.css';
 const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [loading, setLoading] = useState(false);
   const { showSuccess, showError } = useNotification();
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
@@ -20,25 +19,29 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
+      // Add timeout to prevent hanging
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const res = await authFetch({
         method: 'get',
-        url: API_BASE_URL
+        url: API_BASE_URL,
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       console.log('API Response:', res.data);
       console.log('Products received:', res.data.products);
       setProducts(res.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
-      showError('Failed to fetch products');
-    } finally {
-      setLoading(false);
+      // Don't show error notification, just set empty products
+      setProducts([]);
     }
   };
 
   const handleAddProduct = async (formData) => {
     try {
-      setLoading(true);
       
       // Create FormData for file upload
       const productData = new FormData();
@@ -88,14 +91,11 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       
       showError(errorMessage);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleUpdateProduct = async (formData) => {
     try {
-      setLoading(true);
       
       // Create FormData for file upload
       const productData = new FormData();
@@ -147,8 +147,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       
       showError(errorMessage);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -162,7 +160,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
     }
 
     try {
-      setLoading(true);
       console.log('Deleting product with ID:', productId);
       
       const res = await authFetch({
@@ -185,8 +182,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       }
       
       showError(errorMessage);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -208,7 +203,14 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   };
 
   const handleNavigation = (view) => {
-    window.dispatchEvent(new CustomEvent('navigate', { detail: { view } }));
+    if (view === 'orders') {
+      window.location.href = '/dashboard/order';
+    } else if (view === 'customer') {
+      window.location.href = '/products';
+    } else {
+      // Stay on current page for other views
+      console.log('Navigation to:', view);
+    }
   };
 
   return (
@@ -247,14 +249,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
                 </svg>}
                 onClick={() => handleNavigation('orders')}
               />
-              
-              <NavLink 
-                title="Customer Shop" 
-                icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>}
-                onClick={() => handleNavigation('customer')}
-              />
             </div>
           </div>
 
@@ -267,7 +261,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         <div className="catalog-content flex gap-6">
           <ProductForm
             editingProduct={editingProduct}
-            loading={loading}
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
             onCancelEdit={handleCancelEdit}
@@ -275,7 +268,6 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
           
           <ProductGrid
             products={products}
-            loading={loading}
             onEditProduct={handleEditProduct}
             onDeleteProduct={handleDeleteProduct}
           />

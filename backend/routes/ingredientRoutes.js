@@ -26,16 +26,20 @@ const {
   deleteIngredientDetails,
 } = require('../controllers/ingredientsController');
 
+const {
+  staffAuthMiddleware
+} = require("../middlewares/staffAuthMiddleware");
+
 // Create
-router.post('/', addIngredient);
+router.post('/', staffAuthMiddleware,addIngredient);
 
 // Read all
-router.get('/', getIngredients);
+router.get('/', staffAuthMiddleware,getIngredients);
 
 // Update
-router.put('/:id', updateIngredientDetails);
+router.put('/:id', staffAuthMiddleware,updateIngredientDetails);
 
 // Delete
-router.delete('/:id', deleteIngredientDetails);
+router.delete('/:id',staffAuthMiddleware, deleteIngredientDetails);
 
 module.exports = router;
