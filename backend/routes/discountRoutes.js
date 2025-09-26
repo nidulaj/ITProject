@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { staffAuthMiddleware } = require("../middlewares/staffAuthMiddleware");
+
 const {
   createDiscountController,
   getAllDiscountsController,
@@ -9,10 +11,10 @@ const {
 } = require('../controllers/discountController');
 
 
-router.post('/', createDiscountController);            
-router.get('/', getAllDiscountsController);            
-router.put('/:discount_id', updateDiscountController); 
-router.delete('/:discount_id', deleteDiscountController); 
-router.post("/apply", applyBestDiscount);
+router.post('/', staffAuthMiddleware, createDiscountController);            
+router.get('/', staffAuthMiddleware, getAllDiscountsController);            
+router.put('/:discount_id', staffAuthMiddleware, updateDiscountController); 
+router.delete('/:discount_id', staffAuthMiddleware, deleteDiscountController); 
+router.post("/apply", staffAuthMiddleware, applyBestDiscount);
 
 module.exports = router;

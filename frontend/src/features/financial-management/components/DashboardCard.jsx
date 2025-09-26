@@ -9,7 +9,7 @@ const DashboardCard = ({ title, description, route, icon }) => {
   return (
       <div
       onClick={() => navigate(route)}
-      className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-blue-500">
+      className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 ease-in-out border-l-4 border-blue-500">
         <div className="flex items-center gap-4">
           <div className="text-blue-600">{icon}</div>
           <div>
