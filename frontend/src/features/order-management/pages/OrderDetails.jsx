@@ -1,36 +1,23 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 
-const OrderDetails = ({ orderId: propOrderId }) => {
+const OrderDetails = () => {
   const [order, setOrder] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentOrderId, setCurrentOrderId] = useState(propOrderId);
+  const navigate = useNavigate();
+  const { orderId } = useParams();
 
   const API_BASE_URL = 'http://localhost:5000/api/orders';
 
-  // Listen for navigation events to update the order ID
-  useEffect(() => {
-    const handleNavigation = (event) => {
-      if (event.detail && event.detail.view === 'order-details' && event.detail.orderId) {
-        setCurrentOrderId(event.detail.orderId);
-      }
-    };
-
-    window.addEventListener('navigate', handleNavigation);
-    
-    return () => {
-      window.removeEventListener('navigate', handleNavigation);
-    };
-  }, []);
-
   // Fetch order details when orderId changes
   useEffect(() => {
-    if (currentOrderId) {
-      fetchOrderDetails(currentOrderId);
+    if (orderId) {
+      fetchOrderDetails(orderId);
     }
-  }, [currentOrderId]);
+  }, [orderId]);
 
   const fetchOrderDetails = async (orderId) => {
     try {
@@ -90,10 +77,7 @@ const OrderDetails = ({ orderId: propOrderId }) => {
   };
 
   const handleBackToOrders = () => {
-    // Dispatch a custom event to navigate back to orders
-    window.dispatchEvent(new CustomEvent('navigate', {
-      detail: { view: 'order-management' }
-    }));
+    navigate('/dashboard/order');
   };
 
   if (loading) {
@@ -140,130 +124,135 @@ const OrderDetails = ({ orderId: propOrderId }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <button 
-            onClick={handleBackToOrders}
-            className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Orders
-          </button>
-          
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
-          <p className="text-gray-600">View detailed information about order #{currentOrderId ? String(currentOrderId).padStart(3, '0') : ''}</p>
-        </div>
-
-        {order && (
-          <div className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+    <Routes>
+      <Route path="/" element={
+        <div className="min-h-screen bg-gray-50 p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-6">
+              <button 
+                onClick={handleBackToOrders}
+                className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Orders
+              </button>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Order ID</p>
-                  <p className="font-medium">#{String(order.order_id).padStart(3, '0')}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500">Customer ID</p>
-                  <p className="font-medium">#{String(order.cus_id).padStart(3, '0')}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500">Order Date</p>
-                  <p className="font-medium">{formatDate(order.order_date)}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500">Total Amount</p>
-                  <p className="font-medium text-blue-600">{formatPrice(order.total_price)}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500">Payment Status</p>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.payment_status)}`}>
-                    {order.payment_status}
-                  </span>
-                </div>
-                
-                <div>
-                  <p className="text-sm text-gray-500">Order Status</p>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
-                    {order.order_status}
-                  </span>
-                </div>
-              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Details</h1>
+              <p className="text-gray-600">View detailed information about order #{orderId ? String(orderId).padStart(3, '0') : ''}</p>
             </div>
 
-            {/* Order Items */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-800">Order Items</h2>
-              </div>
-              
-              {items.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
+            {order && (
+              <div className="space-y-6">
+                {/* Order Summary */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Order ID</p>
+                      <p className="font-medium">#{String(order.order_id).padStart(3, '0')}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500">Customer ID</p>
+                      <p className="font-medium">#{String(order.cus_id).padStart(3, '0')}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500">Order Date</p>
+                      <p className="font-medium">{formatDate(order.order_date)}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500">Total Amount</p>
+                      <p className="font-medium text-blue-600">{formatPrice(order.total_price)}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500">Payment Status</p>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.payment_status)}`}>
+                        {order.payment_status}
+                      </span>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-500">Order Status</p>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
+                        {order.order_status}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-                  <p className="text-gray-500">This order doesn't contain any items.</p>
                 </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {items.map((item, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            #{String(item.product_id).padStart(3, '0')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.quantity}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatPrice(item.price)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
-                            {formatPrice(item.price * item.quantity)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-gray-50">
-                      <tr>
-                        <td colSpan="3" className="px-6 py-3 text-right text-sm font-medium text-gray-900">
-                          Total:
-                        </td>
-                        <td className="px-6 py-3 whitespace-nowrap text-sm font-bold text-blue-600">
-                          {formatPrice(items.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
+
+                {/* Order Items */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-xl font-semibold text-gray-800">Order Items</h2>
+                  </div>
+                  
+                  {items.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="mx-auto h-16 w-16 text-gray-400 mb-4">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
+                      <p className="text-gray-500">This order doesn't contain any items.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {items.map((item, index) => (
+                            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                #{String(item.product_id).padStart(3, '0')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {item.quantity}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {formatPrice(item.price)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600">
+                                {formatPrice(item.price * item.quantity)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="bg-gray-50">
+                          <tr>
+                            <td colSpan="3" className="px-6 py-3 text-right text-sm font-medium text-gray-900">
+                              Total:
+                            </td>
+                            <td className="px-6 py-3 whitespace-nowrap text-sm font-bold text-blue-600">
+                              {formatPrice(items.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
+                            </td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 

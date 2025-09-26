@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import ProductCatalog from './ProductCatalog';
 import NotificationProvider from '../../../contexts/NotificationContext';
@@ -6,14 +7,16 @@ import OrderStats from '../components/OrderStats';
 import OrderTable from '../components/OrderTable';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import UserProfile from '../../user-management/components/UserProfile';
 
 const OrderDashboard = () => {
-  const [currentView, setCurrentView] = useState('orders');
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const [stats, setStats] = useState({
     totalOrders: 0,
     packingOrders: 0,
@@ -25,21 +28,24 @@ const OrderDashboard = () => {
 
   useEffect(() => {
     fetchOrders();
+    fetchUserInfo();
   }, []);
 
   useEffect(() => {
     calculateStats();
   }, [orders]);
 
-  useEffect(() => {
-    const handleNavigation = (event) => {
-      if (event.detail?.view) {
-        setCurrentView(event.detail.view);
-      }
-    };
-    window.addEventListener('navigate', handleNavigation);
-    return () => window.removeEventListener('navigate', handleNavigation);
-  }, []);
+  const fetchUserInfo = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/staff/auth/userInfo",
+      });
+      setUserInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
 
   const calculateStats = () => {
     const totalOrders = orders.length;
@@ -190,13 +196,6 @@ const OrderDashboard = () => {
     }
   };
 
-  const handleNavigate = (view) => {
-    if (view === 'products') {
-      window.location.href = '/dashboard/products';
-    } else {
-      setCurrentView(view);
-    }
-  };
 
 
   if (error) {
@@ -230,46 +229,43 @@ const OrderDashboard = () => {
 
   return (
     <NotificationProvider>
-      <div className="relative">
-        {currentView === 'products' && (
-          <>
-            <ProductCatalog />
-          </>
-        )}
-        
-        {currentView === 'orders' && (
-          <>
-            <div className="flex min-h-screen">
-              {/* Left sidebar navigation */}
-              <Sidebar handleNavigate={handleNavigate} />
+      <Routes>
+        <Route path="/" element={
+          <div className="flex min-h-screen">
+            {/* Left sidebar navigation */}
+            <Sidebar />
 
-              {/* Main content */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
+            {/* Main content */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
+              {/* Header */}
+              <Header userInfo={userInfo} />
+              
+              <div className="p-6">
                 {/* Header for main content */}
                 <div className="mb-8 text-center">
-                  <h1 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-lg">Order Management Dashboard</h1>
-                </div>
-
-                {/* Order Statistics */}
-                <OrderStats stats={stats} />
-
-                {/* Recent Orders Table */}
-                <div className="bg-white rounded-xl shadow-lg border border-blue-200 transform perspective-1000 hover:shadow-xl transition-all duration-300">
-                  <div className="px-6 py-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
-                    <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
-                  </div>
                   
-                  <OrderTable 
-                    orders={orders} 
-                    error={error} 
-                    fetchOrders={fetchOrders} 
-                    formatPrice={formatPrice} 
-                    formatDate={formatDate} 
-                    handleViewOrderDetails={handleViewOrderDetails} 
-                    handleUpdateOrderStatus={handleUpdateOrderStatus} 
-                    handleDeleteOrder={handleDeleteOrder} 
-                  />
                 </div>
+
+              {/* Order Statistics */}
+              <OrderStats stats={stats} />
+
+              {/* Recent Orders Table */}
+              <div className="bg-white rounded-xl shadow-lg border border-blue-200 transform perspective-1000 hover:shadow-xl transition-all duration-300">
+                <div className="px-6 py-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
+                  <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
+                </div>
+                
+                <OrderTable 
+                  orders={orders} 
+                  error={error} 
+                  fetchOrders={fetchOrders} 
+                  formatPrice={formatPrice} 
+                  formatDate={formatDate} 
+                  handleViewOrderDetails={handleViewOrderDetails} 
+                  handleUpdateOrderStatus={handleUpdateOrderStatus} 
+                  handleDeleteOrder={handleDeleteOrder} 
+                />
+              </div>
 
                 {/* Order Details Modal */}
                 <OrderDetailsModal 
@@ -282,11 +278,31 @@ const OrderDashboard = () => {
                 />
               </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        } />
+        <Route path="/profile" element={
+          <div className="flex min-h-screen">
+            {/* Left sidebar navigation */}
+            <Sidebar />
+
+            {/* Main content */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
+              {/* Header */}
+              <Header userInfo={userInfo} />
+              
+              <div className="p-6">
+                <UserProfile userInfo={userInfo} />
+              </div>
+            </div>
+          </div>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </NotificationProvider>
   );
 };
+
+
+
 
 export default OrderDashboard;

@@ -87,7 +87,7 @@ function App() {
               />
 
               <Route
-                path="/dashboard/order"
+                path="/dashboard/order/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -98,7 +98,7 @@ function App() {
               />
 
               <Route
-                path="/dashboard/products"
+                path="/dashboard/products/*"
                 element={
                   <ProtectedRoute>
                     <NotificationProvider>
