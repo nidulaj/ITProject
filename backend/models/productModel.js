@@ -1,6 +1,7 @@
 const { pool } = require('../db/dbConnect');  // Importing the pool from dbConnect
 
 // Create a new product in the database
+//a
 const createProduct = async (name, description, price, stock_quantity, category, image) => {
   try {
     let query, values;
