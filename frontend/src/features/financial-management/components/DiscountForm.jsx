@@ -197,13 +197,22 @@ const DiscountForm = ({ discount, onSuccess }) => {
           name="value"
           value={formData.value}
           onChange={handleChange}
+          onInput={(e) => {
+          const val = Number(e.target.value);
+          if (formData.discount_type === "percentage" && val > 100) {
+            e.target.value = 100;
+          } else if (val < 1) {
+            e.target.value = 1;
+          }
+        }}
+          min={formData.discount_type === "fixed" ? 1 : 1}
+          max={formData.discount_type === "percentage" ? 100 : undefined}
           required
-          //className="border p-2 rounded"
           className={`border p-2 rounded ${errors.value ? "border-red-500" : ""}`}
         />
         {errors.value && (
-    <span className="text-sm text-red-500 mt-1">{errors.value}</span>
-  )}
+          <span className="text-sm text-red-500 mt-1">{errors.value}</span>
+        )}
       </label>
 
       <label className="flex flex-col">
@@ -229,6 +238,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.valid_from}
           onChange={handleChange}
           required
+          min={new Date().toISOString().split("T")[0]} // Today’s date
           className="border p-2 rounded"
         />
         {errors.valid_from && (
@@ -245,11 +255,12 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.valid_to}
           onChange={handleChange}
           required
+          min={formData.valid_from || new Date().toISOString().split("T")[0]}
           className="border p-2 rounded"
         />
         {errors.valid_to && (
-  <span className="text-sm text-red-500 mt-1">{errors.valid_to}</span>
-)}
+          <span className="text-sm text-red-500 mt-1">{errors.valid_to}</span>
+        )}
 
       </label>
 
