@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { authFetch } from "../utils/authFetchStaff";
+
 export default function UserProfile() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
@@ -91,14 +92,43 @@ export default function UserProfile() {
     }
   };
 
-  const handlePhotoUpload = (e) => {
+  const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUser((prev) => ({ ...prev, profile_photo: e.target.result }));
-      };
-      reader.readAsDataURL(file);
+    console.log("File received:", file);
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("profilePhoto", file);
+
+    try {
+      const res = await authFetch({
+        method: "post",
+        url: "http://localhost:5000/api/staff/auth/uploadProfilePhoto",
+        data: formData,
+      });
+
+      setUser((prev) => ({
+        ...prev,
+        profile_photo: res.data.photoUrl,
+      }));
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+    }
+  };
+
+  const handlePhotoRemove = async () => {
+    try {
+      const res = await authFetch({
+        method: "delete",
+        url: "http://localhost:5000/api/staff/auth/removeProfilePhoto",
+      });
+
+      setUser((prev) => ({
+        ...prev,
+        profile_photo: null,
+      }));
+    } catch (error) {
+      console.error("Error removing photo:", error);
     }
   };
 
@@ -120,7 +150,7 @@ export default function UserProfile() {
       <div className="flex flex-col items-center space-y-4 py-6">
         <div className="relative">
           <img
-            src="https://via.placeholder.com/150"
+            src={user.profile_photo || "/src/assets/default-user-icon.png"}
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600"
           />
@@ -151,10 +181,38 @@ export default function UserProfile() {
               className="hidden"
             />
           </label>
+          {user.profile_photo && (
+            <button
+              onClick={handlePhotoRemove}
+              className="absolute bottom-0 left-0 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow-lg transition"
+              title="Remove profile photo"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          )}
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Click the camera icon to change your profile photo
-        </p>
+        <div className="text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Click the camera icon to change your profile photo
+          </p>
+          {user.profile_photo && (
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              Click the trash icon to remove it
+            </p>
+          )}
+        </div>
       </div>
 
       {/* User Information Grid */}

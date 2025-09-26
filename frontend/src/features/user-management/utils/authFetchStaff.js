@@ -4,10 +4,12 @@ export const authFetch = async (config) => {
   try {
     // Ensure credentials are always sent
     config.withCredentials = true;
-    config.headers = {
-      ...config.headers,
-      "Content-Type": "application/json",
-    };
+    if (!(config.data instanceof FormData)) {
+      config.headers = {
+        ...config.headers,
+        "Content-Type": "application/json",
+      };
+    }
 
     return await axios(config);
   } catch (err) {

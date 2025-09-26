@@ -2,8 +2,10 @@ import { authFetch } from "../utils/authFetchStaff";
 import { useState } from "react"; 
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
+
 export default function Header({ userInfo }) {
   const navigate = useNavigate();
+  
   const handleLogout = async () => {
     try {
       const res = await authFetch({
@@ -18,6 +20,7 @@ export default function Header({ userInfo }) {
       console.error("Error fetching staff list:", error);
     }
   };
+
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -27,10 +30,21 @@ export default function Header({ userInfo }) {
 
         <div className="flex items-center space-x-4">
           {/* User Profile */}
-          <button onClick={() => navigate("userProfile")} className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-            <div className="bg-gray-300 dark:bg-gray-700 rounded-full p-2">
-              <User size={16} />
-            </div>
+          <button 
+            onClick={() => navigate("userProfile")} 
+            className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            {userInfo?.profile_photo ? (
+              <img
+                src={userInfo.profile_photo}
+                alt="Profile"
+                className="w-8 h-8 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+              />
+            ) : (
+              <div className="bg-gray-300 dark:bg-gray-700 rounded-full p-2">
+                <User size={16} />
+              </div>
+            )}
             <span className="text-sm font-medium">Hi {userInfo?.first_name}</span>
           </button>
 
