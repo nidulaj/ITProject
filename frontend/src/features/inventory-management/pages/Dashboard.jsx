@@ -7,7 +7,7 @@ import ZoneForm from "../components/ZoneForm";
 import profilePic from "../../../assets/profile.jpg";
 import Header from "../components/Header";
 import UserProfile from "../../user-management/components/UserProfile";
-import IcodePage from "../components/IcodePage"; // ✅ ensure correct path
+import IcodePage from "../components/IcodePage"; 
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
