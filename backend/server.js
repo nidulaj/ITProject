@@ -28,6 +28,8 @@ const customizedOrdersRoute = require("./routes/customizedOrders"); //Rashmika
 const staffAuthRoutes = require("./routes/staffAuthRoutes");
 const userManagementAuditRoutes = require("./routes/userManagementAuditLogRoutes");
 const userRoleRoutes = require("./routes/userRoleRoutes");
+const icodeRoutes = require("./routes/icodeRoutes");
+
 
 
 
@@ -69,6 +71,7 @@ app.use('/api/productions', productionRoutes);  //Rashmika
 app.use("/api/returns", returnsRoute);  //Rahmika
 app.use("/api/customized_orders", customizedOrdersRoute); //Rahmika
 app.use('/api/user-management/audit', userManagementAuditRoutes);
+app.use("/api/icodes", icodeRoutes);
 
 
 app.listen(5000, () => {

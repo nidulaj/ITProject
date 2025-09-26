@@ -6,7 +6,8 @@ import FinalProductForm from "../components/FinalProductForm";
 import ZoneForm from "../components/ZoneForm";
 import profilePic from "../../../assets/profile.jpg";
 import Header from "../components/Header";
-import UserProfile from "../../user-management/components/UserProfile";   // ✅ import your profile component
+import UserProfile from "../../user-management/components/UserProfile";
+import IcodePage from "../components/IcodePage"; // ✅ ensure correct path
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -58,10 +59,13 @@ const Dashboard = () => {
     { name: "Special Ingredients", gradient: "from-blue-500 to-cyan-500" },
     { name: "Final Products", gradient: "from-blue-500 to-cyan-500" },
     { name: "Storage Zones", gradient: "from-blue-500 to-cyan-500" },
-    { name: "User Profile", gradient: "from-blue-500 to-cyan-500" }, // ✅ new tab
+    { name: "User Profile", gradient: "from-blue-500 to-cyan-500" },
+    { name: "Ingredient Codes", gradient: "from-blue-500 to-cyan-500" }, // ✅ button in sidebar
   ];
 
   const renderForm = () => {
+    console.log("ActiveTab:", activeTab); // ✅ debug log
+
     switch (activeTab) {
       case "Dashboard":
         return (
@@ -167,7 +171,8 @@ const Dashboard = () => {
       case "Special Ingredients": return <SpecialIngredientForm />;
       case "Final Products":      return <FinalProductForm />;
       case "Storage Zones":       return <ZoneForm />;
-      case "User Profile":        return <UserProfile userInfo={userInfo} />; // ✅ render profile
+      case "User Profile":        return <UserProfile userInfo={userInfo} />;
+      case "Ingredient Codes":    return <IcodePage />; // ✅ load page
       default:                    return <IngredientForm />;
     }
   };
@@ -197,7 +202,6 @@ const Dashboard = () => {
       </aside>
 
       <main className="flex-1 bg-white p-8 overflow-y-auto">
-        {/* pass setActiveTab so Header can change tab */}
         <Header userInfo={userInfo} setActiveTab={setActiveTab} />
         <div className="rounded-2xl shadow-md border border-gray-200 p-6 min-h-screen">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">{activeTab}</h2>
