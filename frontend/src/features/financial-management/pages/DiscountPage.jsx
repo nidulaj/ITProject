@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DiscountForm from "../components/DiscountForm";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
-const DiscountPage = ({ onUpdateStats }) => {
+const DiscountPage = ({ onUpdateStats, onUpdateRecentActivity }) => {
   const [discounts, setDiscounts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingDiscount, setEditingDiscount] = useState(null);
 
   const fetchDiscounts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/discounts");
+      const res = await authFetch({
+        method: 'get',
+        url: "http://localhost:5000/api/discounts"
+      });
       setDiscounts(res.data || []);
     } catch (err) {
       console.error("Error fetching discounts:", err);
@@ -23,34 +27,35 @@ const DiscountPage = ({ onUpdateStats }) => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this discount?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/discounts/${id}`);
+      const res = await authFetch({
+        method: 'delete',
+        url: `http://localhost:5000/api/discounts/${id}`
+      });
       setDiscounts((prev) => prev.filter((d) => d.discount_id !== id));
       if (onUpdateStats) onUpdateStats();
-
+      if (onUpdateRecentActivity) onUpdateRecentActivity();
     } catch (err) {
       console.error("Error deleting discount:", err);
     }
   };
 
-
-    const handleEdit = (discount) => {
+  const handleEdit = (discount) => {
     const formatDate = (dateStr) => {
       if (!dateStr) return "";
       const date = new Date(dateStr);
       return date.toISOString().split("T")[0];
+    };
+
+    const formattedDiscount = {
+      ...discount,
+      valid_from: formatDate(discount.valid_from),
+      valid_to: formatDate(discount.valid_to),
+    };
+
+    setEditingDiscount(formattedDiscount);
+    setShowForm(true);
   };
 
-  const formattedDiscount = {
-    ...discount,
-    valid_from: formatDate(discount.valid_from),
-    valid_to: formatDate(discount.valid_to),
-  };
-
-  setEditingDiscount(formattedDiscount);
-  setShowForm(true);
-};
-
-  
   const handleFormSuccess = (savedDiscount) => {
     if (!savedDiscount) {
       fetchDiscounts();
@@ -70,6 +75,7 @@ const DiscountPage = ({ onUpdateStats }) => {
     setShowForm(false);
     setEditingDiscount(null);
     if (onUpdateStats) onUpdateStats();
+    if (onUpdateRecentActivity) onUpdateRecentActivity();
   };
 
   return (
@@ -90,7 +96,6 @@ const DiscountPage = ({ onUpdateStats }) => {
         )}
       </div>
 
-      
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md relative">
@@ -104,7 +109,6 @@ const DiscountPage = ({ onUpdateStats }) => {
               &times;
             </button>
 
-            
             <DiscountForm
               discount={editingDiscount}
               onSuccess={(saved) => handleFormSuccess(saved)}
@@ -113,12 +117,11 @@ const DiscountPage = ({ onUpdateStats }) => {
         </div>
       )}
 
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {discounts.map((d) => (
           <div
             key={d.discount_id}
-            className="bg-white shadow-md rounded-2xl border border-gray-200 p-5 flex flex-col justify-between hover:shadow-lg transition"
+            className="bg-white shadow-md rounded-2xl border border-gray-200 p-5 flex flex-col justify-between hover:shadow-lg hover:scale-[1.01] transition"
           >
             <div>
               <h3 className="font-bold text-xl text-blue-600 mb-2">
@@ -139,7 +142,6 @@ const DiscountPage = ({ onUpdateStats }) => {
               </p>
             </div>
 
-            
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => handleDelete(d.discount_id)}
@@ -162,3 +164,4 @@ const DiscountPage = ({ onUpdateStats }) => {
 };
 
 export default DiscountPage;
+
