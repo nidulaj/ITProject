@@ -5,7 +5,7 @@ const { pool } = require("../db/dbConnect"); // ✅ destructure pool
 // GET /api/dashboard/summary
 router.get("/summary", async (req, res) => {
   try {
-    const ingredients = await pool.query("SELECT COUNT(*) AS count FROM ingredients");
+    const ingredients = await pool.query("SELECT COUNT(*) AS count FROM icode");
     const specialIngredients = await pool.query("SELECT COUNT(*) AS count FROM special_ingredient");
     const finalProducts = await pool.query("SELECT COUNT(*) AS count FROM final_products");
     const zones = await pool.query("SELECT COUNT(*) AS count FROM storage_zone");
