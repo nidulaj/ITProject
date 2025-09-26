@@ -160,210 +160,278 @@ export default function staffUserInfo() {
   };
 
   if (!staff) {
-    return <div className="p-6">Loading staff details...</div>;
+    return (
+      <div className="text-center p-6">
+        <p className="text-gray-600 dark:text-gray-300">Loading staff details...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Staff Details
-      </h2>
-
-      {/* Info Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Side */}
-        <div className="space-y-3 text-gray-700 dark:text-gray-300">
-          <p>
-            <span className="font-semibold">Staff Code:</span>{" "}
-            {staff.staff_code}
-          </p>
-          <p>
-            <span className="font-semibold">First Name:</span>{" "}
-            {staff.first_name}
-          </p>
-          <p>
-            <span className="font-semibold">Last Name:</span> {staff.last_name}
-          </p>
-          <p>
-            <span className="font-semibold">Email:</span> {staff.email}
-          </p>
-          <p>
-            <span className="font-semibold">Phone:</span> {staff.phone}
-          </p>
-          <p className="flex items-center gap-2">
-            <span className="font-semibold">Role:</span> {staff.role_name}
-            <button
-              onClick={() => setIsEditRoleOpen(true)}
-              disabled={!staff.is_active && staff.deactivated_until === null}
-              className={`ml-2 text-sm px-3 py-1 rounded-lg shadow transition text-white
-    ${
-      !staff.is_active && staff.deactivated_until === null
-        ? "bg-indigo-600 hover:bg-indigo-700 cursor-not-allowed"
-        : "bg-indigo-600 hover:bg-indigo-700"
-    }
-  `}
-            >
-              Change
-            </button>
-          </p>
-          <button
-            onClick={() => setIsEditOpen(true)}
-            className={`px-4 py-2 rounded-lg shadow transition mt-4 mr-4 text-white 
-    ${
-      !staff.is_active && staff.deactivated_until === null
-        ? "bg-blue-600 hover:bg-blue-700 cursor-not-allowed"
-        : "bg-blue-600 hover:bg-blue-700"
-    }
-  `}
-          >
-            ✏️ Edit Details
-          </button>
-
-          <button
-            onClick={handleRemoveUser}
-            disabled={!staff.is_active && staff.deactivated_until === null}
-            className={`px-4 py-2 rounded-lg text-white 
-    ${
-      !staff.is_active && staff.deactivated_until === null
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-red-600 hover:bg-red-700"
-    }
-  `}
-          >
-            🗑️ Remove User
-          </button>
-        </div>
-
-        {/* Right Side */}
-        <div className="space-y-4 text-gray-700 dark:text-gray-300">
-          <p>
-            <span className="font-semibold">Created At:</span>{" "}
-            {new Date(staff.created_at).toLocaleString()}
-          </p>
-          <p>
-            <span className="font-semibold">Updated At:</span>{" "}
-            {new Date(staff.updated_at).toLocaleString()}
-          </p>
-
-          {/* Active Control */}
-          <div className="flex items-center gap-3">
-            {accountStatus.isActive ? (
-              <select
-                value={accountStatus.deactivationPeriod || "default"}
-                onChange={(e) =>
-                  setAccountStatus((prev) => ({
-                    ...prev,
-                    deactivationPeriod: e.target.value,
-                  }))
-                }
-                className="border rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="default" disabled>
-                  Select
-                </option>
-                <option value="2 minutes">1 Hour</option>
-                <option value="12 hours">12 Hours</option>
-                <option value="24 hours">24 Hours</option>
-                <option value="7 days">7 Days</option>
-              </select>
-            ) : null}
-
-            {/* Active toggle */}
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={accountStatus.isActive ?? false}
-                onChange={handleChangeAccountStatus}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
-              <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                Active
-              </span>
-            </label>
-          </div>
-          {/* Show when disabled temporarily */}
-          {!accountStatus.isActive && staff.deactivated_until && (
-            <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-              Account will be active on:{" "}
-              {new Date(staff.deactivated_until).toLocaleString()}
-            </p>
-          )}
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6 max-w-6xl mx-auto">
+      <div className="flex items-center gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Staff Details
+        </h2>
+        {/* Status Badge */}
+        <div className="flex items-center gap-2">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+            staff.is_active 
+              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+          }`}>
+            {staff.is_active ? 'Active' : 'Inactive'}
+          </span>
         </div>
       </div>
 
-      {/* Extra Admin Controls */}
-      <div className="mt-6 space-y-3">
+      {/* Profile Photo and Basic Info Section */}
+      <div className="flex flex-col md:flex-row gap-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+        {/* Profile Photo */}
+        <div className="flex flex-col items-center space-y-3">
+          <div className="relative">
+            <img
+              src={staff.profile_photo || "/src/assets/default-user-icon.png"}
+              alt="Staff Profile"
+              className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 shadow-lg"
+            />
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {staff.first_name} {staff.last_name}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {staff.role_name}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+              Staff ID: {staff.staff_code}
+            </p>
+          </div>
+        </div>
+
+        {/* Basic Info Grid */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Side */}
+          <div className="space-y-4 text-gray-700 dark:text-gray-300">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Contact Information</span>
+              <div className="space-y-2 text-sm">
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">Email:</span> 
+                  {staff.email}
+                  {staff.is_email_verified ? (
+                    <span className="text-green-500 text-xs">✓ Verified</span>
+                  ) : (
+                    <span className="text-red-500 text-xs">✗ Not Verified</span>
+                  )}
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">Phone:</span> 
+                  {staff.phone}
+                  {staff.is_phone_verified ? (
+                    <span className="text-green-500 text-xs">✓ Verified</span>
+                  ) : (
+                    <span className="text-red-500 text-xs">✗ Not Verified</span>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Role Management</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm">{staff.role_name}</span>
+                <button
+                  onClick={() => setIsEditRoleOpen(true)}
+                  disabled={!staff.is_active && staff.deactivated_until === null}
+                  className={`text-sm px-3 py-1 rounded-lg shadow transition text-white
+                    ${
+                      !staff.is_active && staff.deactivated_until === null
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700"
+                    }
+                  `}
+                >
+                  Change Role
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="space-y-4 text-gray-700 dark:text-gray-300">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Account Timeline</span>
+              <div className="space-y-2 text-sm">
+                <p>
+                  <span className="font-medium">Created:</span>{" "}
+                  {new Date(staff.created_at).toLocaleDateString()}
+                </p>
+                <p>
+                  <span className="font-medium">Last Updated:</span>{" "}
+                  {new Date(staff.updated_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Account Status</span>
+              <div className="flex items-center gap-3">
+                {accountStatus.isActive ? (
+                  <select
+                    value={accountStatus.deactivationPeriod || "default"}
+                    onChange={(e) =>
+                      setAccountStatus((prev) => ({
+                        ...prev,
+                        deactivationPeriod: e.target.value,
+                      }))
+                    }
+                    className="border rounded-lg px-3 py-2 dark:bg-gray-600 dark:text-white text-sm"
+                  >
+                    <option value="default" disabled>
+                      Select deactivation period
+                    </option>
+                    <option value="2 minutes">1 Hour</option>
+                    <option value="12 hours">12 Hours</option>
+                    <option value="24 hours">24 Hours</option>
+                    <option value="7 days">7 Days</option>
+                  </select>
+                ) : null}
+
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={accountStatus.isActive ?? false}
+                    onChange={handleChangeAccountStatus}
+                  />
+                  <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
+                    Active
+                  </span>
+                </label>
+              </div>
+              {/* Show when disabled temporarily */}
+              {!accountStatus.isActive && staff.deactivated_until && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  Account will be active on:{" "}
+                  {new Date(staff.deactivated_until).toLocaleString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-wrap gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setIsEditOpen(true)}
+          disabled={!staff.is_active && staff.deactivated_until === null}
+          className={`px-4 py-2 rounded-lg shadow transition text-white 
+            ${
+              !staff.is_active && staff.deactivated_until === null
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }
+          `}
+        >
+          ✏️ Edit Details
+        </button>
+
+        <button
+          onClick={handleRemoveUser}
+          disabled={!staff.is_active && staff.deactivated_until === null}
+          className={`px-4 py-2 rounded-lg text-white shadow transition
+            ${
+              !staff.is_active && staff.deactivated_until === null
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            }
+          `}
+        >
+          🗑️ Remove User
+        </button>
+      </div>
+
+      {/* Security Settings */}
+      <div className="space-y-4">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Admin Controls
+          Security & Verification Settings
         </h3>
-        <div className="flex flex-wrap gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Email Verified */}
-          <div className="flex items-center gap-2">
-            <span>Email Verified</span>
-            <label className="flex items-center cursor-not-allowed">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={!!staff.is_email_verified}
-                disabled
-              />
-              <div
-                className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative 
-      after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white 
-      after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
-      after:transition-all peer-checked:after:translate-x-full"
-              ></div>
-            </label>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-900 dark:text-white">Email Verified</span>
+              <label className="flex items-center cursor-not-allowed">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={!!staff.is_email_verified}
+                  disabled
+                />
+                <div
+                  className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative 
+                    after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white 
+                    after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
+                    after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+            </div>
           </div>
 
           {/* Phone Verified */}
-          <div className="flex items-center gap-2">
-            <span>Phone Verified</span>
-            <label className="flex items-center cursor-not-allowed">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={!!staff.is_phone_verified}
-                disabled
-              />
-              <div
-                className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative 
-      after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white 
-      after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
-      after:transition-all peer-checked:after:translate-x-full"
-              ></div>
-            </label>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-900 dark:text-white">Phone Verified</span>
+              <label className="flex items-center cursor-not-allowed">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={!!staff.is_phone_verified}
+                  disabled
+                />
+                <div
+                  className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative 
+                    after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white 
+                    after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
+                    after:transition-all peer-checked:after:translate-x-full"
+                ></div>
+              </label>
+            </div>
           </div>
 
           {/* 2FA Enabled */}
-          <div className="flex items-center gap-2">
-            <span>2FA Enabled</span>
-            <label
-              className={`flex items-center ${
-                !staff.is_active && staff.deactivated_until === null
-                  ? "cursor-not-allowed"
-                  : "cursor-pointer"
-              }`}
-            >
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={staff.is_2FA_enabled || false}
-                onChange={handle2FAChange}
-                disabled={!staff.is_active && staff.deactivated_until === null} // 🔒 disable when removed
-              />
-              <div
-                className={`w-11 h-6 rounded-full relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-      after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
-      peer-checked:after:translate-x-full
-      ${
-        !staff.is_active && staff.deactivated_until === null
-          ? "bg-gray-300" // 🔒 disabled look
-          : "bg-gray-200 peer-checked:bg-green-500"
-      }`}
-              ></div>
-            </label>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-gray-900 dark:text-white">2FA Enabled</span>
+              <label
+                className={`flex items-center ${
+                  !staff.is_active && staff.deactivated_until === null
+                    ? "cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={staff.is_2FA_enabled || false}
+                  onChange={handle2FAChange}
+                  disabled={!staff.is_active && staff.deactivated_until === null}
+                />
+                <div
+                  className={`w-11 h-6 rounded-full relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                    after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
+                    peer-checked:after:translate-x-full
+                    ${
+                      !staff.is_active && staff.deactivated_until === null
+                        ? "bg-gray-300"
+                        : "bg-gray-200 peer-checked:bg-green-500"
+                    }`}
+                ></div>
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -386,9 +454,10 @@ export default function staffUserInfo() {
                 </label>
                 <select
                   className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                  onClick={(e) => setSelectedRoleId(e.target.value)}
+                  onChange={(e) => setSelectedRoleId(e.target.value)}
+                  value={selectedRoleId || ""}
                 >
-                  <option value={null}>Select</option>
+                  <option value="">Select a role</option>
                   {roles.map((role) => (
                     <option key={role.id} value={role.id}>
                       {role.name}

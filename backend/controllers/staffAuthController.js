@@ -17,6 +17,8 @@ const {
   removeUser,
   changePassword,
   getCurrentPassword,
+  updateProfilePhoto,
+  removeProfilePhoto
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -444,6 +446,42 @@ const change2FASetting = async (req, res) => {
   }
 };
 
+const uploadStaffProfilePhoto = async (req, res) => {
+  console.log("File received:");
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const staffId = req.user.id;
+    const photoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    const updatedUser = await updateProfilePhoto(staffId, photoUrl);
+
+    res.status(200).json({
+      message: "Profile photo updated successfully",
+      photoUrl: updatedUser.profile_photo,
+    });
+  } catch (error) {
+    console.error("Error uploading photo:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeStaffProfilePhoto = async (req, res) => {
+  try {
+    const staffId = req.user.id;
+    const removedPhoto = await removeProfilePhoto(staffId);
+    res.status(200).json({
+      message: "Profile photo removed successfully",
+      removedPhoto,
+    });
+  } catch (error) {
+    console.error("Error removing photo:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -462,5 +500,7 @@ module.exports = {
   removeStaffAccount,
   getUserInfo,
   updateUserDetails,
-  change2FASetting
+  change2FASetting,
+  uploadStaffProfilePhoto,
+  removeStaffProfilePhoto
 };

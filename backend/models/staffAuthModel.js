@@ -77,7 +77,7 @@ const getStaffByRole = async (roleId) => {
 };
 
 const getStaffById = async (id) => {
-  const query = `SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, s.is_email_verified, s.is_phone_verified, s."is_2FA_enabled", s.created_at, s.updated_at, s.deactivated_until, ur.role_name
+  const query = `SELECT s.staff_id, s.staff_code, s.first_name, s.last_name, s.email, s.phone, s.is_active, s.is_email_verified, s.is_phone_verified, s."is_2FA_enabled", s.created_at, s.updated_at, s.deactivated_until, s.profile_photo, ur.role_name
                FROM staff s JOIN user_roles ur ON s.role = ur.role_id
                WHERE s.staff_id = $1`;
   const values = [id];
@@ -153,6 +153,25 @@ const changePassword = async (staffId, newPassword) => {
   return result.rows[0];
 }
 
+const updateProfilePhoto = async (staffId, photoUrl) => {
+  const query = `UPDATE staff 
+     SET profile_photo = $1, updated_at = NOW()
+     WHERE staff_id = $2
+     RETURNING staff_id, first_name, last_name, email, phone, profile_photo`;
+  const values = [photoUrl, staffId];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+const removeProfilePhoto = async (staffId) => {
+  const query = `UPDATE staff 
+     SET profile_photo = NULL, updated_at = NOW()
+     WHERE staff_id = $1`;
+  const values = [staffId];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
 module.exports = {
   createStaff,
   staffLogin,
@@ -170,5 +189,7 @@ module.exports = {
   updateStaffDetails,
   removeUser,
   changePassword,
-  getCurrentPassword
+  getCurrentPassword,
+  updateProfilePhoto,
+  removeProfilePhoto
 };
