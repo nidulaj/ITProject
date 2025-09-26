@@ -3,7 +3,7 @@ import { authFetch } from "../utils/authFetchStaff";
 export default function UserProfile() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-
+  const [is2FAEnabled, setIs2FAEnabled] = useState(null);
   const [editForm, setEditForm] = useState({
     first_name: "",
     last_name: "",
@@ -51,22 +51,44 @@ export default function UserProfile() {
       alert("New passwords don't match!");
       return;
     }
-    // Simulate API call - replace with actual API call later
-    console.log("Changing password");
-    setPasswordForm({
-      current_password: "",
-      new_password: "",
-      confirm_password: "",
-    });
-    setIsChangePasswordOpen(false);
-    alert("Password changed successfully!");
+
+    try {
+      const res = authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/staff/auth/updatePassword`,
+        data: {
+          currentPassword: passwordForm.current_password,
+          newPassword: passwordForm.new_password,
+        },
+      });
+
+      console.log(res.data)
+
+      setIsChangePasswordOpen(false);
+      setPasswordForm({
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+    } catch (error) {
+      console.error("Error changing password:", error);
+    }
   };
 
-  const handle2FAToggle = async (e) => {
+  const handle2FAChange = async (e) => {
     const isEnabled = e.target.checked;
-    // Simulate API call - replace with actual API call later
-    console.log("Toggling 2FA:", isEnabled);
-    setUser((prev) => ({ ...prev, is_2FA_enabled: isEnabled }));
+    setIs2FAEnabled(isEnabled);
+
+    try {
+      const res = await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/staff/auth/change2FA`,
+        data: { is2FAEnabled: isEnabled },
+      });
+      setUser((prev) => ({ ...prev, is_2FA_enabled: isEnabled }));
+    } catch (error) {
+      console.error("Error changing 2FA setting:", error);
+    }
   };
 
   const handlePhotoUpload = (e) => {
@@ -231,11 +253,11 @@ export default function UserProfile() {
           </span>
           <label className="flex items-center cursor-pointer">
             <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={user.is_2FA_enabled}
-              onChange={handle2FAToggle}
-            />
+                type="checkbox"
+                className="sr-only peer"
+                checked={user.is_2FA_enabled || false}
+                onChange={handle2FAChange}
+              />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
           </label>
         </div>

@@ -133,6 +133,26 @@ const removeUser = async (staffId) => {
   return result.rows[0];
 }
 
+const getCurrentPassword = async (staffId) => {
+  const query = `SELECT password FROM staff WHERE staff_id = $1`;
+  const values = [staffId];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+}
+
+const changePassword = async (staffId, newPassword) => {
+  const query = `UPDATE staff 
+                 SET password = $1
+                 WHERE staff_id = $2`;
+  const values = [newPassword, staffId];
+  await pool.query(query, values);
+  const userInfoQuery = `select * from staff where staff_id = $1`;
+  const resultValues = [staffId];
+  const result = await pool.query(userInfoQuery, resultValues);
+  console.log(result.rows[0]);
+  return result.rows[0];
+}
+
 module.exports = {
   createStaff,
   staffLogin,
@@ -148,5 +168,7 @@ module.exports = {
   changeAccountStatus,
   change2FA,
   updateStaffDetails,
-  removeUser
+  removeUser,
+  changePassword,
+  getCurrentPassword
 };
