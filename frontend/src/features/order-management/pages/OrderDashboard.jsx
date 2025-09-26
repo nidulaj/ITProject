@@ -7,6 +7,8 @@ import OrderStats from '../components/OrderStats';
 import OrderTable from '../components/OrderTable';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import UserProfile from '../../user-management/components/UserProfile';
 
 const OrderDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -14,6 +16,7 @@ const OrderDashboard = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const [stats, setStats] = useState({
     totalOrders: 0,
     packingOrders: 0,
@@ -25,11 +28,24 @@ const OrderDashboard = () => {
 
   useEffect(() => {
     fetchOrders();
+    fetchUserInfo();
   }, []);
 
   useEffect(() => {
     calculateStats();
   }, [orders]);
+
+  const fetchUserInfo = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/staff/auth/userInfo",
+      });
+      setUserInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
 
   const calculateStats = () => {
     const totalOrders = orders.length;
@@ -220,11 +236,15 @@ const OrderDashboard = () => {
             <Sidebar />
 
             {/* Main content */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
-              {/* Header for main content */}
-              <div className="mb-8 text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4 drop-shadow-lg">Order Management Dashboard</h1>
-              </div>
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
+              {/* Header */}
+              <Header userInfo={userInfo} />
+              
+              <div className="p-6">
+                {/* Header for main content */}
+                <div className="mb-8 text-center">
+                  
+                </div>
 
               {/* Order Statistics */}
               <OrderStats stats={stats} />
@@ -247,15 +267,32 @@ const OrderDashboard = () => {
                 />
               </div>
 
-              {/* Order Details Modal */}
-              <OrderDetailsModal 
-                showOrderDetails={showOrderDetails} 
-                selectedOrder={selectedOrder} 
-                orderItems={orderItems} 
-                handleCloseOrderDetails={handleCloseOrderDetails} 
-                formatDate={formatDate} 
-                formatPrice={formatPrice} 
-              />
+                {/* Order Details Modal */}
+                <OrderDetailsModal 
+                  showOrderDetails={showOrderDetails} 
+                  selectedOrder={selectedOrder} 
+                  orderItems={orderItems} 
+                  handleCloseOrderDetails={handleCloseOrderDetails} 
+                  formatDate={formatDate} 
+                  formatPrice={formatPrice} 
+                />
+              </div>
+            </div>
+          </div>
+        } />
+        <Route path="/profile" element={
+          <div className="flex min-h-screen">
+            {/* Left sidebar navigation */}
+            <Sidebar />
+
+            {/* Main content */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
+              {/* Header */}
+              <Header userInfo={userInfo} />
+              
+              <div className="p-6">
+                <UserProfile userInfo={userInfo} />
+              </div>
             </div>
           </div>
         } />
