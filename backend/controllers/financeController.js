@@ -28,7 +28,7 @@ const getRecentActivity = async (req, res) => {
         'Discount' AS type, 
         valid_from AS timestamp 
       FROM "Discount"
-      ORDER BY valid_from DESC
+      ORDER BY discount_id DESC
       LIMIT 3
     `;
 
@@ -40,7 +40,7 @@ const getRecentActivity = async (req, res) => {
         payment_date AS timestamp, 
         payment_status 
       FROM payments
-      ORDER BY payment_date DESC
+      ORDER BY payment_id DESC
       LIMIT 3
     `;
 
