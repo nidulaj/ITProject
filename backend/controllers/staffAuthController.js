@@ -14,7 +14,9 @@ const {
   changeAccountStatus,
   change2FA,
   updateStaffDetails,
-  removeUser
+  removeUser,
+  changePassword,
+  getCurrentPassword,
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -25,10 +27,10 @@ const {
   send2FACode,
   sendVerificationLink,
   sendResetPasswordLink,
-  sendStaffRegistrationInfo
+  sendStaffRegistrationInfo,
 } = require("../utils/emailService");
 
-const {generatePassword} = require("../utils/passwordGenerator");
+const { generatePassword } = require("../utils/passwordGenerator");
 
 const { createLog } = require("../models/userManagementAuditLogModel");
 
@@ -49,11 +51,9 @@ const registerStaff = async (req, res) => {
       password,
       role
     );
-    await sendStaffRegistrationInfo(email,password);
+    await sendStaffRegistrationInfo(email, password);
     await createLog(staffUser.staff_code, "New User Registered", req.ip);
-    res
-      .status(201)
-      .json(staffUser);
+    res.status(201).json(staffUser);
   } catch (error) {
     console.error("Error creating staff:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -72,7 +72,11 @@ const loginStaff = async (req, res) => {
     }
 
     if (!staffUser.is_active) {
-      await createLog(staffUser.staff_code, "Disabled Account Login Attempt", req.ip);
+      await createLog(
+        staffUser.staff_code,
+        "Disabled Account Login Attempt",
+        req.ip
+      );
       return res.status(403).json({ message: "Account is disabled" });
     }
 
@@ -90,14 +94,12 @@ const loginStaff = async (req, res) => {
         maxAge: 15 * 60 * 1000,
       });
 
-      return res
-        .status(200)
-        .json({
-          message: "2FA code sent",
-          is_2FA_enabled: true,
-          role: staffUser.role,
-          type: "staff",
-        });
+      return res.status(200).json({
+        message: "2FA code sent",
+        is_2FA_enabled: true,
+        role: staffUser.role,
+        type: "staff",
+      });
     }
 
     const accessToken = generateAccessTokenStaff(staffUser);
@@ -174,7 +176,6 @@ const refreshToken = async (req, res) => {
   }
 };
 
-
 const logout = async (req, res) => {
   const staffId = req.user.id;
   const staffUser = await findUserById(staffId);
@@ -221,14 +222,12 @@ const verify2FACode = async (req, res) => {
     res.clearCookie("tempToken");
 
     await createLog(staffUser.staff_code, "Logged In", req.ip);
-    res
-      .status(200)
-      .json({
-        message: "Login successful",
-        accessToken,
-        refreshToken,
-        role: user.role,
-      });
+    res.status(200).json({
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+      role: user.role,
+    });
   } catch (error) {
     console.error("Error verifying code:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -305,11 +304,15 @@ const changeUserRole = async (req, res) => {
 
 const changeAccountActivation = async (req, res) => {
   const { staffId } = req.params;
-  const { isActive, deactivationPeriod } = req.body; 
+  const { isActive, deactivationPeriod } = req.body;
   console.log(deactivationPeriod);
 
   try {
-    const updatedStaff = await changeAccountStatus(staffId, isActive, deactivationPeriod);
+    const updatedStaff = await changeAccountStatus(
+      staffId,
+      isActive,
+      deactivationPeriod
+    );
     res.status(200).json(updatedStaff);
   } catch (error) {
     console.error("Error changing account activation:", error);
@@ -317,7 +320,7 @@ const changeAccountActivation = async (req, res) => {
   }
 };
 
-const change2FASetting = async (req, res) => {
+const change2FASettingByAdmin = async (req, res) => {
   const { staffId } = req.params;
   const { is2FAEnabled } = req.body;
 
@@ -335,7 +338,11 @@ const changeStaffDetailsByAdmin = async (req, res) => {
   const { first_name, last_name, phone } = req.body;
 
   try {
-    const updatedStaff = await updateStaffDetails(staffId, { first_name, last_name, phone });
+    const updatedStaff = await updateStaffDetails(staffId, {
+      first_name,
+      last_name,
+      phone,
+    });
     res.status(200).json(updatedStaff);
   } catch (error) {
     console.error("Error updating staff details:", error);
@@ -348,7 +355,9 @@ const removeStaffAccount = async (req, res) => {
 
   try {
     const removedUser = await removeUser(staffId);
-    res.status(200).json({ message: "Staff member removed successfully", removedUser });
+    res
+      .status(200)
+      .json({ message: "Staff member removed successfully", removedUser });
   } catch (error) {
     console.error("Error removing staff member:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -357,11 +366,10 @@ const removeStaffAccount = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
   const staffId = req.user.id;
-  console.log(req.user.id)
+  console.log(req.user.id);
 
   try {
     const userInfo = await getStaffById(staffId);
-    console.log(userInfo);
     res.status(200).json(userInfo);
   } catch (error) {
     console.error("Error fetching user info:", error);
@@ -374,11 +382,65 @@ const updateUserDetails = async (req, res) => {
   const { first_name, last_name, phone } = req.body;
 
   try {
-    const updatedUser = await updateStaffDetails(staffId, { first_name, last_name, phone });
+    const updatedUser = await updateStaffDetails(staffId, {
+      first_name,
+      last_name,
+      phone,
+    });
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error("Error updating user details:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updatePassword = async (req, res) => {
+  const staffId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const currentPass = await getCurrentPassword(staffId);
+    if (currentPass.password !== currentPassword) {
+      console.log("Current password is incorrect");
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    const updatedPasswordUser = await changePassword(staffId, newPassword);
+    const newAccessToken = generateAccessTokenStaff(updatedPasswordUser);
+    const newRefreshToken = generateRefreshTokenStaff(updatedPasswordUser);
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: false, // change to true in production with HTTPS
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.status(200).json(updatedPasswordUser);
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const change2FASetting = async (req, res) => {
+  const staffId = req.user.id;
+  const { is2FAEnabled } = req.body;
+
+  try {
+    const updatedStaff = await change2FA(staffId, is2FAEnabled);
+    res.status(200).json(updatedStaff);
+  } catch (error) {
+    console.error("Error changing 2FA setting:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -387,6 +449,7 @@ module.exports = {
   loginStaff,
   refreshToken,
   logout,
+  updatePassword,
   verify2FACode,
   resend2FACode,
   getStaffList,
@@ -394,9 +457,10 @@ module.exports = {
   getStaffDetailsById,
   changeUserRole,
   changeAccountActivation,
-  change2FASetting,
+  change2FASettingByAdmin,
   changeStaffDetailsByAdmin,
   removeStaffAccount,
   getUserInfo,
   updateUserDetails,
+  change2FASetting
 };
