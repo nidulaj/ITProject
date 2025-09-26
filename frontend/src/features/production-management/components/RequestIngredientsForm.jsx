@@ -1,9 +1,9 @@
 // src/components/RequestIngredientsForm.jsx
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import RequestIngredientsUpdateForm from "./RequestIngredientsUpdateForm";
 import Modal from "./Modal";
 import { Factory, Edit, Trash2 } from "lucide-react";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 /**
  * Props (all optional for backward-compat):
@@ -37,7 +37,11 @@ function RequestIngredientsForm({ recipeNo = "", onSuccess, onCancel, hideList }
 
   const fetchRequests = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/req_ingredients");
+      //const res = await axios.get("http://localhost:5000/api/req_ingredients");
+      const res = await authFetch({
+                    method:"get",
+                    url:"http://localhost:5000/api/req_ingredients",
+                  });
       setRequests(res.data.data || []);
     } catch (err) {
       console.error("❌ Error fetching requests:", err);
@@ -62,10 +66,16 @@ function RequestIngredientsForm({ recipeNo = "", onSuccess, onCancel, hideList }
     });
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/req_ingredients",
-        payload
-      );
+      // const res = await axios.post(
+      //   "http://localhost:5000/api/req_ingredients",
+      //   payload
+      // );
+
+      const res = await authFetch({
+                    method:"post",
+                    url:"http://localhost:5000/api/req_ingredients",
+                    data:payload,
+                  });
 
       const created = res?.data?.data;
       if (created) {
@@ -95,7 +105,11 @@ function RequestIngredientsForm({ recipeNo = "", onSuccess, onCancel, hideList }
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/req_ingredients/${req_id}`);
+      const res = await authFetch({
+      method: "delete",
+      url: `http://localhost:5000/api/req_ingredients/${req_id}`,
+    });
+
       setRequests((prev) => prev.filter((r) => r.req_id !== req_id));
       alert("Request deleted!");
     } catch (err) {
@@ -119,10 +133,16 @@ function RequestIngredientsForm({ recipeNo = "", onSuccess, onCancel, hideList }
             : updatedDraft.quantity,
       };
 
-      const res = await axios.put(
-        `http://localhost:5000/api/req_ingredients/${updatedDraft.req_id}`,
-        body
-      );
+      // const res = await axios.put(
+      //   `http://localhost:5000/api/req_ingredients/${updatedDraft.req_id}`,
+      //   body
+      // );
+
+      const res = await authFetch({
+      method: "put",
+      url: `http://localhost:5000/api/req_ingredients/${updatedDraft.req_id}`,
+      data: body,
+    });
 
       const updated = res?.data?.data || { ...updatedDraft };
       setRequests((prev) =>
@@ -145,9 +165,14 @@ function RequestIngredientsForm({ recipeNo = "", onSuccess, onCancel, hideList }
     }
 
     try {
-      const res = await axios.post(
-        `http://localhost:5000/api/productions/start-from-request/${reqRow.req_id}`
-      );
+      // const res = await axios.post(
+      //   `http://localhost:5000/api/productions/start-from-request/${reqRow.req_id}`
+      // );
+      const res = await authFetch({
+      method: "post",
+      url: `http://localhost:5000/api/productions/start-from-request/${reqRow.req_id}`,
+    });
+      
       const started = res?.data?.production;
       alert(
         `✅ Production started${
