@@ -1,10 +1,10 @@
 // src/components/RecipeForm.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import RecipeUpdateForm from "./RecipeUpdateForm";
 import RequestIngredientsForm from "./RequestIngredientsForm";
 import Modal from "./Modal";
 import { Package, Edit, Trash2 } from "lucide-react";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 function RecipeForm() {
   const initialForm = {
@@ -44,7 +44,11 @@ function RecipeForm() {
 
   const fetchRecipes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/recipe");
+      //const res = await axios.get("http://localhost:5000/api/recipe");
+      const res = await authFetch({
+        method:"get",
+        url:"http://localhost:5000/api/recipe",
+      });
       setRecipes(res.data.recipe || []);
     } catch (err) {
       console.error("Error fetching recipes:", err);
@@ -88,7 +92,13 @@ function RecipeForm() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/api/recipe", payload);
+      //const res = await axios.post("http://localhost:5000/api/recipe", payload);
+       const res = await authFetch({
+        method:"post",
+        url:"http://localhost:5000/api/recipe",
+        data:payload,
+      });
+
       if (res.data.recipe) {
         setRecipes([...recipes, res.data.recipe]);
         alert("✅ Recipe added successfully!");
@@ -115,7 +125,11 @@ function RecipeForm() {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/recipe/${id}`);
+      // await axios.delete(`http://localhost:5000/api/recipe/${id}`);
+      await authFetch({
+        method: "delete",
+        url: `http://localhost:5000/api/recipe/${id}`,
+      });
       setRecipes(recipes.filter((r) => r.recipe_id !== id));
     } catch (err) {
       console.error(err);
@@ -222,9 +236,9 @@ function RecipeForm() {
                 <th className="p-2">Top_1</th>
                 <th className="p-2">Top_2</th>
                 <th className="p-2">Top_3</th>
-                <th className="p-2">Bottom1</th>
-                <th className="p-2">Bottom2</th>
-                <th className="p-2">Bottom3</th>
+                <th className="p-2">Bot_1</th>
+                <th className="p-2">Bot_2</th>
+                <th className="p-2">Bot_3</th>
                 <th className="p-2 text-center">Actions</th>
               </tr>
             </thead>

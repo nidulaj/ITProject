@@ -3,6 +3,7 @@ import axios from "axios";
 import CustomOrderForm from "../components/CustomOrderForm";
 import CustomOrderTable from "../components/CustomOrderTable";
 import { ArrowLeft } from "lucide-react";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const API = import.meta?.env?.VITE_API_URL || "http://localhost:5000";
 
@@ -32,17 +33,20 @@ export default function CustomizedOrderPage({ onBack }) {
   const [ok, setOk] = useState("");
 
   const load = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const { data } = await axios.get(`${API}/api/customized_orders`);
-      setRows(Array.isArray(data?.data) ? data.data : []);
-    } catch (e) {
-      setError(e?.response?.data?.error || e.message || "Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    setError("");
+    const res = await authFetch({
+      method: "get", // Method set to GET
+      url: `${API}/api/customized_orders`,
+    });
+    setRows(Array.isArray(res.data?.data) ? res.data.data : []);
+  } catch (e) {
+    setError(e?.response?.data?.error || e.message || "Failed to load orders");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => { load(); }, []);
 
@@ -53,12 +57,24 @@ export default function CustomizedOrderPage({ onBack }) {
 
       if (editingId) {
         const { data } = await axios.put(`${API}/api/customized_orders/${editingId}`, form);
+        // const res = await authFetch({
+        //   method: "post", // Change to POST
+        //   url: `http://localhost:5000/api/customized_orders/${editingId}`, // Same URL but using POST
+        //   data: form, // Send the same form data
+        // });
+
         if (data?.success) {
           setRows((r) => r.map((x) => (x.id === editingId ? data.data : x)));
           setOk("Order updated.");
         } else setError(data?.error || "Failed to update");
       } else {
         const { data } = await axios.post(`${API}/api/customized_orders`, form);
+        // const res = await authFetch({
+        //   method: "post", // Keeping the POST method
+        //   url: `${API}/api/customized_orders`, // Same URL
+        //   data: form, // Send the same form data
+        // });
+
         if (data?.success) {
           setRows((r) => [data.data, ...r]);
           setOk("Order created.");
@@ -92,7 +108,13 @@ export default function CustomizedOrderPage({ onBack }) {
   const onDelete = async (row) => {
     if (!confirm("Delete this order?")) return;
     try {
-      await axios.delete(`${API}/api/customized_orders/${row.id}`);
+     await axios.delete(`${API}/api/customized_orders/${row.id}`);
+    //  await authFetch({
+    //     method: "delete", // Using DELETE method
+    //     url: `${API}/api/customized_orders/${row.id}`, // Same URL
+    //   });
+
+
       setRows((r) => r.filter((x) => x.id !== row.id));
     } catch (e) {
       alert(e?.response?.data?.error || e.message);
