@@ -9,6 +9,7 @@ import DashboardCard from "../components/DashboardCard";
 import StatCard from "../components/StatCard";
 import { Clock, CheckCircle, Percent, Tag, CreditCard } from "lucide-react";
 import axios from "axios";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const FinanceDashboard = () => {
   const [stats, setStats] = useState({
@@ -17,17 +18,35 @@ const FinanceDashboard = () => {
     total_discounts: 0,
   });
 
+  const [recentActivity, setRecentActivity] = useState([]);
+
   const fetchStats = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/finance/stats");
+      const res = await authFetch({
+        method: 'get',
+        url: "http://localhost:5000/api/finance/stats"
+      });
       setStats(res.data);
     } catch (err) {
       console.error("Error fetching stats:", err);
     }
   };
 
+  const fetchRecentActivity = async () => {
+  try {
+    const res = await authFetch({
+      method: 'get',
+      url: "http://localhost:5000/api/finance/recent-activity"
+    });
+    setRecentActivity(res.data);
+  } catch (err) {
+    console.error("Error fetching activity:", err);
+  }
+};
+
   useEffect(() => {
     fetchStats();
+    fetchRecentActivity();
   }, []);
 
   return (
@@ -37,7 +56,6 @@ const FinanceDashboard = () => {
       </h1>
 
       <Routes>
-        {/* Dashboard Home */}
         <Route
           path="/"
           element={
@@ -76,13 +94,39 @@ const FinanceDashboard = () => {
                   route="payments"
                   icon={<CreditCard />}
                 />
+
+
+
               </div>
+
+
+            <div className="mt-10 bg-gradient-to-br from-white to-blue-50 p-6 rounded-2xl shadow-lg">
+              <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center gap-2">
+                📋 Recent Activity
+              </h2>
+
+              {recentActivity.length > 0 ? (
+                <ul className="space-y-4">
+                  {recentActivity.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-start gap-3 bg-white p-4 rounded-xl shadow hover:shadow-md transition duration-200 border-l-4 border-blue-500"
+                    >
+                      <div className="text-blue-500 text-xl">🔹</div>
+                      <p className="text-gray-800 font-medium">{item.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No recent activity yet.</p>
+              )}
+            </div>
             </>
           }
         />
 
-        {/* Routes with onUpdateStats passed down */}
-        <Route path="/discounts" element={<DiscountPage onUpdateStats={fetchStats} />} />
+        
+        <Route path="/discounts" element={<DiscountPage onUpdateStats={fetchStats} onUpdateRecentActivity={fetchRecentActivity}/>} />
         <Route path="/payments" element={<PaymentPage onUpdateStats={fetchStats} />} />
         <Route path="/payment-form" element={<PaymentFormPage onUpdateStats={fetchStats} />} />
       </Routes>

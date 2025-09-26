@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { getFinanceStats } = require("../controllers/financeController");
+const { getFinanceStats, getRecentActivity  } = require("../controllers/financeController");
+const { staffAuthMiddleware } = require("../middlewares/staffAuthMiddleware");
 
-router.get("/stats", getFinanceStats);
+router.get("/stats", staffAuthMiddleware, getFinanceStats);
+router.get("/recent-activity", getRecentActivity);
 
 module.exports = router;
