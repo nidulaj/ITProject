@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ handleNavigate }) => {
+const Sidebar = () => {
+  const navigate = useNavigate();
   return (
     <div className="w-64 bg-white shadow-2xl fixed h-full transform perspective-1000">
       <div className="flex flex-col h-full">
@@ -10,7 +12,7 @@ const Sidebar = ({ handleNavigate }) => {
 
         <nav className="flex-1 px-2 py-4 space-y-1">
           <button 
-            onClick={() => handleNavigate('products')}
+            onClick={() => navigate('/dashboard/products')}
             className="w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:text-blue-800 hover:shadow-md"
           >
             <div className="text-xl">

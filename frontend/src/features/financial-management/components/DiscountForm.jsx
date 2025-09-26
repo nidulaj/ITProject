@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
 
+
 const DiscountForm = ({ discount, onSuccess }) => {
   const [formData, setFormData] = useState({
     discount_name: "",
@@ -12,7 +13,8 @@ const DiscountForm = ({ discount, onSuccess }) => {
     valid_to: "",
   });
 
-  
+  const [errors, setErrors] = useState({});
+
   const toInputDate = (dateVal) => {
     if (!dateVal) return "";
     const s = String(dateVal);
@@ -50,7 +52,9 @@ const DiscountForm = ({ discount, onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
   };
 
   const preparePayload = (fd) => {
@@ -67,6 +71,58 @@ const DiscountForm = ({ discount, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const num = Number(formData.value);
+    let hasError = false;
+
+    // Validation for value (already partially included)
+  if (formData.discount_type === "percentage" && (num < 1 || num > 100)) {
+    setErrors((prev) => ({
+      ...prev,
+      value: "Percentage must be between 1 and 100",
+    }));
+    hasError = true;
+  } else if (formData.discount_type === "fixed" && num <= 0) {
+    setErrors((prev) => ({
+      ...prev,
+      value: "Fixed amount must be a positive number",
+    }));
+    hasError = true;
+  } else {
+    setErrors((prev) => ({ ...prev, value: null }));
+  }
+
+  // Date validations
+  const today = new Date().setHours(0, 0, 0, 0); // Today at midnight
+  const validFrom = new Date(formData.valid_from).setHours(0, 0, 0, 0);
+  const validTo = new Date(formData.valid_to).setHours(0, 0, 0, 0);
+
+  if (!formData.valid_from || validFrom < today) {
+    setErrors((prev) => ({
+      ...prev,
+      valid_from: "Valid From must be today or a future date",
+    }));
+    hasError = true;
+  } else {
+    setErrors((prev) => ({ ...prev, valid_from: null }));
+  }
+
+  if (!formData.valid_to || validTo <= validFrom) {
+    setErrors((prev) => ({
+      ...prev,
+      valid_to: "Valid To must be after Valid From",
+    }));
+    hasError = true;
+  } else {
+    setErrors((prev) => ({ ...prev, valid_to: null }));
+  }
+
+  // Prevent submission if any error exists
+  if (hasError) {
+    alert("Please fix errors in input values before submitting.");
+    return;
+  }
+    
     try {
       const payload = preparePayload(formData);
 
@@ -141,9 +197,22 @@ const DiscountForm = ({ discount, onSuccess }) => {
           name="value"
           value={formData.value}
           onChange={handleChange}
+          onInput={(e) => {
+          const val = Number(e.target.value);
+          if (formData.discount_type === "percentage" && val > 100) {
+            e.target.value = 100;
+          } else if (val < 1) {
+            e.target.value = 1;
+          }
+        }}
+          min={formData.discount_type === "fixed" ? 1 : 1}
+          max={formData.discount_type === "percentage" ? 100 : undefined}
           required
-          className="border p-2 rounded"
+          className={`border p-2 rounded ${errors.value ? "border-red-500" : ""}`}
         />
+        {errors.value && (
+          <span className="text-sm text-red-500 mt-1">{errors.value}</span>
+        )}
       </label>
 
       <label className="flex flex-col">
@@ -169,8 +238,13 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.valid_from}
           onChange={handleChange}
           required
+          min={new Date().toISOString().split("T")[0]} // Today’s date
           className="border p-2 rounded"
         />
+        {errors.valid_from && (
+          <span className="text-sm text-red-500 mt-1">{errors.valid_from}</span>
+        )}
+
       </label>
 
       <label className="flex flex-col">
@@ -181,8 +255,13 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.valid_to}
           onChange={handleChange}
           required
+          min={formData.valid_from || new Date().toISOString().split("T")[0]}
           className="border p-2 rounded"
         />
+        {errors.valid_to && (
+          <span className="text-sm text-red-500 mt-1">{errors.valid_to}</span>
+        )}
+
       </label>
 
       <div className="flex justify-end gap-3 mt-4">

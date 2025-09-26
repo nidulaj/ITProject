@@ -20,6 +20,7 @@ const ProductCatalog = lazy(() => import ("./features/order-management/pages/Pro
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
 
+const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage"))
 
 
 const DashboardLayout = ({ children }) => <div>{children}</div>
@@ -36,6 +37,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify2FA" element={<Verify2FA />} />
               <Route path="/verifyEmail" element={<VerifyEmail />} />
+
+              <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} />
               
 
               {/* User Dashboards */}
@@ -84,7 +87,7 @@ function App() {
               />
 
               <Route
-                path="/dashboard/order"
+                path="/dashboard/order/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
@@ -95,7 +98,7 @@ function App() {
               />
 
               <Route
-                path="/dashboard/products"
+                path="/dashboard/products/*"
                 element={
                   <ProtectedRoute>
                     <NotificationProvider>

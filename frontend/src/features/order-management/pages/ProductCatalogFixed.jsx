@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import ProductForm from '../components/ProductForm';
@@ -9,6 +10,7 @@ const ProductCatalogFixed = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const { showSuccess, showError } = useNotification();
+  const navigate = useNavigate();
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
 
@@ -121,53 +123,58 @@ const ProductCatalogFixed = () => {
 
   const handleNavigation = (view) => {
     if (view === 'orders') {
-      window.location.href = '/dashboard/order';
+      navigate('/dashboard/order');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Left sidebar navigation */}
-      <div className="w-64 bg-white shadow-2xl fixed h-full">
-        <div className="flex flex-col h-full">
-          <div className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-blue-600">
-            <h1 className="text-xl font-bold text-white">Product Management</h1>
+    <Routes>
+      <Route path="/" element={
+        <div className="min-h-screen bg-gray-50">
+          {/* Left sidebar navigation */}
+          <div className="w-64 bg-white shadow-2xl fixed h-full">
+            <div className="flex flex-col h-full">
+              <div className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-blue-600">
+                <h1 className="text-xl font-bold text-white">Product Management</h1>
+              </div>
+
+              <nav className="flex-1 px-2 py-4 space-y-1">
+                <button 
+                  onClick={() => handleNavigation('orders')}
+                  className="w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                >
+                  <div className="text-xl">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span className="font-medium">Orders Dashboard</span>
+                </button>
+              </nav>
+            </div>
           </div>
 
-          <nav className="flex-1 px-2 py-4 space-y-1">
-            <button 
-              onClick={() => handleNavigation('orders')}
-              className="w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-            >
-              <div className="text-xl">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <span className="font-medium">Orders Dashboard</span>
-            </button>
-          </nav>
+          {/* Main content */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
+            <div className="catalog-content flex gap-6">
+              <ProductForm
+                editingProduct={editingProduct}
+                onAddProduct={handleAddProduct}
+                onUpdateProduct={handleUpdateProduct}
+                onCancelEdit={handleCancelEdit}
+              />
+              
+              <ProductGrid
+                products={products}
+                onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Main content */}
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
-        <div className="catalog-content flex gap-6">
-          <ProductForm
-            editingProduct={editingProduct}
-            onAddProduct={handleAddProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onCancelEdit={handleCancelEdit}
-          />
-          
-          <ProductGrid
-            products={products}
-            onEditProduct={handleEditProduct}
-            onDeleteProduct={handleDeleteProduct}
-          />
-        </div>
-      </div>
-    </div>
+      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 

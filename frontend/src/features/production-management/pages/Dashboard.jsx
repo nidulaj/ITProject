@@ -61,7 +61,11 @@ const ProductionDashboard = () => {
     try {
       setProdLoading(true);
       setProdError('');
-      const res = await axios.get(`${API}/api/productions`);
+      //const res = await axios.get(`${API}/api/productions`);
+      const res = await authFetch({
+        method: "get", // Using GET method
+        url: `${API}/api/productions`, // Same URL
+      });
       setProductions(res?.data?.data || []);
     } catch (err) {
       console.error('Failed to load productions', err);
@@ -98,7 +102,11 @@ const ProductionDashboard = () => {
     try {
       setReturnsLoading(true);
       setReturnsError('');
-      const res = await axios.get(`${API}/api/returns`);
+      //const res = await axios.get(`${API}/api/returns`);
+      const res = await authFetch({
+        method: "get", // Using GET method
+        url: `${API}/api/returns`, // Same URL
+      });
       const rows = res?.data?.data || [];
 
       const mapped = rows.map((r) => ({
@@ -135,7 +143,13 @@ const ProductionDashboard = () => {
 
   const pmSetReturnStatus = async (id, status) => {
     try {
-      await axios.patch(`${API}/api/returns/${id}/status`, { status });
+      //await axios.patch(`${API}/api/returns/${id}/status`, { status });
+      await authFetch({
+        method: "patch", // Using PATCH method
+        url: `${API}/api/returns/${id}/status`, // Same URL with dynamic id
+        data: { status }, // Send status as the request body
+      });
+
       setReturnsData((prev) =>
         prev.map((r) => (r['Return ID'] === id ? { ...r, Status: status } : r))
       );
@@ -149,7 +163,12 @@ const ProductionDashboard = () => {
     try {
       setPendingCOLoading(true);
       setPendingCOError('');
-      const res = await axios.get(`${API}/api/customized_orders`);
+      //const res = await axios.get(`${API}/api/customized_orders`);
+      const res = await authFetch({
+        method: "get", // Using GET method
+        url: `${API}/api/customized_orders`, // Same URL
+      });
+
       const all = res?.data?.data || [];
       const pending = all.filter((o) => (o.status || '').toLowerCase() === 'pending');
       setPendingCO(pending);
@@ -164,7 +183,13 @@ const ProductionDashboard = () => {
 
   const pmSetCustomOrderStatus = async (id, status) => {
     try {
-      await axios.patch(`${API}/api/customized_orders/${id}/status`, { status });
+      //await axios.patch(`${API}/api/customized_orders/${id}/status`, { status });
+      await authFetch({
+        method: "patch", // Using PATCH method
+        url: `${API}/api/customized_orders/${id}/status`, // Same URL with dynamic id
+        data: { status }, // Send the status as the request body
+      });
+
       // remove from pending list immediately (accepted/rejected)
       setPendingCO((list) => list.filter((x) => x.id !== id));
     } catch (e) {
