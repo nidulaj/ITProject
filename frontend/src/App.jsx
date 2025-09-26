@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { AuthProvider } from "./components/AuthContext"
 import { NotificationProvider } from "./contexts/NotificationContext"
 import ProtectedRoute from "./components/ProtectedRoute"
+import CustomerDiscountPage from "./features/financial-management/pages/CustomerDiscountPage";
 
 
 const Register = lazy(() => import("./features/user-management/pages/Register"))
@@ -130,6 +131,8 @@ function App() {
 
               {/* 404 fallback */}
               <Route path="*" element={<Navigate to="/login" replace />} />
+              {/* Customer-facing discount view (independent route) */}
+        <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
             </Routes>
           </Suspense>
         </Router>

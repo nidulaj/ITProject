@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const paymentController = require("../controllers/paymentController");
 const upload = require("../middlewares/uploadMiddleware");
-
+const { staffAuthMiddleware } = require("../middlewares/staffAuthMiddleware");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,11 +15,11 @@ const storage = multer.diskStorage({
 });
 
 
-router.post("/", upload.single("payment_proof"), paymentController.addPayment);
+router.post("/", staffAuthMiddleware, upload.single("payment_proof"), paymentController.addPayment);
 
-router.get("/", paymentController.getPayments);
+router.get("/", staffAuthMiddleware, paymentController.getPayments);
 
-router.put("/status/:id", paymentController.updatePaymentStatus);
+router.put("/status/:id", staffAuthMiddleware, paymentController.updatePaymentStatus);
 
 
 
