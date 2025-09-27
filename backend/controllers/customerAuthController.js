@@ -22,7 +22,8 @@ const {
   change2FA,
   updateProfilePhoto,
   removeProfilePhoto,
-  removeUser
+  removeUser,
+  changeAccountStatus
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -38,6 +39,7 @@ const {
 } = require("../utils/emailService");
 
 const {createLog} = require("../models/userManagementAuditLogModel");
+const { ref } = require("process");
 
 const registerCustomer = async (req, res) => {
   const { firstName, lastName, email, phone, address, password } = req.body;
@@ -74,7 +76,8 @@ const loginCustomer = async (req, res) => {
   try {
     const customer = await login(email, password);
     if (!customer) {
-      await createLog(customer.customer_code, "Failed Login Attempt", req.ip);
+      const triedUser = await findCustomerByEmail(email);
+      await createLog(triedUser.customer_code, "Failed Login Attempt", req.ip);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -176,6 +179,11 @@ const googleLogin = async (req, res) => {
         await emailVerification(customer.cus_id)
         customer = await attachGoogleIdToUser(customer.cus_id, googleId);
       }
+    }
+
+    if (!customer.is_active) {
+      await createLog(customer.customer_code, "Disabled Account Login Attempt", req.ip);
+      return res.status(403).json({ message: "Account is disabled" });
     }
 
     if(customer.is_2FA_enabled){
@@ -340,10 +348,13 @@ const verifyVerificationCode = async (req, res) => {
   }
 };
 
+// controllers/customerAuthController.js (modify verify2FACode)
 const verify2FACode = async (req, res) => {
-  const customerId = req.user.id;
+  // Get ID from decoded temp token payload (support multiple property names)
+  const tempUser = req.user || {};
+  const customerId = tempUser.id || tempUser.cus_id || tempUser.userId;
+
   const { code } = req.body;
-  console.log(customerId, code);
 
   try {
     const verificationInfo = await getVerificationDetails(customerId);
@@ -355,36 +366,48 @@ const verify2FACode = async (req, res) => {
     if (!code || Number(verificationInfo.verification_code) !== Number(code)) {
       return res.status(400).json({ message: "Invalid verification code" });
     }
+
+    // Clear verification code
     await deleteVerificationCode(customerId);
-    const customer = req.user;
-    const accessToken = generateAccessToken(customer);
-    const refreshToken = generateRefreshToken(customer);
+
+    // --- IMPORTANT: fetch full user from DB and use that to generate tokens ---
+    const customerFromDb = await findUserById(customerId);
+    if (!customerFromDb) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    const accessToken = generateAccessToken(customerFromDb);
+    const refreshToken = generateRefreshToken(customerFromDb);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
+      secure: false, // true in production with HTTPS
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // remove temp token
     res.clearCookie("tempToken");
 
-    await createLog(verificationInfo.customer_code, "Logged In", req.ip);
-    res
-      .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken, role: null });
+    await createLog(customerFromDb.customer_code, "Logged In", req.ip);
+
+    return res.status(200).json({
+      message: "Login successful",
+      role: customerFromDb.role || null,
+    });
   } catch (error) {
     console.error("Error verifying code:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const verifyEmail = async (req, res) => {
   const token = req.query.token;
@@ -560,8 +583,73 @@ const removeCustomerProfilePhoto = async (req, res) => {
   }
 };
 
+
+const getCustomerDetailsForAdmin = async (req, res) => {
+  const customerId = parseInt(req.params.id, 10);
+
+  try {
+    const customer = await findUserById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    console.error("Error fetching customer details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const changeAccountActivation = async (req, res) => {
+  const { customerId } = req.params;
+  const { isActive, deactivationPeriod } = req.body;
+  console.log(deactivationPeriod);
+
+  try {
+    const updatedCustomer = await changeAccountStatus(
+      customerId,
+      isActive,
+      deactivationPeriod
+    );
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error changing account activation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const change2FASettingByAdmin = async (req, res) => {
+  const { customerId } = req.params;
+  const { is2FAEnabled } = req.body;
+
+  try {
+    const updatedCustomer = await change2FA(customerId, is2FAEnabled);
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error changing 2FA setting:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const changeCustomerDetailsByAdmin = async (req, res) => {
+  const { customerId } = req.params;
+  const { first_name, last_name, phone, address } = req.body;
+
+  try {
+    const updatedCustomer = await updateCustomerDetails(customerId, {
+      first_name,
+      last_name,
+      phone,
+      address
+    });
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error updating customer details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 const removeCustomerAccount = async (req, res) => {
-  const { customerId } = req.user.id;
+  const { customerId } = req.params;
 
   try {
     const removedUser = await removeUser(customerId);
@@ -594,5 +682,9 @@ module.exports = {
   change2FASetting,
   uploadCustomerProfilePhoto,
   removeCustomerProfilePhoto,
-  removeCustomerAccount
+  removeCustomerAccount,
+  getCustomerDetailsForAdmin,
+  changeAccountActivation,
+  change2FASettingByAdmin,
+  changeCustomerDetailsByAdmin
 };

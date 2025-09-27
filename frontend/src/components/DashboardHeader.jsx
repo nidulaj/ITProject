@@ -2,17 +2,17 @@ import { Link } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { authFetchCustomer } from "../features/user-management/utils/authFetchCustomer";
 
 export default function DashboardHeader({ userInfo }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/logout",
-        {},
-        { withCredentials: true }
-      );
+      const res = await authFetchCustomer({
+        method: "post",
+        url: `http://localhost:5000/api/auth/logout`,
+      });
       navigate("/login");
       console.log(res.data.message);
     } catch (err) {
@@ -65,8 +65,8 @@ export default function DashboardHeader({ userInfo }) {
 
         {/* Right: User + Logout */}
         <div className="flex items-center space-x-6">
-          <button 
-            onClick={() => navigate("userProfile")} 
+          <button
+            onClick={() => navigate("userProfile")}
             className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             {userInfo?.profile_photo ? (
@@ -80,7 +80,9 @@ export default function DashboardHeader({ userInfo }) {
                 <User size={16} />
               </div>
             )}
-            <span className="text-sm font-medium">Hi {userInfo?.first_name}</span>
+            <span className="text-sm font-medium">
+              Hi {userInfo?.first_name}
+            </span>
           </button>
           <button
             className="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm transition"
