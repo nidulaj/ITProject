@@ -15,6 +15,8 @@ const createOrder = async (cus_id, total_price, items) => {
     
     const order = orderResult.rows[0];
     console.log('Order created:', order);
+    console.log('Order keys:', Object.keys(order));
+    console.log('Order ID field:', order.order_id || order.id || order.orderId);
     
     // Insert order items if there's an order_items table
     if (items && items.length > 0) {
