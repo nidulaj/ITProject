@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 
 const PaymentForm = ({ onUpdateStats }) => {
+  const [orderId, setOrderId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
@@ -18,7 +19,22 @@ const PaymentForm = ({ onUpdateStats }) => {
   // Pre-populate form with order data if available
   useEffect(() => {
     if (location.state) {
-      const { orderData, totalAmount, customerName: passedCustomerName } = location.state;
+      const { orderData, totalAmount, customerName: passedCustomerName, orderId: passedOrderId } = location.state;
+      
+      console.log('Payment form received state:', location.state);
+      console.log('Order ID from state:', passedOrderId);
+      console.log('Order data:', orderData);
+      
+      // Try to extract order ID from orderData if not passed directly
+      let extractedOrderId = passedOrderId;
+      if (!extractedOrderId && orderData) {
+        extractedOrderId = orderData.order_id || orderData.id || orderData.orderId || orderData.orderID;
+        console.log('Extracted order ID from orderData:', extractedOrderId);
+      }
+      
+      if (extractedOrderId) {
+        setOrderId(extractedOrderId);
+      }
       
       if (passedCustomerName) {
         setCustomerName(passedCustomerName);
@@ -34,15 +50,48 @@ const PaymentForm = ({ onUpdateStats }) => {
     }
   }, [location.state]);
 
+  // Test middleware function
+  const testMiddleware = async () => {
+    try {
+      console.log('Testing payment middleware...');
+      const response = await authFetchCustomer({
+        method: 'get',
+        url: 'http://localhost:5000/api/payments/test'
+      });
+      console.log('Middleware test successful:', response.data);
+    } catch (error) {
+      console.error('Middleware test failed:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      console.log('Submitting payment with order_id:', orderId);
+      
+      // Test middleware first
+      await testMiddleware();
+      
       const formData = new FormData();
+      formData.append("order_id", orderId);
       formData.append("customer_name", customerName);
       formData.append("amount", amount);
       formData.append("payment_date", paymentDate);
       formData.append("payment_proof", paymentProof);
+      
+      console.log('Form data being sent:', {
+        order_id: orderId,
+        customer_name: customerName,
+        amount: amount,
+        payment_date: paymentDate
+      });
+      
+      // Debug FormData contents
+      console.log('FormData entries:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
 
       /*await axios.post("http://localhost:5000/api/payments", formData, {
         headers: { "Content-Type": "multipart/form-data", },
@@ -60,6 +109,7 @@ const PaymentForm = ({ onUpdateStats }) => {
 
       alert("✅ Payment submitted successfully!");
       if (onUpdateStats) onUpdateStats();
+      setOrderId("");
       setCustomerName("");
       setAmount("");
       setPaymentDate("");
@@ -81,6 +131,19 @@ const PaymentForm = ({ onUpdateStats }) => {
       <h2 className="text-xl font-bold text-gray-800 text-center">
         Complete Your Payment
       </h2>
+
+      {orderId && (
+        <div>
+          <label className="block text-gray-700">Order ID</label>
+          <input
+            type="text"
+            value={orderId}
+            className="w-full px-3 py-2 border rounded-md bg-gray-100 cursor-not-allowed"
+            readOnly
+            disabled
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-gray-700">Customer Name</label>
