@@ -1,6 +1,5 @@
 // pages/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import StatCard from '../components/StatCard';
@@ -10,7 +9,6 @@ import Modal from '../components/Modal';
 import RecipeForm from '../components/RecipeForm';
 import RequestIngredientsForm from '../components/RequestIngredientsForm';
 import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon } from 'lucide-react';
-import CustomOrderTable from '../components/CustomOrderTable';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const API = 'http://localhost:5000';
