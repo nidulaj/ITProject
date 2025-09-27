@@ -29,7 +29,8 @@ const {
   generateAccessToken,
   generateRefreshToken,
   generateTempToken,
-  generateEmailVerificationToken
+  generateEmailVerificationToken,
+  generateResetPasswordToken
 } = require("../utils/token");
 const { sendSMS } = require("../utils/smsService");
 const {
@@ -662,6 +663,45 @@ const removeCustomerAccount = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await findCustomerByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const resetToken = generateResetPasswordToken(user);
+    await sendResetPasswordLink(email, resetToken, "customer");
+
+    res.status(200).json({ message: "Reset password email sent" });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
+    const user = await findUserById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+   const updatedUser = await changePassword(user.cus_id, newPassword);
+   await createLog(updatedUser.customer_code, "Password Reset", req.ip);
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerCustomer,
   loginCustomer,
@@ -686,5 +726,7 @@ module.exports = {
   getCustomerDetailsForAdmin,
   changeAccountActivation,
   change2FASettingByAdmin,
-  changeCustomerDetailsByAdmin
+  changeCustomerDetailsByAdmin,
+  forgotPassword,
+  resetPassword
 };

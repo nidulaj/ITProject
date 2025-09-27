@@ -17,9 +17,9 @@ const ProductionDashboard = lazy(() => import("./features/production-management/
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
-
+const ResetPassword = lazy(() => import ("./features/user-management/pages/ResetPassword"))
 const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage"))
-
+const ResetPasswordStaff = lazy(() => import ("./features/user-management/pages/ResetPasswordStaff"))
 
 const DashboardLayout = ({ children }) => <div>{children}</div>
 
@@ -35,7 +35,8 @@ function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/verify2FA" element={<Verify2FA />} />
               <Route path="/verifyEmail" element={<VerifyEmail />} />
-
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/reset-password-staff" element={<ResetPasswordStaff />} />
               <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} />
               
 

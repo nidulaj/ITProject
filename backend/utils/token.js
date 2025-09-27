@@ -24,6 +24,12 @@ const generateEmailVerificationToken = (user) => {
   });
 };
 
+const generateResetPasswordToken = (user) => {
+  return jwt.sign({ id: user.cus_id, type: "customer" }, process.env.RESET_TOKEN_SECRET, {
+    expiresIn: process.env.RESET_TOKEN_EXP,
+  });
+};
+
 const generateAccessTokenStaff = (staff) => {
   return jwt.sign(
     { id: staff.staff_id, role: staff.role },
@@ -48,6 +54,12 @@ const generateTempTokenStaff = (staff) => {
   );
 };
 
+const generateResetPasswordTokenStaff = (user) => {
+  return jwt.sign({ id: user.staff_id, type: "staff" }, process.env.RESET_TOKEN_SECRET, {
+    expiresIn: process.env.RESET_TOKEN_EXP,
+  });
+};
+
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
@@ -56,4 +68,6 @@ module.exports = {
   generateAccessTokenStaff,
   generateRefreshTokenStaff,
   generateTempTokenStaff,
+  generateResetPasswordToken,
+  generateResetPasswordTokenStaff
 };
