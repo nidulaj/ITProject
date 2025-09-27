@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useCustomer } from '../../../contexts/CustomerContext';
 import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
@@ -8,6 +9,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
   const [isProcessing, setIsProcessing] = useState(false);
   const { showSuccess, showError } = useNotification();
   const { currentCustomer } = useCustomer();
+  const navigate = useNavigate();
   const getImageSrc = (product) => {
     if (product.image) {
       if (typeof product.image === 'string') {
@@ -59,7 +61,16 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         onClose();
         
         // Show success message
-        showSuccess('Order placed successfully!');
+        showSuccess('Order placed successfully! Redirecting to payment...');
+        
+        // Navigate to payment form with order data
+        navigate('/dashboard/finance/payment-form', { 
+          state: { 
+            orderData: response.data.order,
+            totalAmount: total,
+            customerName: currentCustomer?.name || 'Customer'
+          } 
+        });
       } else {
         showError('Failed to place order. Please try again.');
       }
