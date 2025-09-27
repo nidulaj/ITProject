@@ -4,19 +4,17 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { AuthProvider } from "./components/AuthContext"
 import { NotificationProvider } from "./contexts/NotificationContext"
 import ProtectedRoute from "./components/ProtectedRoute"
-import CustomerDiscountPage from "./features/financial-management/pages/CustomerDiscountPage";
 
 
 const Register = lazy(() => import("./features/user-management/pages/Register"))
 const Login = lazy(() => import("./features/user-management/pages/Login"))
 const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
-const CustomerDashboard = lazy(() => import("./features/user-management/pages/Dashboard"))
+const CustomerDashboard = lazy(() => import("./pages/Dashboard"))
 const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"))
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
-const ProductCatalog = lazy(() => import ("./features/order-management/pages/ProductCatalogFixed"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))
 
@@ -44,22 +42,11 @@ function App() {
 
               {/* User Dashboards */}
               <Route
-                path="/dashboard"
+                path="/dashboard/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
                       <CustomerDashboard />
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/products"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout>
-                      <CustomerCatalog />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
@@ -88,25 +75,12 @@ function App() {
               />
 
               <Route
-                path="/dashboard/order"
+                path="/dashboard/order/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
                       <OrderDashboard />
                     </DashboardLayout>
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/dashboard/products"
-                element={
-                  <ProtectedRoute>
-                    <NotificationProvider>
-                      <DashboardLayout>
-                        <ProductCatalog />
-                      </DashboardLayout>
-                    </NotificationProvider>
                   </ProtectedRoute>
                 }
               />
@@ -135,6 +109,7 @@ function App() {
 
               {/* 404 fallback */}
               <Route path="*" element={<Navigate to="/login" replace />} />
+
               {/* Customer-facing discount view (independent route) */}
         <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
         

@@ -1,15 +1,16 @@
-const { createReturn, listReturns, updateReturn, updateStatus, deleteReturn } =
-  require("../models/returnsModel");
+const { createReturn, listReturns, updateReturn, updateStatus, deleteReturn } = require("../models/returnsModel");
 
+// Create a new return (with image upload)
 const create = async (req, res) => {
   try {
-    const row = await createReturn(req.body);
+    const row = await createReturn(req.body, req.file);  // Pass the uploaded file (req.file) to the model
     res.status(201).json({ success: true, data: row });
   } catch (e) {
     res.status(400).json({ success: false, error: e.message });
   }
 };
 
+// List all returns
 const list = async (_req, res) => {
   try {
     const rows = await listReturns();
@@ -19,15 +20,17 @@ const list = async (_req, res) => {
   }
 };
 
+// Update an existing return (with image upload)
 const update = async (req, res) => {
   try {
-    const row = await updateReturn(req.params.id, req.body);
+    const row = await updateReturn(req.params.id, req.body, req.file);  // Pass the uploaded file (req.file) to the model
     res.json({ success: true, data: row });
   } catch (e) {
     res.status(400).json({ success: false, error: e.message });
   }
 };
 
+// Update the status of a return (accept/reject/pending)
 const patchStatus = async (req, res) => {
   try {
     const row = await updateStatus(req.params.id, req.body.status);
@@ -37,6 +40,7 @@ const patchStatus = async (req, res) => {
   }
 };
 
+// Delete a return
 const remove = async (req, res) => {
   try {
     await deleteReturn(req.params.id);
