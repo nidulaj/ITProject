@@ -12,7 +12,7 @@ const Sidebar = () => {
 
         <nav className="flex-1 px-2 py-4 space-y-1">
           <button 
-            onClick={() => navigate('/dashboard/products')}
+            onClick={() => navigate('/dashboard/order/products')}
             className="w-full text-left mb-2 px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-gray-600 hover:bg-gradient-to-r hover:from-blue-100 hover:to-blue-200 hover:text-blue-800 hover:shadow-md"
           >
             <div className="text-xl">

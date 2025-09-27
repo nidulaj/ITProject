@@ -280,6 +280,7 @@ const OrderDashboard = () => {
             </div>
           </div>
         } />
+        <Route path="/products" element={<ProductCatalog />} />
         <Route path="/profile" element={
           <div className="flex min-h-screen">
             {/* Left sidebar navigation */}
