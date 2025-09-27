@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -7,9 +7,26 @@ import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer
 
 const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, onClearCart, total }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const { showSuccess, showError } = useNotification();
   const { currentCustomer } = useCustomer();
   const navigate = useNavigate();
+
+  // Fetch user info to get first name
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const res = await authFetchCustomer({
+          method: "get",
+          url: `http://localhost:5000/api/auth/userInfo`,
+        });
+        setUserInfo(res.data);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    fetchUserInfo();
+  }, []);
   const getImageSrc = (product) => {
     if (product.image) {
       if (typeof product.image === 'string') {
@@ -68,7 +85,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
           state: { 
             orderData: response.data.order,
             totalAmount: total,
-            customerName: currentCustomer?.name || 'Customer'
+            customerName: userInfo?.first_name || currentCustomer?.name || 'Customer'
           } 
         });
       } else {
