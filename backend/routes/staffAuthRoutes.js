@@ -24,7 +24,9 @@ const {
   updatePassword,
   change2FASetting,
   uploadStaffProfilePhoto,
-  removeStaffProfilePhoto
+  removeStaffProfilePhoto,
+  forgotPassword,
+  resetPassword
 } = require("../controllers/staffAuthController");
 
 const upload = require("../middlewares/uploadMiddleware");
@@ -49,5 +51,7 @@ router.put("/updatePassword", staffAuthMiddleware, updatePassword);
 router.put("/change2FA", staffAuthMiddleware, change2FASetting);
 router.post("/uploadProfilePhoto", staffAuthMiddleware, upload.single("profilePhoto"), uploadStaffProfilePhoto);
 router.delete("/removeProfilePhoto", staffAuthMiddleware, removeStaffProfilePhoto);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;

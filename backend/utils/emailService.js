@@ -164,14 +164,93 @@ const sendVerificationLink = async (email, verificationLink) => {
   });
 };
 
-const sendResetPasswordLink = async (email, resetLink) => {
+const sendResetPasswordLink = async (email, resetToken, type) => {
+  // Decide which reset URL to use (customer vs staff)
+  const resetUrl =
+    type === "customer"
+      ? `http://localhost:5173/reset-password?token=${resetToken}`
+      : `http://localhost:5173/reset-password-staff?token=${resetToken}`;
+
   await transporter.sendMail({
     from: `"Smart Dairy" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Reset your password",
-    html: `<p>Click the link below to reset your password:</p> <a href="${resetLink}">Reset Password</a>`,
+    subject: "Reset Your Password",
+    html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8" />
+      <title>Password Reset</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
+        }
+        .container {
+          max-width: 500px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .header {
+          background-color: #2563eb; /* Tailwind's blue-600 */
+          color: #ffffff;
+          padding: 16px;
+          text-align: center;
+          font-size: 20px;
+          font-weight: bold;
+        }
+        .content {
+          padding: 20px;
+          color: #333333;
+          line-height: 1.6;
+        }
+        .btn {
+          display: inline-block;
+          padding: 10px 16px;
+          margin-top: 16px;
+          background-color: #2563eb;
+          color: #ffffff !important;
+          text-decoration: none;
+          border-radius: 4px;
+          font-weight: bold;
+        }
+        .footer {
+          text-align: center;
+          font-size: 12px;
+          color: #777777;
+          padding: 12px;
+          border-top: 1px solid #eeeeee;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">Smart Dairy</div>
+        <div class="content">
+          <p>Hello,</p>
+          <p>We received a request to reset your password. Click the button below to set a new password:</p>
+          <p style="text-align:center;">
+            <a href="${resetUrl}" class="btn">Reset Password</a>
+          </p>
+          <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+          <p><a href="${resetUrl}">${resetUrl}</a></p>
+          <p>If you didn’t request a password reset, please ignore this email. Your account will remain secure.</p>
+        </div>
+        <div class="footer">
+          &copy; 2025 Smart Dairy. All rights reserved.
+        </div>
+      </div>
+    </body>
+    </html>
+    `,
   });
 };
+
 
 const sendStaffRegistrationInfo = async (email, password) => {
   await transporter.sendMail({

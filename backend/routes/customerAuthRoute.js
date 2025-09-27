@@ -26,6 +26,8 @@ const {
   change2FASettingByAdmin,
   changeCustomerDetailsByAdmin,
     removeCustomerAccount,
+    forgotPassword,
+  resetPassword
 } = require("../controllers/customerAuthController");
 
 const upload = require("../middlewares/uploadMiddleware");
@@ -42,6 +44,8 @@ router.post("/verify-code", authMiddleware, verifyVerificationCode);
 router.post("/verify-2fa", tempMiddleware, verify2FACode);
 router.get("/verify-email", verifyEmail);
 router.post("/resend-2fa", tempMiddleware, resend2FACode);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
 
 router.get("/allCustomers", authMiddleware, getAllCustomerDetails);
 router.get("/userInfo", authMiddleware, getCustomerDetails);
