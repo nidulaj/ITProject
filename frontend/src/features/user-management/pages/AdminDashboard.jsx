@@ -12,6 +12,7 @@ import RoleInfo from "../components/RoleInfo";
 import StaffUserInfo from "../components/staffUserInfo";
 import CustomerManagement from "../components/customerManagement";
 import UserProfile from "../components/UserProfile";
+import CustomerInfo from "../components/CustomerInfo";
 import { authFetch } from "../utils/authFetchStaff";
 
 export default function AdminDashboard() {
@@ -45,6 +46,7 @@ export default function AdminDashboard() {
           <Route path="staff" element={<StaffManagement />} />
           <Route path="customers" element={<CustomerManagement />} />
           <Route path="staff/:staffId" element={<StaffUserInfo />} />
+          <Route path="customers/:customerId" element={<CustomerInfo />} />
           <Route path="rolesAccess" element={<RolesAccess />} />
           <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
           <Route path="logsMonitoring" element={<LogsMonitoring />} />

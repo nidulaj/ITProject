@@ -207,8 +207,8 @@ export default function ReturnsCustomer({ onBack }) {
               >
                 <option value="">Select Reason</option>
                 <option value="damaged">Damaged</option>
-                <option value="Wrong Item">wrong item</option>
-                <option value="Quality">quality</option>
+                <option value="wrong_item">wrong item</option>
+                <option value="quality">quality</option>
               </select>
             </div>
 

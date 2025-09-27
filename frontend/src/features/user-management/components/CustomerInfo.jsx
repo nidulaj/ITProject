@@ -17,6 +17,7 @@ export default function CustomerInfo() {
     first_name: "",
     last_name: "",
     phone: "",
+    address: "",
   });
 
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function CustomerInfo() {
       try {
         const res = await authFetch({
           method: "get",
-          url: `http://localhost:5000/api/staff/auth/staffDetails/${staffId}`,
+          url: `http://localhost:5000/api/auth/customerDetailsForAdmin/${customerId}`,
         });
         setCustomer(res.data);
 
@@ -39,6 +40,7 @@ export default function CustomerInfo() {
           first_name: res.data.first_name,
           last_name: res.data.last_name,
           phone: res.data.phone,
+          address: res.data.address,
         });
       } catch (error) {
         console.error("Error fetching staff:", error);
@@ -73,7 +75,7 @@ export default function CustomerInfo() {
     try {
       const res = await authFetch({
         method: "put",
-        url: `http://localhost:5000/api/staff/auth/changeAccountStatus/${staffId}`,
+        url: `http://localhost:5000/api/auth/changeAccountActivation/${customerId}`,
         data: newStatus,
       });
       setCustomer(res.data);
@@ -89,7 +91,7 @@ export default function CustomerInfo() {
     try {
       const res = await authFetch({
         method: "put",
-        url: `http://localhost:5000/api/staff/auth/change2FA/${staffId}`,
+        url: `http://localhost:5000/api/auth/change2FASetting/${customerId}`,
         data: { is2FAEnabled: isEnabled },
       });
       setCustomer(res.data);
@@ -103,7 +105,7 @@ export default function CustomerInfo() {
     try {
       const res = await authFetch({
         method: "put",
-        url: `http://localhost:5000/api/staff/auth/changeStaffDetails/${staffId}`,
+        url: `http://localhost:5000/api/auth/changeCustomerDetails/${customerId}`,
         data: editForm,
       });
       setCustomer(res.data);
@@ -117,7 +119,7 @@ export default function CustomerInfo() {
     try {
       const res = await authFetch({
         method: "put",
-        url: `http://localhost:5000/api/staff/auth/removeStaff/${staffId}`,
+        url: `http://localhost:5000/api/auth/removeCustomerAccount/${customerId}`,
       });
       navigate("/dashboard/admin/staff");
     } catch (error) {
@@ -196,6 +198,10 @@ export default function CustomerInfo() {
                   ) : (
                     <span className="text-red-500 text-xs">✗ Not Verified</span>
                   )}
+                </p>
+                <p className="flex items-center gap-2">
+                  <span className="font-medium">Address:</span> 
+                  {customer.address}
                 </p>
               </div>
             </div>
@@ -285,10 +291,10 @@ export default function CustomerInfo() {
 
         <button
           onClick={handleRemoveUser}
-          disabled={!staff.is_active && staff.deactivated_until === null}
+          disabled={!customer.is_active && customer.deactivated_until === null}
           className={`px-4 py-2 rounded-lg text-white shadow transition
             ${
-              !staff.is_active && staff.deactivated_until === null
+              !customer.is_active && customer.deactivated_until === null
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-red-600 hover:bg-red-700"
             }
@@ -435,6 +441,19 @@ export default function CustomerInfo() {
                   value={editForm.phone}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  value={editForm.address}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, address: e.target.value }))
                   }
                   className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
                 />

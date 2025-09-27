@@ -5,7 +5,6 @@ import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer
 import { useNavigate, useLocation } from "react-router-dom";
 
 
-
 const PaymentForm = ({ onUpdateStats }) => {
   const [orderId, setOrderId] = useState("");
   const [customerName, setCustomerName] = useState("");

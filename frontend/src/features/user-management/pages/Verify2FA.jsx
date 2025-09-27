@@ -36,13 +36,20 @@ export default function Verify2FA() {
       // no role → customer
       navigate("/dashboard");
     } else {
-      // staff with role
-      if (role === "admin") navigate("/dashboard/admin");
-      else if (role === "manager") navigate("/dashboard/manager");
-      else{
-        navigate("/login")
-        setIsLoggedIn(false);
-      };
+      setIsLoggedIn(true);
+        if (!role) {
+          navigate("/dashboard");
+        } else {
+          if (role === 1) navigate("/dashboard/admin");
+          else if (role === 12) navigate("/dashboard/production");
+          else if (role === 9) navigate("/dashboard/order");
+          else if (role === 11) navigate("/dashboard/inventory");
+          else if (role === 13) navigate("/dashboard/finance");
+          else {
+            navigate("/login");
+            setIsLoggedIn(false);
+          }
+        }
     }
 
     } catch (err) {

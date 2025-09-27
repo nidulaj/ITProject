@@ -111,9 +111,9 @@ function App() {
               {/* 404 fallback */}
               <Route path="*" element={<Navigate to="/login" replace />} />
 
+
               {/* Customer-facing discount view (independent route) */}
               <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
-        
 
             </Routes>
           </Suspense>
