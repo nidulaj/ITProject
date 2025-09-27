@@ -38,6 +38,7 @@ const {
 } = require("../utils/emailService");
 
 const {createLog} = require("../models/userManagementAuditLogModel");
+const { ref } = require("process");
 
 const registerCustomer = async (req, res) => {
   const { firstName, lastName, email, phone, address, password } = req.body;
@@ -340,10 +341,13 @@ const verifyVerificationCode = async (req, res) => {
   }
 };
 
+// controllers/customerAuthController.js (modify verify2FACode)
 const verify2FACode = async (req, res) => {
-  const customerId = req.user.id;
+  // Get ID from decoded temp token payload (support multiple property names)
+  const tempUser = req.user || {};
+  const customerId = tempUser.id || tempUser.cus_id || tempUser.userId;
+
   const { code } = req.body;
-  console.log(customerId, code);
 
   try {
     const verificationInfo = await getVerificationDetails(customerId);
@@ -355,36 +359,48 @@ const verify2FACode = async (req, res) => {
     if (!code || Number(verificationInfo.verification_code) !== Number(code)) {
       return res.status(400).json({ message: "Invalid verification code" });
     }
+
+    // Clear verification code
     await deleteVerificationCode(customerId);
-    const customer = req.user;
-    const accessToken = generateAccessToken(customer);
-    const refreshToken = generateRefreshToken(customer);
+
+    // --- IMPORTANT: fetch full user from DB and use that to generate tokens ---
+    const customerFromDb = await findUserById(customerId);
+    if (!customerFromDb) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    const accessToken = generateAccessToken(customerFromDb);
+    const refreshToken = generateRefreshToken(customerFromDb);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
+      secure: false, // true in production with HTTPS
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // remove temp token
     res.clearCookie("tempToken");
 
-    await createLog(verificationInfo.customer_code, "Logged In", req.ip);
-    res
-      .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken, role: null });
+    await createLog(customerFromDb.customer_code, "Logged In", req.ip);
+
+    return res.status(200).json({
+      message: "Login successful",
+      role: customerFromDb.role || null,
+    });
   } catch (error) {
     console.error("Error verifying code:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const verifyEmail = async (req, res) => {
   const token = req.query.token;
