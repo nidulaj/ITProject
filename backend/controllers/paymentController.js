@@ -3,8 +3,19 @@ const { pool } = require("../db/dbConnect");
 
 const addPayment = async (req, res) => {
   try {
-    const { customer_name, amount, payment_date } = req.body;
+    const { order_id, customer_name, amount, payment_date } = req.body;
     const payment_proof = req.file ? req.file.filename : null;
+
+    console.log('Payment controller received:', {
+      order_id,
+      customer_name,
+      amount,
+      payment_date,
+      payment_proof
+    });
+    
+    console.log('Full request body:', req.body);
+    console.log('Request headers:', req.headers);
 
     if (!customer_name || !amount || !payment_date) {
       return res.status(400).json({ message: "Customer name, amount, and payment date are required" });
@@ -13,6 +24,7 @@ const addPayment = async (req, res) => {
     const payment_status = "pending";
 
     const payment = await Payment.createPayment(
+      order_id,
       customer_name,
       amount,
       payment_status,
@@ -44,7 +56,6 @@ const updatePaymentStatus = async (req, res) => {
   console.log("Incoming status update request:");
   console.log("Payment ID:", id);
   console.log("New Status:", status);
-
 
   try {
     const result = await pool.query(

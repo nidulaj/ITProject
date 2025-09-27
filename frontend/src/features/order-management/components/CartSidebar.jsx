@@ -70,7 +70,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         data: orderData
       });
       
-      if (response.data.message === 'Order placed successfully') {
+      if (response.data.success && response.data.message === 'Order placed successfully') {
         // Clear cart after successful order
         onClearCart();
         
@@ -80,11 +80,24 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         // Show success message
         showSuccess('Order placed successfully! Redirecting to payment...');
         
+        console.log('Order response:', response.data);
+        console.log('Order object:', response.data.order);
+        console.log('Order object keys:', Object.keys(response.data.order || {}));
+        
+        // Try different possible field names for order ID
+        const orderId = response.data.order?.order_id || 
+                       response.data.order?.id || 
+                       response.data.order?.orderId ||
+                       response.data.order?.orderID;
+        
+        console.log('Extracted order ID:', orderId);
+        
         // Navigate to payment form with order data
         navigate('/dashboard/finance/payment-form', { 
           state: { 
             orderData: response.data.order,
             totalAmount: total,
+            orderId: orderId,
             customerName: userInfo?.first_name || currentCustomer?.name || 'Customer'
           } 
         });
