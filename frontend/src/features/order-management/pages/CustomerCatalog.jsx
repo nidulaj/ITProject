@@ -5,8 +5,10 @@ import CartSidebar from '../components/CartSidebar';
 import NotificationIcon from '../../../components/NotificationIcon';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useCustomer } from '../../../contexts/CustomerContext';
+import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
 
 const CustomerCatalog = () => {
+  console.log('CustomerCatalog component rendering...');
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,8 @@ const CustomerCatalog = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { showSuccess, showError } = useNotification();
   const { currentCustomer, setCustomer } = useCustomer();
+  
+  console.log('CustomerCatalog state:', { products, loading, currentCustomer });
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
 
@@ -26,11 +30,18 @@ const CustomerCatalog = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(API_BASE_URL);
+      console.log('Fetching products from:', API_BASE_URL);
+      const response = await authFetchCustomer({
+        method: 'get',
+        url: API_BASE_URL
+      });
+      console.log('Products response:', response.data);
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
       showError('Failed to fetch products');
+      // Set empty products array to prevent blank page
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -104,6 +115,18 @@ const CustomerCatalog = () => {
 
   // Get unique categories
   const categories = ['all', ...new Set(products.map(product => product.category).filter(Boolean))];
+
+  // Add error boundary fallback
+  if (!currentCustomer) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Customer Data...</h2>
+          <p className="text-gray-600">Please wait while we load your information.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -226,7 +249,7 @@ const CustomerCatalog = () => {
       
       // Create order
       const orderData = {
-        customer_id: 1, // In a real app, this would come from user context
+        customer_id: currentCustomer?.id || 1, // Use current customer ID
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
@@ -234,7 +257,11 @@ const CustomerCatalog = () => {
         }))
       };
       
-      const response = await axios.post('http://localhost:5000/api/orders', orderData);
+      const response = await authFetchCustomer({
+        method: 'post',
+        url: 'http://localhost:5000/api/orders',
+        data: orderData
+      });
       
       if (response.data.success) {
         // Clear cart

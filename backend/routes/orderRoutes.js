@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const {authMiddleware} = require("../middlewares/authMiddleware");
 const { 
   createOrderController,
   getOrders, 
@@ -11,7 +12,7 @@ const {
 } = require('../controllers/orderController');
 
 // Create new order
-router.post('/', createOrderController);
+router.post('/', authMiddleware, createOrderController);
 
 // Get all orders
 router.get('/', getOrders);
@@ -20,10 +21,10 @@ router.get('/', getOrders);
 router.get('/all', getOrders);
 
 // Get orders by customer ID
-router.get('/customer/:customer_id', getCustomerOrders);
+router.get('/customer/:customer_id', authMiddleware, getCustomerOrders);
 
 // Get single order by ID
-router.get('/:order_id', getSingleOrder);
+router.get('/:order_id', authMiddleware, getSingleOrder);
 
 // Update order status
 router.put('/:order_id/status', updateOrderStatusController);
@@ -32,6 +33,6 @@ router.put('/:order_id/status', updateOrderStatusController);
 router.put('/:order_id/payment', updatePaymentStatusController);
 
 // Delete order
-router.delete('/:order_id', deleteOrderController);
+router.delete('/:order_id', authMiddleware, deleteOrderController);
 
 module.exports = router;
