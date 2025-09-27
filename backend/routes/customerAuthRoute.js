@@ -14,8 +14,17 @@ const {
   verifyEmail,
   resend2FACode,
   googleLogin,
-  getAllCustomerDetails
+  getAllCustomerDetails,
+  getCustomerDetails,
+   updateUserDetails,
+  updatePassword,
+  change2FASetting,
+  uploadCustomerProfilePhoto,
+  removeCustomerProfilePhoto,
+  removeCustomerAccount
 } = require("../controllers/customerAuthController");
+
+const upload = require("../middlewares/uploadMiddleware");
 
 router.post("/register", registerCustomer);
 router.post("/login", loginCustomer);
@@ -31,5 +40,11 @@ router.get("/verify-email", verifyEmail);
 router.post("/resend-2fa", tempMiddleware, resend2FACode);
 
 router.get("/allCustomers", authMiddleware, getAllCustomerDetails);
+router.get("/userInfo", authMiddleware, getCustomerDetails);
 
+router.put("/updateUserDetails", authMiddleware, updateUserDetails);
+router.put("/updatePassword", authMiddleware, updatePassword);
+router.put("/change2FA", authMiddleware, change2FASetting);
+router.post("/uploadProfilePhoto", authMiddleware, upload.single("profilePhoto"), uploadCustomerProfilePhoto);
+router.delete("/removeProfilePhoto", authMiddleware, removeCustomerProfilePhoto);
 module.exports = router;

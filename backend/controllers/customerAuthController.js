@@ -16,6 +16,13 @@ const {
   findUserByGoogleId,
   attachGoogleIdToUser,
   getAllCustomers,
+ updateCustomerDetails,
+  getCurrentPassword,
+  changePassword,
+  change2FA,
+  updateProfilePhoto,
+  removeProfilePhoto,
+  removeUser
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -369,7 +376,7 @@ const verify2FACode = async (req, res) => {
 
     res.clearCookie("tempToken");
 
-    await createLog(customer.customer_code, "Logged In", req.ip);
+    await createLog(verificationInfo.customer_code, "Logged In", req.ip);
     res
       .status(200)
       .json({ message: "Login successful", accessToken, refreshToken, role: null });
@@ -432,6 +439,141 @@ const getAllCustomerDetails = async (req, res) => {
   }
 };
 
+const getCustomerDetails = async (req, res) => {
+  const customerId = req.user.id;
+
+  try {
+    const customer = await findUserById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    console.error("Error fetching customer details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateUserDetails = async (req, res) => {
+  const customerId = req.user.id;
+  const { first_name, last_name, phone, address } = req.body;
+
+  try {
+    const updatedUser = await updateCustomerDetails(customerId, {
+      first_name,
+      last_name,
+      phone,
+      address
+    });
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updatePassword = async (req, res) => {
+  const customerId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const currentPass = await getCurrentPassword(customerId);
+    if (currentPass.password !== currentPassword) {
+      console.log("Current password is incorrect");
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    const updatedPasswordUser = await changePassword(customerId, newPassword);
+    const newAccessToken = generateAccessToken(updatedPasswordUser);
+    const newRefreshToken = generateRefreshToken(updatedPasswordUser);
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: false, // change to true in production with HTTPS
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.status(200).json(updatedPasswordUser);
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const change2FASetting = async (req, res) => {
+  const customerId = req.user.id;
+  const { is2FAEnabled } = req.body;
+
+  try {
+    const updatedCustomer = await change2FA(customerId, is2FAEnabled);
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error changing 2FA setting:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const uploadCustomerProfilePhoto = async (req, res) => {
+  console.log("File received:");
+  try {
+    if (!req.file) {
+      console.log("No file uploaded");
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const customerId = req.user.id;
+    const photoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    const updatedUser = await updateProfilePhoto(customerId, photoUrl);
+    console.log("Profile photo updated:", updatedUser);
+
+    res.status(200).json({
+      message: "Profile photo updated successfully",
+      photoUrl: updatedUser.profile_photo,
+    });
+  } catch (error) {
+    console.error("Error uploading photo:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeCustomerProfilePhoto = async (req, res) => {
+  try {
+    const customerId = req.user.id;
+    const removedPhoto = await removeProfilePhoto(customerId);
+    res.status(200).json({
+      message: "Profile photo removed successfully",
+      removedPhoto,
+    });
+  } catch (error) {
+    console.error("Error removing photo:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const removeCustomerAccount = async (req, res) => {
+  const { customerId } = req.user.id;
+
+  try {
+    const removedUser = await removeUser(customerId);
+    res
+      .status(200)
+      .json({ message: "Customer account removed successfully", removedUser });
+  } catch (error) {
+    console.error("Error removing customer account:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerCustomer,
   loginCustomer,
@@ -445,5 +587,12 @@ module.exports = {
   verifyEmail,
   resend2FACode,
   googleLogin,
-  getAllCustomerDetails
+  getAllCustomerDetails,
+  getCustomerDetails,
+   updateUserDetails,
+  updatePassword,
+  change2FASetting,
+  uploadCustomerProfilePhoto,
+  removeCustomerProfilePhoto,
+  removeCustomerAccount
 };
