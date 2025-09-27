@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
-//import { authFetch } from "../../user-management/utils/authFetchStaff";
+import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer";
 
 const PaymentForm = ({ onUpdateStats }) => {
   const [customerName, setCustomerName] = useState("");
@@ -22,18 +22,18 @@ const PaymentForm = ({ onUpdateStats }) => {
       formData.append("payment_date", paymentDate);
       formData.append("payment_proof", paymentProof);
 
-      await axios.post("http://localhost:5000/api/payments", formData, {
+      /*await axios.post("http://localhost:5000/api/payments", formData, {
         headers: { "Content-Type": "multipart/form-data", },
-      });
+      });*/
 
-      /*const res = await authFetch({
+      const res = await authFetchCustomer({
       method: 'post',
       url: "http://localhost:5000/api/payments",
       data: formData,
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    });*/
+    });
 
 
       alert("✅ Payment submitted successfully!");
