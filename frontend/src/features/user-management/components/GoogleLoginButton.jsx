@@ -24,7 +24,7 @@ export default function GoogleLoginButton(){
             }
 
         } catch(err){
-            console.error("Google login error:", err?.response ?? err);
+            console.error("Google login error:", err?.response.data ?? err);
         }
     }
 

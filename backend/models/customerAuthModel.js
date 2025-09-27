@@ -22,7 +22,7 @@ const findCustomerByEmail = async (email) => {
 };
 
 const findUserById = async (id) => {
-  const query = `SELECT * FROM "customers" WHERE "cus_id" = $1`;
+  const query = `SELECT * FROM "customers" WHERE cus_id = $1`;
   const values = [id];
   const result = await pool.query(query, values);
   return result.rows[0];
@@ -174,6 +174,17 @@ const removeUser = async (customerId) => {
   return result.rows[0];
 }
 
+const changeAccountStatus = async (customerId, isActive, deactivatedUntil) => {
+  console.log(deactivatedUntil);
+  const query = `UPDATE customers
+                 SET is_active = $1, deactivated_until = NOW() + ($2 || '')::interval
+                 WHERE cus_id = $3`;
+  const values = [isActive, deactivatedUntil, customerId];
+  await pool.query(query, values);
+  const result = await findUserById(customerId);
+  return result;
+};
+
 module.exports = {
   createCustomer,
   findCustomerByEmail,
@@ -194,5 +205,6 @@ module.exports = {
   change2FA,
   updateProfilePhoto,
   removeProfilePhoto,
-  removeUser
+  removeUser,
+  changeAccountStatus
 };

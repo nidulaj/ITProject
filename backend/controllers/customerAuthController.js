@@ -22,7 +22,8 @@ const {
   change2FA,
   updateProfilePhoto,
   removeProfilePhoto,
-  removeUser
+  removeUser,
+  changeAccountStatus
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -75,7 +76,8 @@ const loginCustomer = async (req, res) => {
   try {
     const customer = await login(email, password);
     if (!customer) {
-      await createLog(customer.customer_code, "Failed Login Attempt", req.ip);
+      const triedUser = await findCustomerByEmail(email);
+      await createLog(triedUser.customer_code, "Failed Login Attempt", req.ip);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -177,6 +179,11 @@ const googleLogin = async (req, res) => {
         await emailVerification(customer.cus_id)
         customer = await attachGoogleIdToUser(customer.cus_id, googleId);
       }
+    }
+
+    if (!customer.is_active) {
+      await createLog(customer.customer_code, "Disabled Account Login Attempt", req.ip);
+      return res.status(403).json({ message: "Account is disabled" });
     }
 
     if(customer.is_2FA_enabled){
@@ -576,8 +583,73 @@ const removeCustomerProfilePhoto = async (req, res) => {
   }
 };
 
+
+const getCustomerDetailsForAdmin = async (req, res) => {
+  const customerId = parseInt(req.params.id, 10);
+
+  try {
+    const customer = await findUserById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    console.error("Error fetching customer details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const changeAccountActivation = async (req, res) => {
+  const { customerId } = req.params;
+  const { isActive, deactivationPeriod } = req.body;
+  console.log(deactivationPeriod);
+
+  try {
+    const updatedCustomer = await changeAccountStatus(
+      customerId,
+      isActive,
+      deactivationPeriod
+    );
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error changing account activation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const change2FASettingByAdmin = async (req, res) => {
+  const { customerId } = req.params;
+  const { is2FAEnabled } = req.body;
+
+  try {
+    const updatedCustomer = await change2FA(customerId, is2FAEnabled);
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error changing 2FA setting:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const changeCustomerDetailsByAdmin = async (req, res) => {
+  const { customerId } = req.params;
+  const { first_name, last_name, phone, address } = req.body;
+
+  try {
+    const updatedCustomer = await updateCustomerDetails(customerId, {
+      first_name,
+      last_name,
+      phone,
+      address
+    });
+    res.status(200).json(updatedCustomer);
+  } catch (error) {
+    console.error("Error updating customer details:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 const removeCustomerAccount = async (req, res) => {
-  const { customerId } = req.user.id;
+  const { customerId } = req.params;
 
   try {
     const removedUser = await removeUser(customerId);
@@ -610,5 +682,9 @@ module.exports = {
   change2FASetting,
   uploadCustomerProfilePhoto,
   removeCustomerProfilePhoto,
-  removeCustomerAccount
+  removeCustomerAccount,
+  getCustomerDetailsForAdmin,
+  changeAccountActivation,
+  change2FASettingByAdmin,
+  changeCustomerDetailsByAdmin
 };
