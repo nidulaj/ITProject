@@ -16,7 +16,8 @@ const AdminDashboard = lazy(() => import("./features/user-management/pages/Admin
 const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
-const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))  
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))
+
 
 const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage"))
 
@@ -108,6 +109,11 @@ function App() {
 
               {/* 404 fallback */}
               <Route path="*" element={<Navigate to="/login" replace />} />
+
+              {/* Customer-facing discount view (independent route) */}
+        <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
+        
+
             </Routes>
           </Suspense>
         </Router>
