@@ -129,7 +129,7 @@ const PaymentPage = ({ onUpdateStats }) => {
   </table>
       </div>
 
-      {/* Payment Proof Modal */}
+
       {selectedProof && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-xl relative max-w-lg shadow-xl">

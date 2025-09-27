@@ -58,10 +58,11 @@ const getRecentActivity = async (req, res) => {
     const payments = paymentsRes.rows.map((p) => ({
       id: `payment-${p.id}`,
       message: `Payment by ${p.name} ${
-        p.payment_status.toLowerCase() === "completed" ? "approved ✅" : "submitted 🕒"
+        p.payment_status.toLowerCase() === "completed" ? "approved ✅" : "received 🕒"
       }`,
       timestamp: p.timestamp,
     }));
+
 
     const combined = [...discounts, ...payments].sort(
       (a, b) => new Date(b.timestamp) - new Date(a.timestamp)

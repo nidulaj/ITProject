@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import { useNavigate } from "react-router-dom";
-import { authFetch } from "../../user-management/utils/authFetchStaff";
+import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 const PaymentForm = ({ onUpdateStats }) => {
   const [customerName, setCustomerName] = useState("");
@@ -11,6 +12,26 @@ const PaymentForm = ({ onUpdateStats }) => {
   const [paymentProof, setPaymentProof] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Pre-populate form with order data if available
+  useEffect(() => {
+    if (location.state) {
+      const { orderData, totalAmount, customerName: passedCustomerName } = location.state;
+      
+      if (passedCustomerName) {
+        setCustomerName(passedCustomerName);
+      }
+      
+      if (totalAmount) {
+        setAmount(totalAmount.toString());
+      }
+      
+      // Set today's date as default
+      const today = new Date().toISOString().split('T')[0];
+      setPaymentDate(today);
+    }
+  }, [location.state]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,8 +42,12 @@ const PaymentForm = ({ onUpdateStats }) => {
       formData.append("amount", amount);
       formData.append("payment_date", paymentDate);
       formData.append("payment_proof", paymentProof);
-      
-      const res = await authFetch({
+
+      /*await axios.post("http://localhost:5000/api/payments", formData, {
+        headers: { "Content-Type": "multipart/form-data", },
+      });*/
+
+      const res = await authFetchCustomer({
       method: 'post',
       url: "http://localhost:5000/api/payments",
       data: formData,
