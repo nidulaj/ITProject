@@ -10,6 +10,8 @@ import StatCard from "../components/StatCard";
 import { Clock, CheckCircle, Percent, Tag, CreditCard } from "lucide-react";
 import axios from "axios";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
+import Header from "../components/Header"
+import UserProfile from "../../user-management/components/UserProfile"
 
 const FinanceDashboard = () => {
   const [stats, setStats] = useState({
@@ -18,7 +20,25 @@ const FinanceDashboard = () => {
     total_discounts: 0,
   });
 
+    const [userInfo, setUserInfo] = useState(null);
+
   const [recentActivity, setRecentActivity] = useState([]);
+
+    useEffect(() => {
+      const fetchUserInfo = async () => {
+      try {
+          const res = await authFetch({
+            method: "get",
+            url: `http://localhost:5000/api/staff/auth/userInfo`,
+          });
+          setUserInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
+  fetchUserInfo();
+ 
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -51,9 +71,7 @@ const FinanceDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-8">
-      <h1 className="text-3xl font-bold text-blue-600 text-center mb-6">
-        Finance Dashboard
-      </h1>
+      <Header userInfo = {userInfo} />
 
       <Routes>
         <Route
@@ -129,18 +147,10 @@ const FinanceDashboard = () => {
         <Route path="/discounts" element={<DiscountPage onUpdateStats={fetchStats} onUpdateRecentActivity={fetchRecentActivity}/>} />
         <Route path="/payments" element={<PaymentPage onUpdateStats={fetchStats} />} />
         <Route path="/payment-form" element={<PaymentFormPage onUpdateStats={fetchStats} />} />
+        <Route path="userProfile" element={<UserProfile />} />
       </Routes>
     </div>
   );
 };
 
 export default FinanceDashboard;
-
-
-
-
-
-
-
-
-

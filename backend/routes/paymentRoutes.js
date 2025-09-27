@@ -22,7 +22,4 @@ router.get("/", staffAuthMiddleware, paymentController.getPayments);
 router.put("/status/:id", staffAuthMiddleware, paymentController.updatePaymentStatus);
 
 
-
-
 module.exports = router;
-
