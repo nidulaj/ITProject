@@ -21,7 +21,11 @@ const {
   change2FASetting,
   uploadCustomerProfilePhoto,
   removeCustomerProfilePhoto,
-  removeCustomerAccount
+  getCustomerDetailsForAdmin,
+  changeAccountActivation,
+  change2FASettingByAdmin,
+  changeCustomerDetailsByAdmin,
+    removeCustomerAccount,
 } = require("../controllers/customerAuthController");
 
 const upload = require("../middlewares/uploadMiddleware");
@@ -41,6 +45,12 @@ router.post("/resend-2fa", tempMiddleware, resend2FACode);
 
 router.get("/allCustomers", authMiddleware, getAllCustomerDetails);
 router.get("/userInfo", authMiddleware, getCustomerDetails);
+
+router.get("/customerDetailsForAdmin/:id", authMiddleware, getCustomerDetailsForAdmin);
+router.put("/changeAccountActivation/:customerId", authMiddleware, changeAccountActivation);
+router.put("/change2FASetting/:customerId", authMiddleware, change2FASettingByAdmin);
+router.put("/changeCustomerDetails/:customerId", authMiddleware, changeCustomerDetailsByAdmin);
+router.put("/removeCustomerAccount/:customerId", authMiddleware, removeCustomerAccount);
 
 router.put("/updateUserDetails", authMiddleware, updateUserDetails);
 router.put("/updatePassword", authMiddleware, updatePassword);

@@ -23,6 +23,12 @@ router.get("/test", authMiddleware, (req, res) => {
   });
 });
 
+
+// Test route to verify middleware is working
+router.get("/test", authMiddleware, (req, res) => {
+  res.json({ message: "Payment middleware test successful", user: req.user });
+});
+
 router.post("/", authMiddleware, upload.single("payment_proof"), paymentController.addPayment);
 
 router.get("/", staffAuthMiddleware, paymentController.getPayments);

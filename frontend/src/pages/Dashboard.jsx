@@ -4,12 +4,16 @@ import {authFetchCustomer} from "../features/user-management/utils/authFetchCust
 import DashboardHeader from "../components/DashboardHeader";
 import CustomerDiscountPage from "../features/financial-management/pages/CustomerDiscountPage";
 import CustomerCatalog from "../features/order-management/pages/CustomerCatalog";
+
 import CustomerOrders from "../features/order-management/pages/CustomerOrders";
+
 import UserProfile from "../pages/UserProfile"
 import ThemeProvider from "../contexts/ThemeContext";
 import NotificationProvider from "../contexts/NotificationContext";
 import CustomerProvider from "../contexts/CustomerContext";
 import CartSidebar from "../features/order-management/components/CartSidebar";
+
+
 const FeedbackPage = () => <div>Feedback Page</div>;
 
 export default function Dashboard() {

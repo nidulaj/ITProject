@@ -2,12 +2,23 @@
 const { pool } = require('../db/dbConnect'); // your db connection file
 
 
-const createPayment = async (customer_name, amount, payment_status, payment_date, payment_proof) => {
+const createPayment = async (order_id, customer_name, amount, payment_status, payment_date, payment_proof) => {
+  console.log('Payment model - creating payment with:', {
+    order_id,
+    customer_name,
+    amount,
+    payment_status,
+    payment_date,
+    payment_proof
+  });
+  
   const result = await pool.query(
-    `INSERT INTO payments (customer_name, amount, payment_status, payment_date, payment_proof) 
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [customer_name, amount, payment_status, payment_date, payment_proof]
+    `INSERT INTO payments (order_id, customer_name, amount, payment_status, payment_date, payment_proof) 
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [order_id, customer_name, amount, payment_status, payment_date, payment_proof]
   );
+  
+  console.log('Payment created in database:', result.rows[0]);
   return result.rows[0];
 };
 
