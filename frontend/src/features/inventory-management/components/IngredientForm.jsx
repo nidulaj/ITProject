@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const IngredientManager = () => {
   const [form, setForm] = useState({
-    name: "",
+    icode_id: "",
     quantity: "",
     expiry_date: "",
     storage_zone_id: "",
   });
-  const [ingredients, setIngredients] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // Validation error state
+  const [ingredients, setIngredients] = useState([]);
+  const [icodes, setIcodes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // For popup edit form
+  // Edit form
   const [editForm, setEditForm] = useState({
-    name: "",
+    icode_id: "",
     quantity: "",
     expiry_date: "",
     storage_zone_id: "",
@@ -26,14 +25,10 @@ const IngredientManager = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editError, setEditError] = useState("");
 
+  // Fetch ingredients
   const fetchIngredients = async () => {
-      
-    //   const res = await axios.get("http://localhost:5000/api/ingredient");
-     try {
-          const res = await authFetch({
-            method: "get",
-            url: "http://localhost:5000/api/ingredient",
-          });
+    try {
+      const res = await authFetch({ method: "get", url: "http://localhost:5000/api/ingredient" });
       if (Array.isArray(res.data)) setIngredients(res.data);
       else if (res.data.ingredients) setIngredients(res.data.ingredients);
       else setIngredients([]);
@@ -44,17 +39,29 @@ const IngredientManager = () => {
     }
   };
 
+  // Fetch icodes for dropdown
+  const fetchIcodes = async () => {
+    try {
+      const res = await authFetch({ method: "get", url: "http://localhost:5000/api/icodes" });
+      setIcodes(res.data);
+    } catch (err) {
+      console.error("Error fetching icodes:", err);
+    }
+  };
+
   useEffect(() => {
     fetchIngredients();
+    fetchIcodes();
   }, []);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // Form change handler
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Add new ingredient
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation: expiry date must not be in past
+    // Validation: expiry date
     const today = new Date().setHours(0, 0, 0, 0);
     const selectedDate = new Date(form.expiry_date).setHours(0, 0, 0, 0);
     if (selectedDate < today) {
@@ -64,15 +71,9 @@ const IngredientManager = () => {
     setError("");
 
     try {
-      //await axios.post("http://localhost:5000/api/ingredient", form);
-      const res = await authFetch({
-              method: "post",
-              url: "http://localhost:5000/api/ingredient",
-              data: form,
-            });
-
+      await authFetch({ method: "post", url: "http://localhost:5000/api/ingredient", data: form });
       alert("Ingredient added!");
-      setForm({ name: "", quantity: "", expiry_date: "", storage_zone_id: "" });
+      setForm({ icode_id: "", quantity: "", expiry_date: "", storage_zone_id: "" });
       fetchIngredients();
     } catch (err) {
       console.error(err);
@@ -80,15 +81,11 @@ const IngredientManager = () => {
     }
   };
 
+  // Delete ingredient
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
       try {
-        //await axios.delete(`http://localhost:5000/api/ingredient/${id}`);
-        const res = await authFetch({
-        method: "delete",
-        url: `http://localhost:5000/api/ingredient/${id}`,
-        });
-
+        await authFetch({ method: "delete", url: `http://localhost:5000/api/ingredient/${id}` });
         alert("Ingredient deleted!");
         fetchIngredients();
       } catch (err) {
@@ -98,9 +95,10 @@ const IngredientManager = () => {
     }
   };
 
+  // Open edit modal
   const handleEdit = (ingredient) => {
     setEditForm({
-      name: ingredient.name,
+      icode_id: ingredient.icode_id,
       quantity: ingredient.quantity,
       expiry_date: ingredient.expiry_date?.split("T")[0] || "",
       storage_zone_id: ingredient.storage_zone_id,
@@ -109,10 +107,10 @@ const IngredientManager = () => {
     setShowEditModal(true);
   };
 
+  // Update ingredient
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    // Validation: expiry date must not be in past
     const today = new Date().setHours(0, 0, 0, 0);
     const selectedDate = new Date(editForm.expiry_date).setHours(0, 0, 0, 0);
     if (selectedDate < today) {
@@ -122,15 +120,7 @@ const IngredientManager = () => {
     setEditError("");
 
     try {
-          const res = await authFetch({
-        method: "put",
-        url: `http://localhost:5000/api/ingredient/${editId}`,
-        data: {
-        ingredient_id: editId,
-        ...editForm,
-        },
-      });
-
+      await authFetch({ method: "put", url: `http://localhost:5000/api/ingredient/${editId}`, data: editForm });
       alert("Ingredient updated!");
       setShowEditModal(false);
       setEditId(null);
@@ -143,37 +133,39 @@ const IngredientManager = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
-      {/* Ingredient Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-xl p-6 border border-gray-200"
-      >
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Add Ingredient</h2>
-
+      {/* Add Ingredient Form */}
+      <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+        <h2 className="text-2xl font-bold mb-6">Add Ingredient</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
+            <label className="block text-gray-700 mb-2 font-medium">ICode</label>
+            <select
+              name="icode_id"
+              value={form.icode_id}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
+            >
+              <option value="">Select ICode</option>
+              {icodes.map((icode) => (
+                <option key={icode.ingredient_id} value={icode.ingredient_id}>
+                  {icode.ingredient_code} - {icode.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">Quantity</label>
+            <label className="block text-gray-700 mb-2 font-medium">Quantity(l,kg,units)</label>
             <input
               type="number"
               name="quantity"
               value={form.quantity}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
 
@@ -185,38 +177,32 @@ const IngredientManager = () => {
               value={form.expiry_date}
               onChange={handleChange}
               required
-              min={new Date().toISOString().split("T")[0]} // prevents selecting past dates
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
 
           <div>
-            <label className="block text-gray-700 mb-2 font-medium">
-              Storage Zone ID
-            </label>
+            <label className="block text-gray-700 mb-2 font-medium">Storage Zone ID</label>
             <input
               type="text"
               name="storage_zone_id"
               value={form.storage_zone_id}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition"
-        >
+        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg">
           Save
         </button>
       </form>
 
-      {/* Ingredient List */}
+      {/* Ingredient Table */}
       <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Ingredient List</h2>
-
+        <h2 className="text-2xl font-bold mb-6">Ingredient List</h2>
         {loading ? (
           <p className="text-gray-700">Loading ingredients...</p>
         ) : ingredients.length === 0 ? (
@@ -226,62 +212,27 @@ const IngredientManager = () => {
             <table className="min-w-full border border-gray-300 rounded-lg text-gray-800">
               <thead className="bg-blue-600 text-white">
                 <tr>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">ID</th>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">Name</th>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">
-                    Quantity(kg,l,units)
-                  </th>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">
-                    Expiry Date
-                  </th>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">
-                    Storage Zone ID
-                  </th>
-                  <th className="py-3 px-4 text-left border-r border-blue-700">
-                    Created At
-                  </th>
-                  <th className="py-3 px-4 text-left">Actions</th>
+                  <th className="py-3 px-4 border-r border-blue-700">ID</th>
+                  <th className="py-3 px-4 border-r border-blue-700">ICode</th>
+                  <th className="py-3 px-4 border-r border-blue-700">Quantity(l,kg,units)</th>
+                  <th className="py-3 px-4 border-r border-blue-700">Expiry Date</th>
+                  <th className="py-3 px-4 border-r border-blue-700">Storage Zone ID</th>
+                  <th className="py-3 px-4 border-r border-blue-700">Created At</th>
+                  <th className="py-3 px-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {ingredients.map((ingredient, idx) => (
-                  <tr
-                    key={ingredient.ingredient_id}
-                    className={`${
-                      idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"
-                    } hover:bg-blue-100 transition-colors`}
-                  >
-                    <td className="py-2 px-4 border-r border-gray-300 font-medium">
-                      {ingredient.ingredient_id}
-                    </td>
-                    <td className="py-2 px-4 border-r border-gray-300">
-                      {ingredient.name}
-                    </td>
-                    <td className="py-2 px-4 border-r border-gray-300">
-                      {ingredient.quantity}
-                    </td>
-                    <td className="py-2 px-4 border-r border-gray-300">
-                      {ingredient.expiry_date?.split("T")[0]}
-                    </td>
-                    <td className="py-2 px-4 border-r border-gray-300">
-                      {ingredient.storage_zone_id}
-                    </td>
-                    <td className="py-2 px-4 border-r border-gray-300">
-                      {new Date(ingredient.created_at).toLocaleDateString()}
-                    </td>
+                  <tr key={ingredient.ingredient_id} className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-blue-100 transition-colors`}>
+                    <td className="py-2 px-4 border-r border-gray-300 font-medium">{ingredient.ingredient_id}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">{ingredient.ingredient_code} - {ingredient.icode_name}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">{ingredient.quantity}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">{ingredient.expiry_date?.split("T")[0]}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">{ingredient.storage_zone_id}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">{new Date(ingredient.created_at).toLocaleDateString()}</td>
                     <td className="py-2 px-4 flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(ingredient)}
-                        className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-lg transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(ingredient.ingredient_id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => handleEdit(ingredient)} className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-lg">Edit</button>
+                      <button onClick={() => handleDelete(ingredient.ingredient_id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg">Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -291,72 +242,33 @@ const IngredientManager = () => {
         )}
       </div>
 
-      {/* Popup Edit Modal */}
+      {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">
-              Update Ingredient
-            </h2>
-
+            <h2 className="text-xl font-bold mb-4">Update Ingredient</h2>
             {editError && <p className="text-red-500 mb-4">{editError}</p>}
-
             <form onSubmit={handleUpdate} className="space-y-4">
-              <input
-                type="text"
-                name="name"
-                value={editForm.name}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
-                className="w-full px-4 py-2 border rounded-lg"
+              <select
+                name="icode_id"
+                value={editForm.icode_id}
+                onChange={(e) => setEditForm({ ...editForm, icode_id: e.target.value })}
                 required
-              />
-              <input
-                type="number"
-                name="quantity"
-                value={editForm.quantity}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, quantity: e.target.value })
-                }
                 className="w-full px-4 py-2 border rounded-lg"
-                required
-              />
-              <input
-                type="date"
-                name="expiry_date"
-                value={editForm.expiry_date}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, expiry_date: e.target.value })
-                }
-                className="w-full px-4 py-2 border rounded-lg"
-                min={new Date().toISOString().split("T")[0]}
-                required
-              />
-              <input
-                type="text"
-                name="storage_zone_id"
-                value={editForm.storage_zone_id}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, storage_zone_id: e.target.value })
-                }
-                className="w-full px-4 py-2 border rounded-lg"
-                required
-              />
+              >
+                <option value="">Select ICode</option>
+                {icodes.map((icode) => (
+                  <option key={icode.ingredient_id} value={icode.ingredient_id}>
+                    {icode.ingredient_code} - {icode.name}
+                  </option>
+                ))}
+              </select>
+              <input type="number" name="quantity" value={editForm.quantity} onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-4 py-2 border rounded-lg" required />
+              <input type="date" name="expiry_date" value={editForm.expiry_date} onChange={(e) => setEditForm({ ...editForm, expiry_date: e.target.value })} className="w-full px-4 py-2 border rounded-lg" min={new Date().toISOString().split("T")[0]} required />
+              <input type="text" name="storage_zone_id" value={editForm.storage_zone_id} onChange={(e) => setEditForm({ ...editForm, storage_zone_id: e.target.value })} className="w-full px-4 py-2 border rounded-lg" required />
               <div className="flex justify-end space-x-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 px-4 py-2 rounded-lg text-white hover:bg-blue-700 transition"
-                >
-                  Update
-                </button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
+                <button type="submit" className="bg-blue-600 px-4 py-2 rounded-lg text-white hover:bg-blue-700">Update</button>
               </div>
             </form>
           </div>

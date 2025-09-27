@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useCustomer } from '../../../contexts/CustomerContext';
+import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
 
 const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, onClearCart, total }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,7 +45,11 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       console.log('Creating order:', orderData);
       
       // Create order via API
-      const response = await axios.post('http://localhost:5000/api/orders', orderData);
+      const response = await authFetchCustomer({
+        method: 'post',
+        url: 'http://localhost:5000/api/orders',
+        data: orderData
+      });
       
       if (response.data.message === 'Order placed successfully') {
         // Clear cart after successful order
