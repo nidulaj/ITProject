@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
 import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -91,10 +90,6 @@ const PaymentForm = ({ onUpdateStats }) => {
       for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
       }
-
-      /*await axios.post("http://localhost:5000/api/payments", formData, {
-        headers: { "Content-Type": "multipart/form-data", },
-      });*/
 
       const res = await authFetchCustomer({
       method: 'post',
@@ -199,8 +194,3 @@ const PaymentForm = ({ onUpdateStats }) => {
 };
 
 export default PaymentForm;
-
-
-
-
-
