@@ -105,7 +105,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         showError('Failed to place order. Please try again.');
       }
     } catch (error) {
-      //console.error('Error placing order:', error);
+      console.error('Error placing order:', error);
       let errorMessage = 'Failed to place order. Please try again.';
       
       if (error.response && error.response.data && error.response.data.error) {
