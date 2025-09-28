@@ -26,7 +26,12 @@ const CustomerDiscountPage = lazy(() => import("./features/financial-management/
 
 
 
-const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage"))
+const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage")) //Rashmika
+const IngReqAccTable = lazy(() => import ("./features/production-management/components/IngReqAccTable")) //Rahmika
+const PubuduHomepage = lazy(() => import ("./features/production-management/pages/PubuduHomePage")) //Rashmika
+
+
+
 const ResetPasswordStaff = lazy(() => import ("./features/user-management/pages/ResetPasswordStaff"))
 
 const DashboardLayout = ({ children }) => <div>{children}</div>
@@ -45,8 +50,10 @@ function App() {
               <Route path="/verifyEmail" element={<VerifyEmail />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/reset-password-staff" element={<ResetPasswordStaff />} />
-              <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} />
               
+              <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} /> 
+              <Route path="/IngReqAccTable" element={<IngReqAccTable />} />
+              <Route path="/PubuduHomepage" element={<PubuduHomepage />} />
 
               {/* User Dashboards */}
               <Route

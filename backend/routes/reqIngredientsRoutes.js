@@ -21,6 +21,7 @@ router.delete("/:req_id", deleteRequest);
 router.put("/:req_id", updateRequest);
 
 //check status update
-router.patch("/:req_id/status", updateRequestStatus);
+router.patch("/:req_id/status", updateRequestStatus);  // PATCH method for status update
+
 
 module.exports = router;
