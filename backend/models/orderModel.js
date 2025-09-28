@@ -1,22 +1,23 @@
 const { pool } = require('../db/dbConnect');
 
 // Create a new order
-const createOrder = async (cus_id, total_price, items) => {
+const createOrder = async (cus_id, total_price, items, discount_id = null, discount_amount = 0) => {
   const client = await pool.connect();
   
   try {
     await client.query('BEGIN');
     
-    // Create the order
+    // Create the order with discount information
     const orderResult = await client.query(
-      'INSERT INTO orders (cus_id, total_price, order_status, payment_status, order_date) VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-      [cus_id, total_price, 'pending', 'pending']
+      'INSERT INTO orders (cus_id, total_price, order_status, payment_status, order_date, discount_id, discount_amount) VALUES ($1, $2, $3, $4, NOW(), $5, $6) RETURNING *',
+      [cus_id, total_price, 'pending', 'pending', discount_id, discount_amount]
     );
     
     const order = orderResult.rows[0];
     console.log('Order created:', order);
     console.log('Order keys:', Object.keys(order));
     console.log('Order ID field:', order.order_id || order.id || order.orderId);
+    console.log('Discount applied:', { discount_id, discount_amount });
     
     // Insert order items if there's an order_items table
     if (items && items.length > 0) {

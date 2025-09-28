@@ -15,9 +15,9 @@ const { createNotification } = require('../models/notificationModel');
 // Create a new order
 const createOrderController = async (req, res) => {
   try {
-    const { customer_id, items } = req.body;
+    const { customer_id, items, discount_id, discount_amount } = req.body;
     
-    console.log('Create order request:', { customer_id, items });
+    console.log('Create order request:', { customer_id, items, discount_id, discount_amount });
     
     if (!customer_id || !items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ 
@@ -27,13 +27,20 @@ const createOrderController = async (req, res) => {
     }
     
     // Calculate total price
-    const total_price = items.reduce((sum, item) => {
+    const subtotal = items.reduce((sum, item) => {
       return sum + (parseFloat(item.price) * parseInt(item.quantity));
     }, 0);
     
-    console.log(`Creating order for customer ${customer_id} with total price: ${total_price}`);
+    // Apply discount if provided
+    const discountAmount = parseFloat(discount_amount) || 0;
+    const total_price = subtotal - discountAmount;
     
-    const newOrder = await createOrder(customer_id, total_price, items);
+    console.log(`Creating order for customer ${customer_id}:`);
+    console.log(`- Subtotal: ${subtotal}`);
+    console.log(`- Discount: ${discountAmount}`);
+    console.log(`- Final total: ${total_price}`);
+    
+    const newOrder = await createOrder(customer_id, total_price, items, discount_id, discountAmount);
     
     console.log('Order created successfully:', newOrder);
     
