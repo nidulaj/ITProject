@@ -13,7 +13,7 @@ const CustomerDashboard = lazy(() => import("./pages/Dashboard"))
 const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"))
 const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
 const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
-const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
+const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))  //Rashmika
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 
@@ -79,7 +79,7 @@ function App() {
               />
                   
               <Route
-                path="/dashboard/production"
+                path="/dashboard/production/*"
                 element={
                   <ProtectedRoute>
                     <DashboardLayout>
