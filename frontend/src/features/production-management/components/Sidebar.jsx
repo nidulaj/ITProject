@@ -1,6 +1,6 @@
 // components/Sidebar.jsx
 import React from 'react';
-import { Home, Factory, ChefHat, Package, RotateCcw, Check } from 'lucide-react';
+import { Home, Factory, ChefHat, Package, RotateCcw, Check, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -16,7 +16,7 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode }) => {
     { id: 'ingredients', label: 'Ingredient Requests', icon: Package },
     { id: 'productions', label: 'Manage Productions', icon: Factory },
     { id: 'returns', label: 'Returns & Refunds', icon: RotateCcw },
-    { id: 'userProfile', label: 'User Profile', icon: RotateCcw }
+    { id: 'userProfile', label: 'User Profile', icon: User }
 
   ];
 
@@ -82,7 +82,7 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode }) => {
       </nav>
 
       {/* Bottom Accent */}
-      <div className={`mt-auto pt-8 border-t ${
+      {/* <div className={`mt-auto pt-8 border-t ${
         darkMode ? 'border-gray-600' : 'border-blue-600/30'
       }`}>
         <div className={`${
@@ -92,7 +92,7 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode }) => {
         } rounded-lg p-3 text-center`}>
           <p className="text-xs text-blue-200">Pubudu Production System v2.0</p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
