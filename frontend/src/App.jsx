@@ -17,6 +17,7 @@ const ProductionDashboard = lazy(() => import("./features/production-management/
 const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
 const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
 const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))
+const PaymentFormPage = lazy(() => import("./features/financial-management/pages/PaymentFormPage"))
 const CustomerDiscountPage = lazy(() => import("./features/financial-management/pages/CustomerDiscountPage"));
 
 
@@ -92,6 +93,17 @@ function App() {
                   <ProtectedRoute>
                     <DashboardLayout>
                       <FinanceDashboard />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/finance/payment-form"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <PaymentFormPage />
                     </DashboardLayout>
                   </ProtectedRoute>
                 }
