@@ -44,6 +44,7 @@ function AppContent() {
     <>
       <Routes>
         {/* Public routes */}
+        <Route path="/" element={<PubuduHomepage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify2FA" element={<Verify2FA />} />
