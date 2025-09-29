@@ -16,18 +16,6 @@ const storage = multer.diskStorage({
   }
 });
 
-router.get("/test", authMiddleware, (req, res) => {
-  res.json({
-    message: "Payment middleware successful",
-    user: req.user, // assuming your authMiddleware sets req.user
-  });
-});
-
-
-// Test route to verify middleware is working
-router.get("/test", authMiddleware, (req, res) => {
-  res.json({ message: "Payment middleware test successful", user: req.user });
-});
 
 router.post("/", authMiddleware, upload.single("payment_proof"), paymentController.addPayment);
 

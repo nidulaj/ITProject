@@ -136,6 +136,9 @@ const DiscountPage = ({ onUpdateStats, onUpdateRecentActivity }) => {
               <p className="text-gray-700">
                 <span className="font-medium">Criteria:</span> {d.eligibility_criteria}
               </p>
+              <p className="text-gray-700">
+                <span className="font-medium">Code:</span> <span className="font-mono bg-blue-100 px-2 py-1 rounded text-blue-800">{d.discount_code || 'N/A'}</span>
+              </p>
               <p className="text-gray-700 mt-2 text-sm">
                 <span className="font-medium">Valid:</span>{" "}
                 {String(d.valid_from ?? "").slice(0, 10)} → {String(d.valid_to ?? "").slice(0, 10)}

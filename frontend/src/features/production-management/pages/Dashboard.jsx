@@ -8,7 +8,7 @@ import ActionButton from '../components/ActionButton';
 import Modal from '../components/Modal';
 import RecipeForm from '../components/RecipeForm';
 import RequestIngredientsForm from '../components/RequestIngredientsForm';
-import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon } from 'lucide-react';
+import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon, X } from 'lucide-react';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const API = 'http://localhost:5000';
@@ -37,6 +37,9 @@ const ProductionDashboard = () => {
   const [pendingCOError, setPendingCOError] = useState('');
   const [notifOpen, setNotifOpen] = useState(false);
 
+  const [modalImage, setModalImage] = useState(null); // State to hold the image URL for the modal
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+
   useEffect(() => {
     fetchProductions();
     fetchRequestsSlim();
@@ -54,6 +57,18 @@ const ProductionDashboard = () => {
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Function to handle View button click and open modal
+  const handleViewImage = (imageUrl) => {
+    setModalImage(imageUrl); // Set the image URL for the modal
+    setIsModalOpen(true); // Open the modal
+  };
+
+  //Close modal
+  const closeModalPic = () => {
+    setIsModalOpen(false);
+    setModalImage(null); // Reset the modal image
+  };
 
   const fetchProductions = async () => {
     try {
@@ -114,17 +129,16 @@ const ProductionDashboard = () => {
         Phone: r.phone || '—',
         Reason: r.reason,
         Image: r.image_url ? (
-          <a
-            href={r.image_url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-600 hover:underline"
-          >
-            view
-          </a>
-        ) : (
-          '—'
-        ),
+          
+                          <button
+                            onClick={() => handleViewImage(r.image_url)} // Open modal with image
+                            className="text-blue-600 hover:underline"
+                          >
+                            View Image
+                          </button>
+                        ) : (
+                          "—"
+                        ),
         Status: r.status,
         __raw: r,
       }));
@@ -534,6 +548,26 @@ const ProductionDashboard = () => {
           actions={false} // we inject our own Actions cells already
         />
       </Modal>
+      {/* Modal for viewing image */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full">
+            <div className="flex justify-between">
+              <h2 className="text-2xl font-semibold">View Image</h2>
+              <button
+                onClick={closeModalPic}
+                className="text-xl text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="mt-4">
+              <img src={`http://localhost:5000${modalImage}`} alt="Return Image" className="w-full h-auto" />
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

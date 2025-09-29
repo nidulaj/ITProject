@@ -1,26 +1,32 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react"
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { AuthProvider } from "./components/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { GoogleOAuthProvider } from "@react-oauth/google"
+import { AuthProvider } from "./components/AuthContext"
+import { NotificationProvider } from "./contexts/NotificationContext"
+import ProtectedRoute from "./components/ProtectedRoute"
 
-// Lazy-loaded pages
-const Register = lazy(() => import("./features/user-management/pages/Register"));
-const Login = lazy(() => import("./features/user-management/pages/Login"));
-const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"));
-const CustomerDashboard = lazy(() => import("./pages/Dashboard"));
-const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"));
-const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"));
-const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"));
-const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"));
-const OrderDashboard = lazy(() => import("./features/order-management/pages/OrderDashboard"));
-const InventryDashboard = lazy(() => import("./features/inventory-management/pages/Dashboard"));
-const FinanceDashboard = lazy(() => import("./features/financial-management/pages/FinanceDashboard"));
-const ResetPassword = lazy(() => import("./features/user-management/pages/ResetPassword"));
-const ResetPasswordStaff = lazy(() => import("./features/user-management/pages/ResetPasswordStaff"));
+
+const Register = lazy(() => import("./features/user-management/pages/Register"))
+const Login = lazy(() => import("./features/user-management/pages/Login"))
+const Verify2FA = lazy(() => import("./features/user-management/pages/Verify2FA"))
+const CustomerDashboard = lazy(() => import("./pages/Dashboard"))
+const CustomerCatalog = lazy(() => import("./features/order-management/pages/CustomerCatalogWrapper"))
+const VerifyEmail = lazy(() => import("./features/user-management/pages/VerifyEmail"))
+const AdminDashboard = lazy(() => import("./features/user-management/pages/AdminDashboard"))
+const ProductionDashboard = lazy(() => import("./features/production-management/pages/Dashboard"))
+const OrderDashboard = lazy(() => import ("./features/order-management/pages/OrderDashboard"))
+const InventryDashboard = lazy(() => import ("./features/inventory-management/pages/Dashboard")) 
+const FinanceDashboard = lazy(() => import ("./features/financial-management/pages/FinanceDashboard"))
+const PaymentFormPage = lazy(() => import("./features/financial-management/pages/PaymentFormPage"))
+const ResetPassword = lazy(() => import ("./features/user-management/pages/ResetPassword"))
 const CustomerDiscountPage = lazy(() => import("./features/financial-management/pages/CustomerDiscountPage"));
-const YogurtLandingPage = lazy(() => import("./features/production-management/pages/YogurtLandingPage"));
 const SupportWidget = lazy(() => import("./features/user-management/components/SupportWidget"));
+
+
+const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage")) //Rashmika
+const IngReqAccTable = lazy(() => import ("./features/production-management/components/IngReqAccTable")) //Rahmika
+const PubuduHomepage = lazy(() => import ("./features/production-management/pages/PubuduHomePage")) //Rashmika
+const ResetPasswordStaff = lazy(() => import ("./features/user-management/pages/ResetPasswordStaff"))
 
 const DashboardLayout = ({ children }) => <div>{children}</div>;
 
@@ -28,8 +34,11 @@ const DashboardLayout = ({ children }) => <div>{children}</div>;
 function AppContent() {
   const location = useLocation();
 
-  // Hide SupportWidget if path starts with admin dashboard
+
   const hideSupportWidget = location.pathname.startsWith("/dashboard/admin");
+
+
+
 
   return (
     <>

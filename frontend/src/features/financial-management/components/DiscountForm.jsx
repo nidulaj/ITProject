@@ -11,6 +11,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
     eligibility_criteria: "seasonal offer",
     valid_from: "",
     valid_to: "",
+    discount_code: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -36,6 +37,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
         eligibility_criteria: discount.eligibility_criteria || "seasonal offer",
         valid_from: toInputDate(discount.valid_from),
         valid_to: toInputDate(discount.valid_to),
+        discount_code: discount.discount_code || "",
       });
     } else {
       
@@ -46,6 +48,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
         eligibility_criteria: "seasonal offer",
         valid_from: "",
         valid_to: "",
+        discount_code: "",
       });
     }
   }, [discount]);
@@ -66,6 +69,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
       eligibility_criteria: fd.eligibility_criteria,
       valid_from: fd.valid_from || null,
       valid_to: fd.valid_to || null,
+      discount_code: fd.discount_code,
     };
   };
 
@@ -74,6 +78,23 @@ const DiscountForm = ({ discount, onSuccess }) => {
 
     const num = Number(formData.value);
     let hasError = false;
+
+    // Validation for discount code
+    if (!formData.discount_code) {
+      setErrors((prev) => ({
+        ...prev,
+        discount_code: "Discount code is required",
+      }));
+      hasError = true;
+    } else if (formData.discount_code.length < 3) {
+      setErrors((prev) => ({
+        ...prev,
+        discount_code: "Discount code must be at least 3 characters",
+      }));
+      hasError = true;
+    } else {
+      setErrors((prev) => ({ ...prev, discount_code: null }));
+    }
 
     // Validation for value (already partially included)
   if (formData.discount_type === "percentage" && (num < 1 || num > 100)) {
@@ -155,6 +176,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
           eligibility_criteria: "seasonal offer",
           valid_from: "",
           valid_to: "",
+          discount_code: "",
         });
       }
     } catch (error) {
@@ -228,6 +250,29 @@ const DiscountForm = ({ discount, onSuccess }) => {
           <option value="totalprice>5000">Total Price &gt; 5000</option>
           <option value="totalprice>10000">Total Price &gt; 10000</option>
         </select>
+      </label>
+
+      <label className="flex flex-col">
+        Discount Code:
+        <input
+          type="text"
+          name="discount_code"
+          value={formData.discount_code}
+          onChange={(e) => {
+            const value = e.target.value.toUpperCase();
+            setFormData(prev => ({ ...prev, discount_code: value }));
+          }}
+          placeholder="e.g., LKLKU12"
+          maxLength={10}
+          required
+          className="border p-2 rounded"
+        />
+        <span className="text-xs text-gray-500 mt-1">
+          Enter a unique discount code (e.g., LKLKU12, SAVE25, WELC99)
+        </span>
+        {errors.discount_code && (
+          <span className="text-sm text-red-500 mt-1">{errors.discount_code}</span>
+        )}
       </label>
 
       <label className="flex flex-col">

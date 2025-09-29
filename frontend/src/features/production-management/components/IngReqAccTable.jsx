@@ -22,16 +22,18 @@ export default function IngReqAccTable() {
     }
   };
 
-  // Update the status (accept or reject) of a request
   const updateStatus = async (id, status) => {
-    try {
-      await axios.put(`${API}/api/req_ingredients/${id}/status`, { status });
-      // Update the local state to reflect the change immediately
-      setRequests(requests.map((r) => (r.req_id === id ? { ...r, status } : r)));
-    } catch (e) {
-      setErr(e?.response?.data?.error || e.message || "Failed to update status");
-    }
-  };
+  try {
+    // Use PATCH for updating the status
+    const response = await axios.patch(`${API}/api/req_ingredients/${id}/status`, { status });
+    
+    // Update the local state to reflect the status change immediately
+    setRequests(requests.map((r) => (r.req_id === id ? { ...r, status } : r)));
+  } catch (e) {
+    setErr(e?.response?.data?.error || e.message || "Failed to update status");
+  }
+};
+
 
   useEffect(() => {
     loadRequests();

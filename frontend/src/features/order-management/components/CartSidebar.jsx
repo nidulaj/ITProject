@@ -4,13 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useCustomer } from '../../../contexts/CustomerContext';
 import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
+import { useDiscountCode } from '../../../hooks/useDiscountCode';
 
 const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, onClearCart, total }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const { showSuccess, showError } = useNotification();
+  const [discountInfo, setDiscountInfo] = useState(null);
+  const [isLoadingDiscount, setIsLoadingDiscount] = useState(false);
+  const { showSuccess, showError, showInfo } = useNotification();
   const { currentCustomer } = useCustomer();
   const navigate = useNavigate();
+  
+  // Discount code functionality
+  const {
+    discountCode,
+    setDiscountCode,
+    appliedDiscount,
+    isValidating,
+    error,
+    validateDiscountCode,
+    removeDiscount
+  } = useDiscountCode(total);
 
   // Fetch user info to get first name
   useEffect(() => {
@@ -51,14 +65,16 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
     try {
       setIsProcessing(true);
       
-      // Prepare order data
+      // Prepare order data with discount information
       const orderData = {
         customer_id: currentCustomer?.id || 1, // Use current customer ID
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
           price: item.price
-        }))
+        })),
+        discount_id: appliedDiscount ? appliedDiscount.discount.id : null,
+        discount_amount: appliedDiscount ? appliedDiscount.discountAmount : 0
       };
 
       console.log('Creating order:', orderData);
@@ -71,6 +87,14 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       });
       
       if (response.data.success && response.data.message === 'Order placed successfully') {
+        // Extract order ID first
+        const orderId = response.data.order?.order_id || 
+                       response.data.order?.id || 
+                       response.data.order?.orderId ||
+                       response.data.order?.orderID;
+        
+        console.log('Extracted order ID:', orderId);
+        
         // Clear cart after successful order
         onClearCart();
         
@@ -84,21 +108,15 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         console.log('Order object:', response.data.order);
         console.log('Order object keys:', Object.keys(response.data.order || {}));
         
-        // Try different possible field names for order ID
-        const orderId = response.data.order?.order_id || 
-                       response.data.order?.id || 
-                       response.data.order?.orderId ||
-                       response.data.order?.orderID;
-        
-        console.log('Extracted order ID:', orderId);
-        
-        // Navigate to payment form with order data
+        // Navigate to payment form with order data and toast message
         navigate('/dashboard/finance/payment-form', { 
           state: { 
             orderData: response.data.order,
-            totalAmount: total,
+            totalAmount: appliedDiscount ? appliedDiscount.finalPrice : total,
             orderId: orderId,
-            customerName: userInfo?.first_name || currentCustomer?.name || 'Customer'
+            customerName: userInfo?.first_name || currentCustomer?.name || 'Customer',
+            showToast: true,
+            toastMessage: `Your #${orderId} is creating, please pay to proceed`
           } 
         });
       } else {
@@ -223,11 +241,82 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         {/* Footer */}
         {cart.length > 0 && (
           <div className="border-t border-gray-200 p-4 space-y-3">
-            {/* Total */}
+            {/* Discount Code Section */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Discount Code
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code (e.g., LKLKU12)"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {appliedDiscount ? (
+                  <button
+                    onClick={removeDiscount}
+                    className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition-colors duration-200"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => validateDiscountCode(discountCode)}
+                    disabled={!discountCode || isValidating}
+                    className="px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm rounded-md transition-colors duration-200"
+                  >
+                    {isValidating ? 'Validating...' : 'Apply'}
+                  </button>
+                )}
+              </div>
+              
+              {/* Error Message */}
+              {error && (
+                <p className="text-red-500 text-xs">{error}</p>
+              )}
+              
+              {/* Applied Discount Display */}
+              {appliedDiscount && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-600 text-sm font-medium">
+                        🎉 {appliedDiscount.discount.name}
+                      </span>
+                    </div>
+                    <span className="text-green-600 text-sm font-bold">
+                      -LKR {appliedDiscount.discountAmount.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Subtotal */}
             <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Subtotal:</span>
+              <span className="text-sm text-gray-600">
+                LKR {total.toFixed(2)}
+              </span>
+            </div>
+            
+            {/* Discount */}
+            {appliedDiscount && (
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-green-600">Discount:</span>
+                <span className="text-sm text-green-600 font-medium">
+                  -LKR {appliedDiscount.discountAmount.toFixed(2)}
+                </span>
+              </div>
+            )}
+            
+            {/* Total */}
+            <div className="flex justify-between items-center border-t border-gray-200 pt-2">
               <span className="text-lg font-semibold text-gray-900">Total:</span>
               <span className="text-lg font-bold text-blue-600">
-                LKR {total.toFixed(2)}
+                LKR {(appliedDiscount ? appliedDiscount.finalPrice : total).toFixed(2)}
               </span>
             </div>
             
