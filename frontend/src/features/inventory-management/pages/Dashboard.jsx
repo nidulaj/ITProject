@@ -8,6 +8,11 @@ import profilePic from "../../../assets/profile.jpg";
 import Header from "../components/Header";
 import UserProfile from "../../user-management/components/UserProfile";
 import IcodePage from "../components/IcodePage"; 
+import Ing_req_acc_table from "../components/ing_req_acc_table";
+ 
+ 
+ 
+ 
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("Dashboard");
@@ -61,6 +66,11 @@ const Dashboard = () => {
     { name: "Storage Zones", gradient: "from-blue-500 to-cyan-500" },
     { name: "User Profile", gradient: "from-blue-500 to-cyan-500" },
     { name: "Ingredient Codes", gradient: "from-blue-500 to-cyan-500" }, // ✅ button in sidebar
+    { name: "Request form", gradient: "from-blue-500 to-cyan-500" }, 
+     
+
+    
+    
   ];
 
   const renderForm = () => {
@@ -85,7 +95,8 @@ const Dashboard = () => {
                 <p className="text-3xl font-bold mt-2">{summary.finalProducts}</p>
               </div>
               <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-6 rounded-2xl shadow-md">
-                <h3 className="text-lg font-semibold">Available Spaces</h3>
+                <h3 className="text-lg font-semibold">Storage Zones
+                </h3>
                 <p className="text-3xl font-bold mt-2">{summary.availableSpaces}</p>
               </div>
             </div>
@@ -173,6 +184,8 @@ const Dashboard = () => {
       case "Storage Zones":       return <ZoneForm />;
       case "User Profile":        return <UserProfile userInfo={userInfo} />;
       case "Ingredient Codes":    return <IcodePage />; // ✅ load page
+      case "Request form":    return <Ing_req_acc_table />;
+       
       default:                    return <IngredientForm />;
     }
   };
