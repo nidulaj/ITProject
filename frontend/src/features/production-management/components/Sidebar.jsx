@@ -1,8 +1,12 @@
 // components/Sidebar.jsx
 import React from 'react';
 import { Home, Factory, ChefHat, Package, RotateCcw, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const Sidebar = ({ activeTab, setActiveTab, darkMode }) => {
+  const navigate = useNavigate();
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
 
@@ -12,6 +16,8 @@ const Sidebar = ({ activeTab, setActiveTab, darkMode }) => {
     { id: 'ingredients', label: 'Ingredient Requests', icon: Package },
     { id: 'productions', label: 'Manage Productions', icon: Factory },
     { id: 'returns', label: 'Returns & Refunds', icon: RotateCcw },
+    { id: 'userProfile', label: 'User Profile', icon: RotateCcw }
+
   ];
 
   return (
