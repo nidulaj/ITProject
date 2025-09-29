@@ -127,6 +127,7 @@ const loginStaff = async (req, res) => {
       accessToken,
       refreshToken,
       role: staffUser.role,
+      user: staffUser
     });
   } catch (error) {
     console.error("Error logging in staff:", error);
@@ -230,6 +231,7 @@ const verify2FACode = async (req, res) => {
       accessToken,
       refreshToken,
       role: user.role,
+      user: staffUser
     });
   } catch (error) {
     console.error("Error verifying code:", error);

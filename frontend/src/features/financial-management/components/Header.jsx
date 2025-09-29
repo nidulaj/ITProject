@@ -1,11 +1,13 @@
 import { authFetch } from "../../user-management/utils/authFetchStaff";
-import { useState } from "react"; 
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
+import { AuthContext } from "../../../components/AuthContext";
 
 export default function Header({ userInfo }) {
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  
+
   const handleLogout = async () => {
     try {
       const res = await authFetch({
@@ -13,7 +15,9 @@ export default function Header({ userInfo }) {
         url: "http://localhost:5000/api/staff/auth/logout",
       });
       if (res.status === 200) {
+        logout();
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("user");
         navigate("/login");
       }
     } catch (error) {
@@ -30,8 +34,8 @@ export default function Header({ userInfo }) {
 
         <div className="flex items-center space-x-4">
           {/* User Profile */}
-          <button 
-            onClick={() => navigate("userProfile")} 
+          <button
+            onClick={() => navigate("userProfile")}
             className="flex items-center space-x-2 p-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
           >
             {userInfo?.profile_photo ? (
@@ -45,7 +49,9 @@ export default function Header({ userInfo }) {
                 <User size={16} />
               </div>
             )}
-            <span className="text-sm font-medium">Hi {userInfo?.first_name}</span>
+            <span className="text-sm font-medium">
+              Hi {userInfo?.first_name}
+            </span>
           </button>
 
           <button

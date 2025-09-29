@@ -11,7 +11,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
   const [userInfo, setUserInfo] = useState(null);
   const [discountInfo, setDiscountInfo] = useState(null);
   const [isLoadingDiscount, setIsLoadingDiscount] = useState(false);
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess, showError, showInfo } = useNotification();
   const { currentCustomer } = useCustomer();
   const navigate = useNavigate();
   
@@ -87,6 +87,14 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       });
       
       if (response.data.success && response.data.message === 'Order placed successfully') {
+        // Extract order ID first
+        const orderId = response.data.order?.order_id || 
+                       response.data.order?.id || 
+                       response.data.order?.orderId ||
+                       response.data.order?.orderID;
+        
+        console.log('Extracted order ID:', orderId);
+        
         // Clear cart after successful order
         onClearCart();
         
@@ -100,21 +108,15 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         console.log('Order object:', response.data.order);
         console.log('Order object keys:', Object.keys(response.data.order || {}));
         
-        // Try different possible field names for order ID
-        const orderId = response.data.order?.order_id || 
-                       response.data.order?.id || 
-                       response.data.order?.orderId ||
-                       response.data.order?.orderID;
-        
-        console.log('Extracted order ID:', orderId);
-        
-        // Navigate to payment form with order data
+        // Navigate to payment form with order data and toast message
         navigate('/dashboard/finance/payment-form', { 
           state: { 
             orderData: response.data.order,
             totalAmount: appliedDiscount ? appliedDiscount.finalPrice : total,
             orderId: orderId,
-            customerName: userInfo?.first_name || currentCustomer?.name || 'Customer'
+            customerName: userInfo?.first_name || currentCustomer?.name || 'Customer',
+            showToast: true,
+            toastMessage: `Your #${orderId} is creating, please pay to proceed`
           } 
         });
       } else {

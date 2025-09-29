@@ -6,6 +6,8 @@ const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [products, setProducts] = useState({});
+  const [allOrderItems, setAllOrderItems] = useState({});
   const { currentCustomer } = useCustomer();
 
   const API_BASE_URL = 'http://localhost:5000/api/orders';
@@ -30,7 +32,35 @@ const CustomerOrders = () => {
       });
       
       if (response.data.success) {
-        setOrders(response.data.orders || []);
+        const ordersData = response.data.orders || [];
+        setOrders(ordersData);
+        
+        // Fetch order items for each order
+        const orderItemsPromises = ordersData.map(async (order) => {
+          try {
+            const itemsResponse = await authFetchCustomer({
+              method: 'get',
+              url: `${API_BASE_URL}/${order.order_id}`
+            });
+            return {
+              orderId: order.order_id,
+              items: itemsResponse.data.orderItems || []
+            };
+          } catch (error) {
+            console.error(`Error fetching items for order ${order.order_id}:`, error);
+            return { orderId: order.order_id, items: [] };
+          }
+        });
+        
+        const orderItemsResults = await Promise.all(orderItemsPromises);
+        const orderItemsMap = {};
+        orderItemsResults.forEach(result => {
+          orderItemsMap[result.orderId] = result.items;
+        });
+        setAllOrderItems(orderItemsMap);
+        
+        // Fetch all product names once
+        await fetchProductNames();
       } else {
         setError('Failed to fetch orders');
       }
@@ -41,6 +71,30 @@ const CustomerOrders = () => {
       setLoading(false);
     }
   };
+
+  const fetchProductNames = async () => {
+    try {
+      const response = await authFetchCustomer({
+        method: 'get',
+        url: 'http://localhost:5000/api/products'
+      });
+      
+      console.log('Products API response:', response.data);
+      
+      if (response.data.products) {
+        const productMap = {};
+        response.data.products.forEach(product => {
+          console.log('Product data:', product);
+          productMap[product.id] = product.name || product.product_name || `Product ${product.id}`;
+        });
+        console.log('Product map created:', productMap);
+        setProducts(productMap);
+      }
+    } catch (error) {
+      console.error('Error fetching product names:', error);
+    }
+  };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -133,82 +187,117 @@ const CustomerOrders = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map((order) => (
-              <div key={order.order_id} className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
-                <div className="p-6">
-                  {/* Order Header */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Order #{order.order_id}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Placed on {formatDate(order.created_at)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-600">
-                        {formatPrice(order.total_amount)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Order Status */}
-                  <div className="flex flex-wrap gap-4 mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">Status:</span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.order_status)}`}>
-                        {order.order_status}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-700">Payment:</span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatusColor(order.payment_status)}`}>
-                        {order.payment_status}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Order Items Preview */}
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          {order.item_count || 0} item(s)
-                        </p>
-                        {order.delivery_address && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            Delivery to: {order.delivery_address}
+            {orders.map((order) => {
+              const currentOrderItems = allOrderItems[order.order_id] || [];
+              return (
+                <div key={order.order_id} className="bg-gradient-to-r from-white to-blue-50 rounded-2xl shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="p-6">
+                    {/* Header with Order ID and Date */}
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-blue-100 p-3 rounded-full">
+                          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">
+                            Order #{order.order_id}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            {formatDate(order.order_date)}
                           </p>
-                        )}
+                        </div>
                       </div>
                       <div className="text-right">
-                        {order.estimated_delivery && (
-                          <p className="text-sm text-gray-600">
-                            Est. delivery: {formatDate(order.estimated_delivery)}
-                          </p>
+                        <p className="text-2xl font-bold text-blue-600">
+                          {formatPrice(order.total_price)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Status Cards */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                          <span className="text-sm font-medium text-gray-700">Order Status</span>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.order_status)}`}>
+                          {order.order_status}
+                        </span>
+                      </div>
+                      <div className="bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <span className="text-sm font-medium text-gray-700">Payment</span>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPaymentStatusColor(order.payment_status)}`}>
+                          {order.payment_status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Order Items */}
+                    <div className="bg-white rounded-xl p-4 border border-gray-100">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <span className="text-sm font-semibold text-gray-700">Order Items ({currentOrderItems.length})</span>
+                      </div>
+                      <div className="space-y-2">
+                        {currentOrderItems.length > 0 ? (
+                          currentOrderItems.map((item, index) => (
+                            <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-xs font-bold text-blue-600">{item.quantity}</span>
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">
+                                    {products[item.product_id] || `Product ${item.product_id}`}
+                                  </p>
+                                  <p className="text-xs text-gray-500">Unit: {formatPrice(item.price)}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-gray-900">
+                                  {formatPrice(item.price * item.quantity)}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-4">
+                            <p className="text-gray-500 text-sm">No items found for this order</p>
+                          </div>
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-end gap-3 mt-4">
-                    <button className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200">
-                      View Details
-                    </button>
-                    {order.order_status === 'delivered' && (
-                      <button className="px-4 py-2 text-sm font-medium text-green-600 hover:text-green-800 border border-green-600 rounded-lg hover:bg-green-50 transition-colors duration-200">
-                        Reorder
-                      </button>
+                    {/* Delivery Address */}
+                    {order.delivery_address && (
+                      <div className="mt-4 bg-white rounded-xl p-4 border border-gray-100">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-sm font-semibold text-gray-700">Delivery Address</span>
+                        </div>
+                        <p className="text-sm text-gray-600">{order.delivery_address}</p>
+                      </div>
                     )}
+
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
+
     </div>
   );
 };

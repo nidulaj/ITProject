@@ -1,9 +1,11 @@
 import { authFetch } from "../../user-management/utils/authFetchStaff";
-import { useState } from "react"; 
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
+import { AuthContext } from "../../../components/AuthContext";
 
 export default function Header({ userInfo }) {
+    const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
   
   const handleLogout = async () => {
@@ -13,7 +15,9 @@ export default function Header({ userInfo }) {
         url: "http://localhost:5000/api/staff/auth/logout",
       });
       if (res.status === 200) {
+        logout();
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("user");
         navigate("/login");
       }
     } catch (error) {

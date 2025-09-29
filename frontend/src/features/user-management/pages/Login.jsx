@@ -5,7 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 
 export default function Login() {
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setUser, setIsLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("customer"); // "customer" or "staff"
@@ -56,7 +56,9 @@ export default function Login() {
         withCredentials: true,
       });
 
-      const { role } = res.data;
+      const { role, user: loggedInUser } = res.data;
+      setUser(loggedInUser);
+      console.log("Logged in user:", loggedInUser);
 
       if (res.data.is_2FA_enabled) {
         navigate("/verify2FA", {
