@@ -35,6 +35,7 @@ const userRoleRoutes = require("./routes/userRoleRoutes");
 const icodeRoutes = require("./routes/icodeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const chatSystemRoutes = require("./routes/chatSystemRoutes");
+const ingredientTotalsRoutes = require("./routes/ingredientTotalsRoutes");
 
 
 
@@ -81,6 +82,7 @@ app.use("/api/customized_orders", customizedOrdersRoute); //Rahmika
 app.use('/api/user-management/audit', userManagementAuditRoutes);
 app.use("/api/icodes", icodeRoutes);// ingredient code
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/ingredient-totals", ingredientTotalsRoutes);
 
 server.listen(5000, () => {
   console.log("Server + Socket.IO running on http://localhost:5000");
