@@ -67,8 +67,40 @@ const updateTotalForIcode = async (icode_id) => {
   }
 };
 
+// -------------------- Reduce quantity from totals --------------------
+const reduceIngredientTotal = async (icode_id, quantity) => {
+  try {
+    // Get current total
+    const currentResult = await pool.query(`
+      SELECT total_quantity FROM ingredient_totals 
+      WHERE icode_id = $1
+    `, [icode_id]);
+    
+    if (currentResult.rows.length === 0) {
+      throw new Error(`No total found for icode_id: ${icode_id}`);
+    }
+    
+    const currentTotal = currentResult.rows[0].total_quantity;
+    const newTotal = Math.max(0, currentTotal - quantity); // Don't go below 0
+    
+    // Update the total
+    const updateResult = await pool.query(`
+      UPDATE ingredient_totals 
+      SET total_quantity = $1, last_updated = CURRENT_TIMESTAMP
+      WHERE icode_id = $2
+      RETURNING *
+    `, [newTotal, icode_id]);
+    
+    return updateResult.rows[0];
+  } catch (error) {
+    console.error("Error reducing ingredient total:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   calculateTotalsByIcode,
   getAllIngredientTotals,
   updateTotalForIcode,
+  reduceIngredientTotal,
 };
