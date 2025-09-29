@@ -4,7 +4,6 @@ import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNotification } from "../../../contexts/NotificationContext";
 
-
 const PaymentForm = ({ onUpdateStats }) => {
   const [orderId, setOrderId] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -67,7 +66,7 @@ const PaymentForm = ({ onUpdateStats }) => {
   }, [location.state, showInfo]);
 
   // Test middleware function
-  const testMiddleware = async () => {
+  /*const testMiddleware = async () => {
     try {
       console.log('Testing payment middleware...');
       const response = await authFetchCustomer({
@@ -78,7 +77,7 @@ const PaymentForm = ({ onUpdateStats }) => {
     } catch (error) {
       console.error('Middleware test failed:', error);
     }
-  };
+  };*/
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,7 +86,7 @@ const PaymentForm = ({ onUpdateStats }) => {
       console.log('Submitting payment with order_id:', orderId);
       
       // Test middleware first
-      await testMiddleware();
+      //await testMiddleware();
       
       const formData = new FormData();
       formData.append("order_id", orderId);
