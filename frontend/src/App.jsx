@@ -93,6 +93,19 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+                path="/dashboard/finance/payment-form"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout>
+                      <PaymentFormPage />
+                    </DashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+
         <Route
           path="/dashboard/finance/*"
           element={

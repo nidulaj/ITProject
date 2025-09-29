@@ -81,7 +81,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       await fetchProducts();
       showSuccess('Product added successfully!');
     } catch (error) {
-      console.error('Error adding product:', error);
+      //console.error('Error adding product:', error);
       
       let errorMessage = 'Failed to add product';
       if (error.response && error.response.data && error.response.data.error) {
