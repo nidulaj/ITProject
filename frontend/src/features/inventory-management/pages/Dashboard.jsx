@@ -9,7 +9,7 @@ import Header from "../components/Header";
 import UserProfile from "../../user-management/components/UserProfile";
 import IcodePage from "../components/IcodePage"; 
 import Ing_req_acc_table from "../components/ing_req_acc_table";
-import IngredientTotals from "../components/IngredientTotals";
+ 
  
  
  
@@ -67,7 +67,7 @@ const Dashboard = () => {
     { name: "User Profile", gradient: "from-blue-500 to-cyan-500" },
     { name: "Ingredient Codes", gradient: "from-blue-500 to-cyan-500" }, // ✅ button in sidebar
     { name: "Request form", gradient: "from-blue-500 to-cyan-500" }, 
-    { name: "IngredientTotals", gradient: "from-blue-500 to-cyan-500" }, 
+     
 
     
     
@@ -185,7 +185,7 @@ const Dashboard = () => {
       case "User Profile":        return <UserProfile userInfo={userInfo} />;
       case "Ingredient Codes":    return <IcodePage />; // ✅ load page
       case "Request form":    return <Ing_req_acc_table />;
-      case "IngredientTotals":    return <IngredientTotals />;
+       
       default:                    return <IngredientForm />;
     }
   };
