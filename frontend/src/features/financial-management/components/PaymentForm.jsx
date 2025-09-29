@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { authFetchCustomer } from "../../user-management/utils/authFetchCustomer";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useNotification } from "../../../contexts/NotificationContext";
 
 
 const PaymentForm = ({ onUpdateStats }) => {
@@ -10,18 +11,35 @@ const PaymentForm = ({ onUpdateStats }) => {
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentProof, setPaymentProof] = useState(null);
+  const [toastShown, setToastShown] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { showInfo, notifications, removeNotification } = useNotification();
+
+  // Clear any existing notifications when component mounts
+  useEffect(() => {
+    // Clear all existing notifications to prevent stacking
+    notifications.forEach(notification => {
+      removeNotification(notification.id);
+    });
+  }, []);
 
   // Pre-populate form with order data if available
   useEffect(() => {
     if (location.state) {
-      const { orderData, totalAmount, customerName: passedCustomerName, orderId: passedOrderId } = location.state;
+      const { orderData, totalAmount, customerName: passedCustomerName, orderId: passedOrderId, showToast, toastMessage } = location.state;
       
       console.log('Payment form received state:', location.state);
       console.log('Order ID from state:', passedOrderId);
       console.log('Order data:', orderData);
+      
+      // Show toast message if provided (only once)
+      if (showToast && toastMessage && !toastShown) {
+        console.log('Showing toast message in payment form:', toastMessage);
+        showInfo(toastMessage, 5000); // Reduced duration to 5 seconds
+        setToastShown(true);
+      }
       
       // Try to extract order ID from orderData if not passed directly
       let extractedOrderId = passedOrderId;
@@ -46,7 +64,7 @@ const PaymentForm = ({ onUpdateStats }) => {
       const today = new Date().toISOString().split('T')[0];
       setPaymentDate(today);
     }
-  }, [location.state]);
+  }, [location.state, showInfo]);
 
   // Test middleware function
   const testMiddleware = async () => {
@@ -109,7 +127,8 @@ const PaymentForm = ({ onUpdateStats }) => {
       setPaymentDate("");
       setPaymentProof(null);
 
-      navigate("/payments");
+      // Redirect to customer orders page
+      navigate("/dashboard/orders");
 
     } catch (error) {
       console.error("Error submitting payment:", error);

@@ -12,6 +12,7 @@ import ThemeProvider from "../contexts/ThemeContext";
 import NotificationProvider from "../contexts/NotificationContext";
 import CustomerProvider from "../contexts/CustomerContext";
 import CartSidebar from "../features/order-management/components/CartSidebar";
+import NotificationDisplay from "../components/NotificationDisplay";
 
 
 const FeedbackPage = () => <div>Feedback Page</div>;
@@ -43,6 +44,9 @@ export default function Dashboard() {
           <div className="min-h-screen flex flex-col">
             {/* Common Header */}
             <DashboardHeader userInfo={userInfo} />
+
+            {/* Notification Display */}
+            <NotificationDisplay />
 
             {/* Nested Routes */}
             <main className="flex-1 p-4">
