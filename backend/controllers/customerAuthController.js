@@ -132,7 +132,7 @@ const loginCustomer = async (req, res) => {
     await createLog(customer.customer_code, "Logged In", req.ip);
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken, role: null });
+      .json({ message: "Login successful", accessToken, refreshToken, role: null, user: customer });
   } catch (error) {
     console.error("Error logging in customer:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -222,7 +222,7 @@ const googleLogin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     await createLog(customer.customer_code, "Logged In with Google", req.ip);
-    return res.status(200).json({message: "Login successful", accessToken, refreshToken})
+    return res.status(200).json({message: "Login successful", accessToken, refreshToken, role: null, user: customer})
   }catch(err){
     console.error("Google login failed:", err);
     return res.status(400).json({ message: "Google login failed" });
@@ -397,11 +397,12 @@ const verify2FACode = async (req, res) => {
     // remove temp token
     res.clearCookie("tempToken");
 
-    await createLog(customerFromDb.customer_code, "Logged In", req.ip);
+    await createLog(customerFromDb.customer_code, "Logged In", req.ip, );
 
     return res.status(200).json({
       message: "Login successful",
       role: customerFromDb.role || null,
+      user: customerFromDb
     });
   } catch (error) {
     console.error("Error verifying code:", error);

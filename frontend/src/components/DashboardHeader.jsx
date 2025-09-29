@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { authFetchCustomer } from "../features/user-management/utils/authFetchCustomer";
+import { AuthContext } from "./AuthContext";
 
 export default function DashboardHeader({ userInfo }) {
   const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
 
   const handleLogout = async () => {
     try {
@@ -13,6 +16,9 @@ export default function DashboardHeader({ userInfo }) {
         method: "post",
         url: `http://localhost:5000/api/auth/logout`,
       });
+      logout();
+      localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("user");
       navigate("/login");
       console.log(res.data.message);
     } catch (err) {

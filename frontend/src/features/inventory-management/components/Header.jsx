@@ -1,7 +1,10 @@
 import { authFetch } from "../../user-management/utils/authFetchStaff";
 import { User } from "lucide-react";
+import React, { useContext } from "react";
+import { AuthContext } from "../../../components/AuthContext";
 
 export default function Header({ userInfo, setActiveTab }) {
+    const { logout } = useContext(AuthContext);
   const handleLogout = async () => {
     try {
       const res = await authFetch({
@@ -9,7 +12,9 @@ export default function Header({ userInfo, setActiveTab }) {
         url: "http://localhost:5000/api/staff/auth/logout",
       });
       if (res.status === 200) {
+        logout();
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("user");
         // If you want to redirect after logout, you can still use window.location
         window.location.href = "/login";
       }

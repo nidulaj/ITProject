@@ -2,8 +2,12 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const {connectDB} = require('./db/dbConnect');
+const { createServer } = require("http");
+const { initSocket } = require("./utils/socket");
 
 const app = express();
+const server = createServer(app);
+initSocket(server);
 const cookieParser = require('cookie-parser')
 const path = require("path");
 
@@ -30,6 +34,7 @@ const userManagementAuditRoutes = require("./routes/userManagementAuditLogRoutes
 const userRoleRoutes = require("./routes/userRoleRoutes");
 const icodeRoutes = require("./routes/icodeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const chatSystemRoutes = require("./routes/chatSystemRoutes");
 
 
 
@@ -65,7 +70,7 @@ app.use('/api/store',storeRoutes);
 app.use('/api/discounts', discountRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/finance", financeRoutes);
-
+app.use('/api/chat', chatSystemRoutes);
 
 
 app.use('/api/notifications', notificationRoutes);
@@ -77,6 +82,6 @@ app.use('/api/user-management/audit', userManagementAuditRoutes);
 app.use("/api/icodes", icodeRoutes);// ingredient code
 app.use("/api/dashboard", dashboardRoutes);
 
-app.listen(5000, () => {
-  console.log("Server started on http://localhost:5000");
+server.listen(5000, () => {
+  console.log("Server + Socket.IO running on http://localhost:5000");
 });
