@@ -68,7 +68,7 @@ const updateRequestStatus = async (req, res) => {
     const { req_id } = req.params;
     const { status } = req.body;
 
-    if (!status) return res.status(400).json({ error: "status is required" });
+    if (!status) return res.status(400).json({ error: "Status is required" });
 
     const updated = await updateReqStatus(req_id, status);
     res.status(200).json({ message: "Status updated", data: updated });

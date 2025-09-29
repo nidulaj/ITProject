@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { ShoppingCart, User, Heart } from "lucide-react";
+import { ShoppingCart, User, Heart, Phone, Mail, MapPin, Menu, X } from "lucide-react";
 import CustomizedOrderPage from "./CustomizedOrderPage";
 import ReturnsCustomer from "./ReturnsCustomer";
 
 const YogurtLandingPage = () => {
   const [selectedFlavor, setSelectedFlavor] = useState("blueberry");
   const [activePage, setActivePage] = useState("landing"); // landing | customize | returns
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobile menu state
 
-  // Use public/ paths (no import needed). Make sure these files exist.
   const flavors = [
     {
       id: "blueberry",
@@ -42,36 +42,74 @@ const YogurtLandingPage = () => {
   // Landing page UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      <div className="container mx-auto px-6 py-8">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-12">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">Y</span>
+      {/* New Header */}
+      <header className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div>
+                <img 
+                  src="/images_sadi/logoPubudu.png" 
+                  alt="Pubudu Logo" 
+                  className="w-25 h-12 object-cover"
+                />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-blue-600">Pubudu</h1>
+                <p className="text-xs text-gray-500 -mt-1">Milk Products</p>
+              </div>
             </div>
-            <span className="text-2xl font-bold text-blue-600">YogurtCraft</span>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex space-x-8">
+              <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
+              <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
+              <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
+              <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
+              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
+            </nav>
+
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-3">
+              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
+                <Heart className="w-5 h-5 text-gray-600" />
+              </button>
+              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
+                <User className="w-5 h-5 text-gray-600" />
+              </button>
+              <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors relative">
+                <ShoppingCart className="w-5 h-5 text-white" />
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+              </button>
+              
+              {/* Mobile menu button */}
+              <button 
+                className="md:hidden p-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
 
-          <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">About</a>
-            <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Customize</a>
-            <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Nutrition</a>
-            <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Contact</a>
-          </nav>
+          {/* Mobile Menu */}
+          {isMenuOpen && (
+            <nav className="md:hidden mt-4 pb-4 border-t pt-4">
+              <div className="flex flex-col space-y-3">
+                <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
+                <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
+                <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
+                <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
+                <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
+              </div>
+            </nav>
+          )}
+        </div>
+      </header>
 
-          <div className="flex items-center space-x-3">
-            <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-              <Heart className="w-5 h-5 text-gray-600" />
-            </button>
-            <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-              <User className="w-5 h-5 text-gray-600" />
-            </button>
-            <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors">
-              <ShoppingCart className="w-5 h-5 text-white" />
-            </button>
-          </div>
-        </header>
-
+      {/* Landing Page Main Content */}
+      <div className="container mx-auto px-6 py-8">
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Section - Yogurt Display */}
@@ -189,6 +227,75 @@ const YogurtLandingPage = () => {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center"> */}
+                  <img 
+                    src="/images_sadi/logoPubudu.png" 
+                    alt="Pubudu Logo" 
+                    className="w-20 h-10 object-cover"
+                  />
+                {/* </div> */}
+                <div>
+                  <h3 className="text-xl font-bold">Pubudu</h3>
+                  <p className="text-sm text-gray-400">Milk Products</p>
+                </div>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Premium quality dairy products made with love and care, bringing you the finest taste of Ceylon milk.
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <ul className="space-y-2">
+                <li><a href="#home" className="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                <li><a href="#products" className="text-gray-400 hover:text-white transition-colors">Products</a></li>
+                <li><a href="#customize" className="text-gray-400 hover:text-white transition-colors">Customize</a></li>
+                <li><a href="#about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Customer Care</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Order Tracking</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Returns & Refunds</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQs</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Support</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Phone className="w-5 h-5 text-blue-500" />
+                  <span className="text-gray-400">+94 77 123 4567</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Mail className="w-5 h-5 text-blue-500" />
+                  <span className="text-gray-400">info@pubudumilk.lk</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <MapPin className="w-5 h-5 text-blue-500" />
+                  <span className="text-gray-400">Kamburupitiya, Sri Lanka</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p className="text-gray-400">
+              © 2025 Pubudu Milk Products. All rights reserved. Made with ❤️ in Sri Lanka
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
