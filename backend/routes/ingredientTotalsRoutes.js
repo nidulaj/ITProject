@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   calculateTotals,
   getIngredientTotals,
+  reduceTotal,
 } = require('../controllers/ingredientTotalsController');
 
 // Test endpoint
@@ -15,5 +16,8 @@ router.post('/calculate', calculateTotals);
 
 // Get all ingredient totals
 router.get('/', getIngredientTotals);
+
+// Reduce ingredient total
+router.put('/reduce', reduceTotal);
 
 module.exports = router;

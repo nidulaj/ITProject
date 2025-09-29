@@ -130,3 +130,127 @@ CREATE TRIGGER trigger_ingredients_delete
     AFTER DELETE ON ingredients
     FOR EACH ROW
     EXECUTE FUNCTION trigger_update_ingredient_totals();
+
+
+-- =========================
+-- INGREDIENT REQUEST TRIGGERS
+-- =========================
+
+-- Function to reduce ingredient totals when request is accepted
+CREATE OR REPLACE FUNCTION reduce_totals_on_request_accept()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Only process when status changes to 'accept'
+    IF NEW.status = 'accept' AND (OLD.status IS NULL OR OLD.status != 'accept') THEN
+        
+        -- Reduce totals based on ingredient mappings
+        -- ICD002 = Total Milk (icode_id: 2)
+        IF NEW.total_milk > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_milk),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 2;
+        END IF;
+        
+        -- ICD003 = Total Sugar (icode_id: 3)
+        IF NEW.total_sugar > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_sugar),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 3;
+        END IF;
+        
+        -- ICD004 = Total strawberry (icode_id: 4)
+        IF NEW.total_strawberry > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_strawberry),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 4;
+        END IF;
+        
+        -- ICD005 = Total culture (icode_id: 5)
+        IF NEW.total_culture > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_culture),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 5;
+        END IF;
+        
+        -- ICD006 = Total blueberry (icode_id: 6)
+        IF NEW.total_blueberry > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_blueberry),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 6;
+        END IF;
+        
+        -- ICD007 = Total mango (icode_id: 7)
+        IF NEW.total_mango > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_mango),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 7;
+        END IF;
+        
+        -- ICD008 = Total chocolate sirup (icode_id: 8)
+        IF NEW.total_topping1 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_topping1),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 8;
+        END IF;
+        
+        -- ICD009 = Total strawberry sirup (icode_id: 9)
+        IF NEW.total_topping2 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_topping2),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 9;
+        END IF;
+        
+        -- ICD010 = Total honey (icode_id: 10)
+        IF NEW.total_topping3 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_topping3),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 10;
+        END IF;
+        
+        -- ICD011 = Total cashew (icode_id: 11)
+        IF NEW.total_bottom1 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_bottom1),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 11;
+        END IF;
+        
+        -- ICD012 = Total peanut (icode_id: 12)
+        IF NEW.total_bottom2 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_bottom2),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 12;
+        END IF;
+        
+        -- ICD013 = Total almond (icode_id: 13)
+        IF NEW.total_bottom3 > 0 THEN
+            UPDATE ingredient_totals 
+            SET total_quantity = GREATEST(0, total_quantity - NEW.total_bottom3),
+                last_updated = CURRENT_TIMESTAMP
+            WHERE icode_id = 13;
+        END IF;
+        
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger for ingredient requests
+-- Note: Replace 'req_ingredients' with your actual table name for ingredient requests
+DROP TRIGGER IF EXISTS trigger_req_ingredients_accept ON req_ingredients;
+
+CREATE TRIGGER trigger_req_ingredients_accept
+    AFTER UPDATE ON req_ingredients
+    FOR EACH ROW
+    EXECUTE FUNCTION reduce_totals_on_request_accept();
