@@ -10,9 +10,10 @@ const {
 // Create a new notification
 const createNotificationController = async (req, res) => {
   try {
-    const { customer_id, order_id, notification, notification_type } = req.body;
+    const { cus_id, customer_id, order_id, notification, notification_type } = req.body;
+    const customerId = cus_id || customer_id; // Support both field names
     
-    if (!customer_id || !notification) {
+    if (!customerId || !notification) {
       return res.status(400).json({
         success: false,
         error: 'Customer ID and notification message are required'
@@ -20,7 +21,7 @@ const createNotificationController = async (req, res) => {
     }
 
     const newNotification = await createNotification(
-      customer_id, 
+      customerId, 
       order_id, 
       notification, 
       notification_type || 'order_update'
@@ -103,16 +104,17 @@ const getUnreadCount = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const { notification_id } = req.params;
-    const { customer_id } = req.body;
+    const { cus_id, customer_id } = req.body;
+    const customerId = cus_id || customer_id; // Support both field names
 
-    if (!notification_id || !customer_id) {
+    if (!notification_id || !customerId) {
       return res.status(400).json({
         success: false,
         error: 'Notification ID and Customer ID are required'
       });
     }
 
-    const updatedNotification = await markNotificationAsRead(notification_id, customer_id);
+    const updatedNotification = await markNotificationAsRead(notification_id, customerId);
 
     if (!updatedNotification) {
       return res.status(404).json({
@@ -169,16 +171,17 @@ const markAllAsRead = async (req, res) => {
 const deleteNotificationController = async (req, res) => {
   try {
     const { notification_id } = req.params;
-    const { customer_id } = req.body;
+    const { cus_id, customer_id } = req.body;
+    const customerId = cus_id || customer_id; // Support both field names
 
-    if (!notification_id || !customer_id) {
+    if (!notification_id || !customerId) {
       return res.status(400).json({
         success: false,
         error: 'Notification ID and Customer ID are required'
       });
     }
 
-    const deletedNotification = await deleteNotification(notification_id, customer_id);
+    const deletedNotification = await deleteNotification(notification_id, customerId);
 
     if (!deletedNotification) {
       return res.status(404).json({

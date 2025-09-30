@@ -22,6 +22,22 @@ export function initSocket(server) {
       console.log(`✅ Socket ${socket.id} joined room ${userCode}`);
     });
 
+    // --- join customer notification room ---
+    socket.on("join_customer_room", (customerId) => {
+      if (!customerId) return;
+      const roomName = `customer_${customerId}`;
+      socket.join(roomName);
+      console.log(`🔔 Socket ${socket.id} joined customer room ${roomName}`);
+    });
+
+    // --- leave customer notification room ---
+    socket.on("leave_customer_room", (customerId) => {
+      if (!customerId) return;
+      const roomName = `customer_${customerId}`;
+      socket.leave(roomName);
+      console.log(`🚪 Socket ${socket.id} left customer room ${roomName}`);
+    });
+
     // --- leave a room (e.g. logout / user switch) ---
     socket.on("leave_room", (userCode) => {
       if (!userCode) return;
