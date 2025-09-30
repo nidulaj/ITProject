@@ -117,7 +117,6 @@ const DiscountForm = ({ discount, onSuccess }) => {
     const num = Number(formData.value);
     let hasError = false;
 
-    // Validation for discount code
     if (!formData.discount_code) {
       setErrors((prev) => ({
         ...prev,
@@ -140,8 +139,7 @@ if (!isCodeValid) {
 }
 
 
-    // Validation for value (already partially included)
-  if (formData.discount_type === "percentage" && (num < 1 || num > 100)) {
+  if (formData.discount_type === "percentage" && (num < 1 || num > 99)) {
     setErrors((prev) => ({
       ...prev,
       value: "Percentage must be between 1 and 100",
@@ -157,8 +155,8 @@ if (!isCodeValid) {
     setErrors((prev) => ({ ...prev, value: null }));
   }
 
-  // Date validations
-  const today = new Date().setHours(0, 0, 0, 0); // Today at midnight
+  
+  const today = new Date().setHours(0, 0, 0, 0);
   const validFrom = new Date(formData.valid_from).setHours(0, 0, 0, 0);
   const validTo = new Date(formData.valid_to).setHours(0, 0, 0, 0);
 
@@ -182,7 +180,7 @@ if (!isCodeValid) {
     setErrors((prev) => ({ ...prev, valid_to: null }));
   }
 
-  // Prevent submission if any error exists
+
   if (hasError) {
     alert("Please fix errors in input values before submitting.");
     return;
@@ -264,13 +262,18 @@ if (!isCodeValid) {
           value={formData.value}
           onChange={handleChange}
           onInput={(e) => {
-          const val = Number(e.target.value);
-          if (formData.discount_type === "percentage" && val > 100) {
-            e.target.value = 100;
-          } else if (val < 1) {
-            e.target.value = 1;
+          let val = Number(e.target.value);
+
+          if (val < 1) val = 1;
+
+          if (formData.discount_type === "percentage" && val >= 100) {
+            val = 99;
           }
+
+          e.target.value = val;
+          setFormData((prev) => ({ ...prev, value: val })); 
         }}
+
           min={formData.discount_type === "fixed" ? 1 : 1}
           max={formData.discount_type === "percentage" ? 100 : undefined}
           required
@@ -313,7 +316,7 @@ if (!isCodeValid) {
           className={`border p-2 rounded ${errors.discount_code ? "border-red-500" : ""}`}
         />
         <span className="text-xs text-gray-500 mt-1">
-          Enter a unique discount code (e.g., ABCD10, SAVE25)
+          Enter a unique discount code (e.g., ABCD10, SAVE25%)
         </span>
         {errors.discount_code && (
           <span className="text-sm text-red-500 mt-1">{errors.discount_code}</span>
@@ -328,7 +331,7 @@ if (!isCodeValid) {
           value={formData.valid_from}
           onChange={handleChange}
           required
-          min={new Date().toISOString().split("T")[0]} // Today’s date
+          min={new Date().toISOString().split("T")[0]}
           className="border p-2 rounded"
         />
         {errors.valid_from && (

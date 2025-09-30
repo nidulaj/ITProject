@@ -211,7 +211,7 @@ const validateDiscountCode = async (req, res) => {
     }
 
     // Calculate discount amount
-    let discountAmount = 0;
+    /*let discountAmount = 0;
     let finalPrice = totalPrice;
 
     if (discount.discount_type === "percentage" || discount.discount_type === "Percentage") {
@@ -229,7 +229,33 @@ const validateDiscountCode = async (req, res) => {
       discountAmount,
       finalPrice,
       discountName: discount.discount_name
-    });
+    });*/
+
+
+    // ✅ Calculate discount amount
+      let discountAmount = 0;
+      let finalPrice = totalPrice;
+
+      if (discount.discount_type === "percentage" || discount.discount_type === "Percentage") {
+        const percentageValue = parseFloat(discount.value);
+        discountAmount = totalPrice * (percentageValue / 100);
+        finalPrice = totalPrice - discountAmount;
+      } 
+      else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
+
+        // ✅ Check: fixed discount should not exceed total
+        const fixedValue = parseFloat(discount.value);
+        if (fixedValue > totalPrice) {
+          return res.status(400).json({
+            valid: false,
+            error: "This discount cannot be applied for this order total !"
+          });
+        }
+
+        discountAmount = fixedValue;
+        finalPrice = totalPrice - discountAmount;
+      }
+
 
     res.json({
       valid: true,
