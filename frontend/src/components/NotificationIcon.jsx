@@ -1,13 +1,63 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { authFetchCustomer } from '../features/user-management/utils/authFetchCustomer';
 
 const NotificationIcon = ({ customerId = 1 }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   const API_BASE_URL = 'http://localhost:5000/api/notifications';
+
+  // Debug customer ID
+  console.log('🔔 NotificationIcon - customerId:', customerId);
+
+  // Initialize Socket.IO connection
+  useEffect(() => {
+    if (customerId) {
+      console.log('🔌 Initializing Socket.IO connection for customer:', customerId);
+      const newSocket = io('http://localhost:5000', {
+        withCredentials: true,
+        transports: ['websocket', 'polling']
+      });
+
+      newSocket.on('connect', () => {
+        console.log('✅ Socket.IO connected:', newSocket.id);
+        // Join customer room for notifications
+        newSocket.emit('join_customer_room', customerId);
+      });
+
+      newSocket.on('disconnect', () => {
+        console.log('❌ Socket.IO disconnected');
+      });
+
+      newSocket.on('new_notification', (data) => {
+        console.log('🔔 Real-time notification received:', data);
+        // Add new notification to the list
+        setNotifications(prev => [data.notification, ...prev]);
+        // Update unread count
+        setUnreadCount(prev => prev + 1);
+        // Show a browser notification if permission is granted
+        if (Notification.permission === 'granted') {
+          new Notification('New Order Update', {
+            body: data.message,
+            icon: '/favicon.ico'
+          });
+        }
+      });
+
+      setSocket(newSocket);
+
+      return () => {
+        console.log('🔌 Cleaning up Socket.IO connection');
+        newSocket.emit('leave_customer_room', customerId);
+        newSocket.disconnect();
+      };
+    }
+  }, [customerId]);
 
   // Fetch notifications and unread count
   useEffect(() => {
@@ -17,26 +67,42 @@ const NotificationIcon = ({ customerId = 1 }) => {
     }
   }, [customerId]);
 
-  // Auto-refresh notifications every 5 seconds
+  // Request notification permission
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (customerId) {
-        fetchUnreadCount();
-        if (isOpen) {
-          fetchNotifications();
-        }
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [customerId, isOpen]);
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/customer/${customerId}`);
+      console.log('Fetching notifications for customer:', customerId);
+      
+      let response;
+      try {
+        console.log('🔔 Trying authenticated request first...');
+        // Try authenticated request first
+        response = await authFetchCustomer({
+          method: 'get',
+          url: `${API_BASE_URL}/customer/${customerId}`
+        });
+        console.log('✅ Auth request successful:', response.data);
+      } catch (authError) {
+        console.log('❌ Auth request failed, trying direct axios:', authError);
+        // Fallback to direct axios call
+        response = await axios.get(`${API_BASE_URL}/customer/${customerId}`);
+        console.log('✅ Direct axios request successful:', response.data);
+      }
+      
+      console.log('Notifications response:', response.data);
       if (response.data.success) {
-        setNotifications(response.data.notifications || []);
+        const notifications = response.data.notifications || [];
+        setNotifications(notifications);
+        console.log('✅ Notifications loaded:', notifications.length);
+        console.log('📋 Notification details:', notifications);
+      } else {
+        console.log('❌ Failed to load notifications:', response.data);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -47,10 +113,31 @@ const NotificationIcon = ({ customerId = 1 }) => {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/customer/${customerId}/unread-count`);
+      console.log('Fetching unread count for customer:', customerId);
+      
+      let response;
+      try {
+        console.log('🔔 Trying authenticated request for unread count...');
+        // Try authenticated request first
+        response = await authFetchCustomer({
+          method: 'get',
+          url: `${API_BASE_URL}/customer/${customerId}/unread-count`
+        });
+        console.log('✅ Auth request for unread count successful:', response.data);
+      } catch (authError) {
+        console.log('❌ Auth request for unread count failed, trying direct axios:', authError);
+        // Fallback to direct axios call
+        response = await axios.get(`${API_BASE_URL}/customer/${customerId}/unread-count`);
+        console.log('✅ Direct axios request for unread count successful:', response.data);
+      }
+      
+      console.log('Unread count response:', response.data);
       if (response.data.success) {
         const count = response.data.unread_count || 0;
         setUnreadCount(count);
+        console.log('✅ Unread count loaded:', count);
+      } else {
+        console.log('❌ Failed to load unread count:', response.data);
       }
     } catch (error) {
       console.error('Error fetching unread count:', error);
@@ -59,8 +146,11 @@ const NotificationIcon = ({ customerId = 1 }) => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.put(`${API_BASE_URL}/${notificationId}/read`, {
-        customer_id: customerId
+      console.log('Marking notification as read:', notificationId);
+      await authFetchCustomer({
+        method: 'put',
+        url: `${API_BASE_URL}/${notificationId}/read`,
+        data: { customer_id: customerId }
       });
       // Refresh notifications and count
       fetchNotifications();
@@ -72,7 +162,11 @@ const NotificationIcon = ({ customerId = 1 }) => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.put(`${API_BASE_URL}/customer/${customerId}/read-all`);
+      console.log('Marking all notifications as read for customer:', customerId);
+      await authFetchCustomer({
+        method: 'put',
+        url: `${API_BASE_URL}/customer/${customerId}/read-all`
+      });
       // Refresh notifications and count
       fetchNotifications();
       fetchUnreadCount();
@@ -83,7 +177,10 @@ const NotificationIcon = ({ customerId = 1 }) => {
 
   const deleteNotification = async (notificationId) => {
     try {
-      await axios.delete(`${API_BASE_URL}/${notificationId}`, {
+      console.log('Deleting notification:', notificationId);
+      await authFetchCustomer({
+        method: 'delete',
+        url: `${API_BASE_URL}/${notificationId}`,
         data: { customer_id: customerId }
       });
       // Refresh notifications and count
@@ -104,9 +201,46 @@ const NotificationIcon = ({ customerId = 1 }) => {
   };
 
   const toggleDropdown = () => {
+    console.log('🔔 Toggling dropdown, current state:', isOpen);
     setIsOpen(!isOpen);
     if (!isOpen) {
+      console.log('🔔 Fetching notifications on dropdown open');
       fetchNotifications();
+    }
+  };
+
+  // Test function to create a notification (for debugging)
+  const createTestNotification = async () => {
+    try {
+      console.log('Creating test notification for customer:', customerId);
+      const response = await authFetchCustomer({
+        method: 'post',
+        url: `${API_BASE_URL}`,
+        data: {
+          customer_id: customerId,
+          order_id: 999,
+          notification: 'Test notification - Order #999 status updated to confirmed.',
+          notification_type: 'order_update'
+        }
+      });
+      console.log('Test notification created:', response.data);
+      
+      // Emit test notification via Socket.IO
+      if (socket) {
+        socket.emit('new_notification', {
+          notification: response.data.notification,
+          message: 'Test notification - Order #999 status updated to confirmed.',
+          order_id: 999,
+          customer_id: customerId
+        });
+        console.log('🚀 Test notification emitted via Socket.IO');
+      }
+      
+      // Refresh notifications
+      fetchNotifications();
+      fetchUnreadCount();
+    } catch (error) {
+      console.error('Error creating test notification:', error);
     }
   };
 
@@ -133,7 +267,14 @@ const NotificationIcon = ({ customerId = 1 }) => {
           {/* Header */}
           <div className="px-4 py-3 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-blue-800 drop-shadow-sm">Notifications</h3>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-lg font-semibold text-blue-800 drop-shadow-sm">Notifications</h3>
+                {socket && socket.connected ? (
+                  <div className="w-2 h-2 bg-green-500 rounded-full" title="Real-time connected"></div>
+                ) : (
+                  <div className="w-2 h-2 bg-red-500 rounded-full" title="Real-time disconnected"></div>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
@@ -144,6 +285,13 @@ const NotificationIcon = ({ customerId = 1 }) => {
                   title="Refresh"
                 >
                   🔄
+                </button>
+                <button
+                  onClick={createTestNotification}
+                  className="text-green-500 hover:text-green-700 text-sm font-medium p-1 rounded-full hover:bg-green-200 transition-all duration-200 transform hover:scale-110"
+                  title="Create Test Notification"
+                >
+                  🧪
                 </button>
                 {unreadCount > 0 && (
                   <button
@@ -182,8 +330,7 @@ const NotificationIcon = ({ customerId = 1 }) => {
                   >
                     <div className="flex items-start justify-between">
                       <div 
-                        className="flex-1 cursor-pointer"
-                        onClick={() => markAsRead(notification.notification_id)}
+                        className="flex-1"
                       >
                         <p className={`text-sm ${
                           !notification.is_read 

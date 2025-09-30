@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useCart } from '../../../contexts/CartContext';
 
-const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
+const CustomerProductCard = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart, getCartItem } = useCart();
 
   const getImageSrc = () => {
     if (product.image) {
@@ -19,7 +21,7 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
   };
 
   const handleAddToCart = () => {
-    onAddToCart(product, quantity);
+    addToCart(product, quantity);
     setQuantity(1); // Reset quantity after adding
   };
 
@@ -63,9 +65,9 @@ const CustomerProductCard = ({ product, onAddToCart, cartItem }) => {
         )}
         
         {/* Cart Indicator */}
-        {cartItem && (
+        {getCartItem(product.product_id) && (
           <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-            In Cart: {cartItem.quantity}
+            In Cart: {getCartItem(product.product_id).quantity}
           </div>
         )}
       </div>

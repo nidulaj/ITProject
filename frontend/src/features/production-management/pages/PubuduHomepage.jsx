@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
 
-const PubuduHomepage = () => {
+const PubuduHomepage = ({ hideHeader = false }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -109,6 +109,7 @@ const PubuduHomepage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
+      {!hideHeader && (
       <header className="bg-white shadow-lg sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
@@ -173,6 +174,7 @@ const PubuduHomepage = () => {
           )}
         </div>
       </header>
+      )}
 
       {/* Hero Section */}
       <section id="home" className="relative overflow-hidden">
