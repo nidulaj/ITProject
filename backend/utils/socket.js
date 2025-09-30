@@ -15,7 +15,7 @@ export function initSocket(server) {
   io.on("connection", (socket) => {
     console.log(`⚡ Socket connected: ${socket.id}`);
 
-    // --- join a room by customer_code ---
+    // --- join a room by user_code ---
     socket.on("join_room", (userCode) => {
       if (!userCode) return;
       socket.join(userCode);
