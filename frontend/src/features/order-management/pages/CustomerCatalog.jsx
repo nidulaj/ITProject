@@ -174,6 +174,24 @@ const CustomerCatalog = () => {
                       <span className="text-gray-500 text-sm">(4.5)</span>
                     </div>
 
+                    {/* Stock Information */}
+                    <div className="mb-3">
+                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        product.stock_quantity === 0 
+                          ? 'bg-red-100 text-red-800' 
+                          : product.stock_quantity <= 10 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {product.stock_quantity === 0 
+                          ? 'Out of Stock' 
+                          : product.stock_quantity <= 10 
+                          ? `Low Stock (${product.stock_quantity})` 
+                          : `In Stock (${product.stock_quantity})`
+                        }
+                      </span>
+                    </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-xl font-bold text-blue-600">
                         LKR {product.price}
@@ -183,9 +201,14 @@ const CustomerCatalog = () => {
                           addToCart(product, 1);
                           showSuccess(`${product.name || product.product_name} added to cart!`);
                         }}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm"
+                        disabled={product.stock_quantity === 0}
+                        className={`px-4 py-2 rounded-full font-semibold transition-colors text-sm ${
+                          product.stock_quantity === 0
+                            ? 'bg-gray-400 cursor-not-allowed text-white'
+                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                        }`}
                       >
-                        Add to Cart
+                        {product.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>

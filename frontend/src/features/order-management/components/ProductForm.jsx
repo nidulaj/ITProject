@@ -1,15 +1,43 @@
 import { useState, useEffect } from 'react';
+import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEdit }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    stock_quantity: '',
     category: '',
+    final_product_id: '',
     image: null
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [finalProducts, setFinalProducts] = useState([]);
+  const [loadingFinalProducts, setLoadingFinalProducts] = useState(false);
+
+  // Fetch final products for dropdown
+  const fetchFinalProducts = async () => {
+    try {
+      console.log('🔄 Fetching final products...');
+      setLoadingFinalProducts(true);
+      const response = await authFetch({
+        method: 'get',
+        url: 'http://localhost:5000/api/final'
+      });
+      console.log('📦 Final products response:', response.data);
+      setFinalProducts(response.data.finalProduct || []);
+      console.log('✅ Final products loaded:', response.data.finalProduct?.length || 0);
+    } catch (error) {
+      console.error('❌ Error fetching final products:', error);
+      setFinalProducts([]);
+    } finally {
+      setLoadingFinalProducts(false);
+    }
+  };
+
+  // Load final products on component mount
+  useEffect(() => {
+    fetchFinalProducts();
+  }, []);
 
   // Update form when editing product changes
   useEffect(() => {
@@ -18,8 +46,8 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
         name: editingProduct.name,
         description: editingProduct.description,
         price: editingProduct.price.toString(),
-        stock_quantity: editingProduct.stock_quantity.toString(),
         category: editingProduct.category,
+        final_product_id: editingProduct.final_product_id || '',
         image: null // Reset image when editing
       });
       // Set image preview if product has an image
@@ -33,8 +61,8 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
         name: '',
         description: '',
         price: '',
-        stock_quantity: '',
         category: '',
+        final_product_id: '',
         image: null
       });
       setImagePreview(null);
@@ -94,10 +122,18 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || !formData.price || !formData.stock_quantity || !formData.category) {
-      alert('Please fill in all required fields (name, description, price, stock quantity, and category)');
+    console.log('🚀 Form submission started');
+    console.log('📝 Form data:', formData);
+    console.log('🔍 Final products available:', finalProducts.length);
+    
+    if (!formData.name || !formData.description || !formData.price || !formData.category || !formData.final_product_id) {
+      console.log('❌ Validation failed - missing fields');
+      console.log('name:', formData.name, 'description:', formData.description, 'price:', formData.price, 'category:', formData.category, 'final_product_id:', formData.final_product_id);
+      alert('Please fill in all required fields (name, description, price, category, and final product)');
       return;
     }
+    
+    console.log('✅ All fields validated');
 
     try {
       if (editingProduct) {
@@ -111,8 +147,8 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
         name: '',
         description: '',
         price: '',
-        stock_quantity: '',
         category: '',
+        final_product_id: '',
         image: null
       });
       setImagePreview(null);
@@ -176,18 +212,29 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
         </div>
 
         <div className="form-group">
-          <label htmlFor="stock_quantity" className="form-label">Stock Quantity:</label>
-          <input
-            type="number"
-            id="stock_quantity"
-            name="stock_quantity"
-            value={formData.stock_quantity}
+          <label htmlFor="final_product_id" className="form-label">Final Product:</label>
+          <select
+            id="final_product_id"
+            name="final_product_id"
+            value={formData.final_product_id}
             onChange={handleInputChange}
-            placeholder="Enter stock quantity"
-            min="0"
             required
             className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-          />
+            disabled={loadingFinalProducts}
+          >
+            <option value="">Select a final product</option>
+            {finalProducts.map((product) => (
+              <option key={product.fproduct_id} value={product.fproduct_id}>
+                ID: {product.fproduct_id} - {product.pname} (Qty: {product.quantity})
+              </option>
+            ))}
+          </select>
+          {loadingFinalProducts && (
+            <small className="text-blue-500 text-xs mt-1">Loading final products...</small>
+          )}
+          <small className="text-gray-500 text-xs mt-1">
+            Select the final product from inventory to link stock.
+          </small>
         </div>
 
         <div className="form-group">

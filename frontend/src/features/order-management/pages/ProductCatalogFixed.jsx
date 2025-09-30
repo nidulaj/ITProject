@@ -39,7 +39,7 @@ const ProductCatalogFixed = () => {
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
@@ -69,7 +69,7 @@ const ProductCatalogFixed = () => {
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
