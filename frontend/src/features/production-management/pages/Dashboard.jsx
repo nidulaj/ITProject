@@ -10,10 +10,14 @@ import RecipeForm from '../components/RecipeForm';
 import RequestIngredientsForm from '../components/RequestIngredientsForm';
 import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon, X } from 'lucide-react';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
+import { Routes, Route } from "react-router-dom";
+import UserProfile from '../../user-management/components/UserProfile';
 
 const API = 'http://localhost:5000';
 
 const ProductionDashboard = () => {
+  const [userInfo, setUserInfo] = useState(null);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
@@ -56,6 +60,23 @@ const ProductionDashboard = () => {
 
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const res = await authFetch({
+          method: "get",
+          url: `http://localhost:5000/api/staff/auth/userInfo`,
+        });
+        setUserInfo(res.data);
+        console.log("userinfo : ", userInfo)
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    fetchUserInfo();
+
   }, []);
 
   // Function to handle View button click and open modal
@@ -129,16 +150,16 @@ const ProductionDashboard = () => {
         Phone: r.phone || '—',
         Reason: r.reason,
         Image: r.image_url ? (
-          
-                          <button
-                            onClick={() => handleViewImage(r.image_url)} // Open modal with image
-                            className="text-blue-600 hover:underline"
-                          >
-                            View Image
-                          </button>
-                        ) : (
-                          "—"
-                        ),
+
+          <button
+            onClick={() => handleViewImage(r.image_url)} // Open modal with image
+            className="text-blue-600 hover:underline"
+          >
+            View Image
+          </button>
+        ) : (
+          "—"
+        ),
         Status: r.status,
         __raw: r,
       }));
@@ -499,6 +520,18 @@ const ProductionDashboard = () => {
         );
       }
 
+      case 'userProfile': {
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">User Profile</h2>
+            </div>
+            <UserProfile />
+          </div>
+        );
+      }
+
+
       default:
         return renderDashboardContent();
     }
@@ -511,7 +544,7 @@ const ProductionDashboard = () => {
     <div className="flex h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header pendingCount={pendingCO.length} onOpenNotifications={() => setNotifOpen(true)} />
+        <Header pendingCount={pendingCO.length} onOpenNotifications={() => setNotifOpen(true)} userInfo={userInfo} />
         <main className="flex-1 overflow-y-auto p-6">{renderContent()}</main>
       </div>
 
@@ -526,10 +559,10 @@ const ProductionDashboard = () => {
           modalType === 'normal_batch'
             ? 'Create Normal Yogurt Batch'
             : modalType === 'custom_batch'
-            ? 'Create Custom Batch'
-            : modalType === 'ingredient_request'
-            ? 'New Ingredient Request'
-            : 'Modal'
+              ? 'Create Custom Batch'
+              : modalType === 'ingredient_request'
+                ? 'New Ingredient Request'
+                : 'Modal'
         }
         size="medium"
       >

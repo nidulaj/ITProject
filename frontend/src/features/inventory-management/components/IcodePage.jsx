@@ -8,13 +8,13 @@ const IcodePage = () => {
 
   const fetchIcodes = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/icodes"); // ✅ safer full URL
+      const res = await axios.get("http://localhost:5000/api/icodes");
       setIcodes(res.data);
     } catch (err) {
       console.error("Failed to fetch icodes:", err);
     }
   };
-
+   
   useEffect(() => {
     fetchIcodes();
   }, []);
@@ -53,8 +53,7 @@ const IcodePage = () => {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Icode Management ✅</h1> 
-      {/* Added "✅" so you know page actually rendered */}
+      <h1 className="text-2xl font-bold mb-4">Icode Management ✅</h1>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
@@ -70,8 +69,8 @@ const IcodePage = () => {
         </button>
       </form>
 
-      {/* Table */}
-      <table className="w-full border">
+      {/* Icode Table */}
+      <table className="w-full border mb-6">
         <thead>
           <tr className="bg-gray-200">
             <th className="p-2 border">Code</th>
@@ -85,9 +84,7 @@ const IcodePage = () => {
             <tr key={ic.ingredient_id}>
               <td className="p-2 border">{ic.ingredient_code}</td>
               <td className="p-2 border">{ic.name}</td>
-              <td className="p-2 border">
-                {new Date(ic.created_at).toLocaleString()}
-              </td>
+              <td className="p-2 border">{new Date(ic.created_at).toLocaleString()}</td>
               <td className="p-2 border flex gap-2">
                 <button
                   onClick={() => handleEdit(ic.ingredient_id, ic.name)}

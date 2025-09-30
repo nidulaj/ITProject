@@ -37,6 +37,10 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const chatSystemRoutes = require("./routes/chatSystemRoutes");
 
 
+const ingredientTotalsRoutes = require("./routes/ingredientTotalsRoutes");
+
+
+const notificationProductionRoutes = require('./routes/notificationProductionRoutes'); //Rahmika
 
 
 
@@ -76,11 +80,15 @@ app.use('/api/chat', chatSystemRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/req_ingredients', reqIngredientsRoutes);  //Rashmika
 app.use('/api/productions', productionRoutes);  //Rashmika
-app.use("/api/returns", returnsRoute);  //Rahmika
-app.use("/api/customized_orders", customizedOrdersRoute); //Rahmika
+app.use("/api/returns", returnsRoute);  //Rashmika
+app.use("/api/customized_orders", customizedOrdersRoute); //Rashmika
 app.use('/api/user-management/audit', userManagementAuditRoutes);
 app.use("/api/icodes", icodeRoutes);// ingredient code
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/ingredient-totals", ingredientTotalsRoutes);
+
+app.use('/api/notifications', notificationProductionRoutes); //Rashmika
+
 
 server.listen(5000, () => {
   console.log("Server + Socket.IO running on http://localhost:5000");

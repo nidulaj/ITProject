@@ -73,6 +73,7 @@ export default function IngReqAccTable() {
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Blueberry</th>
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Milk</th>
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Culture</th>
+                  <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Sugar</th>
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Topping 1</th>
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Topping 2</th>
                   <th className="p-4 text-left font-semibold text-sm uppercase tracking-wide">Total Topping 3</th>
@@ -111,6 +112,7 @@ export default function IngReqAccTable() {
                       <td className="p-4">{r.total_blueberry}</td>
                       <td className="p-4">{r.total_milk}</td>
                       <td className="p-4">{r.total_culture}</td>
+                      <td className="p-4">{r.total_sugar}</td>
                       <td className="p-4">{r.total_topping1}</td>
                       <td className="p-4">{r.total_topping2}</td>
                       <td className="p-4">{r.total_topping3}</td>

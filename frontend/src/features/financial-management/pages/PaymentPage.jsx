@@ -46,6 +46,7 @@ const PaymentPage = ({ onUpdateStats }) => {
         <table className="min-w-full bg-white shadow-lg rounded-xl overflow-hidden">
         <thead className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
         <tr>
+          <th className="px-6 py-3 text-left font-semibold">Order ID</th>
           <th className="px-6 py-3 text-left font-semibold">Customer</th>
           <th className="px-6 py-3 text-left font-semibold">Amount</th>
           <th className="px-6 py-3 text-left font-semibold">Date</th>
@@ -61,6 +62,7 @@ const PaymentPage = ({ onUpdateStats }) => {
             key={payment.payment_id}
             className="hover:bg-blue-50 transition-all duration-200"
           >
+          <td className="px-6 py-3 font-mono text-sm text-blue-600">#{payment.order_id}</td>
           <td className="px-6 py-3">{payment.customer_name}</td>
           <td className="px-6 py-3">Rs. {payment.amount}</td>
           <td className="px-6 py-3">
@@ -118,7 +120,7 @@ const PaymentPage = ({ onUpdateStats }) => {
       {payments.length === 0 && (
         <tr>
           <td
-            colSpan="6"
+            colSpan="7"
             className="text-center py-6 text-gray-500 italic"
           >
             No payments found.
