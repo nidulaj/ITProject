@@ -15,6 +15,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [existingCodes, setExistingCodes] = useState([]);
 
   const toInputDate = (dateVal) => {
     if (!dateVal) return "";
@@ -53,12 +54,49 @@ const DiscountForm = ({ discount, onSuccess }) => {
     }
   }, [discount]);
 
+
+  useEffect(() => {
+  const fetchCodes = async () => {
+    try {
+      const res = await authFetch({
+        method: 'get',
+        url: "http://localhost:5000/api/discounts",
+      });
+      const codes = res.data.map(d => d.discount_code?.toUpperCase());
+      setExistingCodes(codes);
+    } catch (err) {
+      console.error("Error fetching discount codes:", err);
+    }
+  };
+
+  fetchCodes();
+}, []);
+
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({ ...prev, [name]: value }));
     
   };
+
+
+  const validateDiscountCode = (code) => {
+  if (!code) {
+    setErrors(prev => ({ ...prev, discount_code: "Discount code is required" }));
+    return false;
+  } else if (code.length < 3) {
+    setErrors(prev => ({ ...prev, discount_code: "Must be at least 3 characters" }));
+    return false;
+  } else if (!discount && existingCodes.includes(code.toUpperCase())) {
+    setErrors(prev => ({ ...prev, discount_code: "This discount code already exists" }));
+    return false;
+  } else {
+    setErrors(prev => ({ ...prev, discount_code: null }));
+    return true;
+  }
+};
+
 
   const preparePayload = (fd) => {
     
@@ -79,7 +117,6 @@ const DiscountForm = ({ discount, onSuccess }) => {
     const num = Number(formData.value);
     let hasError = false;
 
-    // Validation for discount code
     if (!formData.discount_code) {
       setErrors((prev) => ({
         ...prev,
@@ -96,8 +133,13 @@ const DiscountForm = ({ discount, onSuccess }) => {
       setErrors((prev) => ({ ...prev, discount_code: null }));
     }
 
-    // Validation for value (already partially included)
-  if (formData.discount_type === "percentage" && (num < 1 || num > 100)) {
+    const isCodeValid = validateDiscountCode(formData.discount_code);
+if (!isCodeValid) {
+  hasError = true;
+}
+
+
+  if (formData.discount_type === "percentage" && (num < 1 || num > 99)) {
     setErrors((prev) => ({
       ...prev,
       value: "Percentage must be between 1 and 100",
@@ -113,8 +155,8 @@ const DiscountForm = ({ discount, onSuccess }) => {
     setErrors((prev) => ({ ...prev, value: null }));
   }
 
-  // Date validations
-  const today = new Date().setHours(0, 0, 0, 0); // Today at midnight
+  
+  const today = new Date().setHours(0, 0, 0, 0);
   const validFrom = new Date(formData.valid_from).setHours(0, 0, 0, 0);
   const validTo = new Date(formData.valid_to).setHours(0, 0, 0, 0);
 
@@ -138,7 +180,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
     setErrors((prev) => ({ ...prev, valid_to: null }));
   }
 
-  // Prevent submission if any error exists
+
   if (hasError) {
     alert("Please fix errors in input values before submitting.");
     return;
@@ -220,13 +262,18 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.value}
           onChange={handleChange}
           onInput={(e) => {
-          const val = Number(e.target.value);
-          if (formData.discount_type === "percentage" && val > 100) {
-            e.target.value = 100;
-          } else if (val < 1) {
-            e.target.value = 1;
+          let val = Number(e.target.value);
+
+          if (val < 1) val = 1;
+
+          if (formData.discount_type === "percentage" && val >= 100) {
+            val = 99;
           }
+
+          e.target.value = val;
+          setFormData((prev) => ({ ...prev, value: val })); 
         }}
+
           min={formData.discount_type === "fixed" ? 1 : 1}
           max={formData.discount_type === "percentage" ? 100 : undefined}
           required
@@ -259,16 +306,17 @@ const DiscountForm = ({ discount, onSuccess }) => {
           name="discount_code"
           value={formData.discount_code}
           onChange={(e) => {
-            const value = e.target.value.toUpperCase();
+            const value = e.target.value.toUpperCase();;
             setFormData(prev => ({ ...prev, discount_code: value }));
+            validateDiscountCode(value);
           }}
-          placeholder="e.g., LKLKU12"
+          placeholder="e.g., ABCD10"
           maxLength={10}
           required
-          className="border p-2 rounded"
+          className={`border p-2 rounded ${errors.discount_code ? "border-red-500" : ""}`}
         />
         <span className="text-xs text-gray-500 mt-1">
-          Enter a unique discount code (e.g., LKLKU12, SAVE25, WELC99)
+          Enter a unique discount code (e.g., ABCD10, SAVE25%)
         </span>
         {errors.discount_code && (
           <span className="text-sm text-red-500 mt-1">{errors.discount_code}</span>
@@ -283,7 +331,7 @@ const DiscountForm = ({ discount, onSuccess }) => {
           value={formData.valid_from}
           onChange={handleChange}
           required
-          min={new Date().toISOString().split("T")[0]} // Today’s date
+          min={new Date().toISOString().split("T")[0]}
           className="border p-2 rounded"
         />
         {errors.valid_from && (
