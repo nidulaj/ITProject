@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
+import FinalProductsTable from '../components/FinalProductsTable';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import './ProductCatalog.css';
@@ -262,6 +263,11 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
           {/* Main content */}
           <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
+            {/* Final Products Table */}
+            <div className="mb-6">
+              <FinalProductsTable />
+            </div>
+            
             <div className="catalog-content flex gap-6">
               <ProductForm
                 editingProduct={editingProduct}
