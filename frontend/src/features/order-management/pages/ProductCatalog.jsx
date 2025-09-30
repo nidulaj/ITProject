@@ -10,6 +10,7 @@ import './ProductCatalog.css';
 const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showProductForm, setShowProductForm] = useState(false);
   const { showSuccess, showError } = useNotification();
   const navigate = useNavigate();
 
@@ -45,24 +46,25 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
   const handleAddProduct = async (formData) => {
     try {
+      console.log('🚀 handleAddProduct called with:', formData);
       
       // Create FormData for file upload
       const productData = new FormData();
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
         productData.append('image', formData.image);
       }
       
-      console.log('Sending product data:', {
+      console.log('📤 Sending product data to backend:', {
         name: formData.name,
         description: formData.description,
         price: formData.price,
-        stock_quantity: formData.stock_quantity,
+        final_product_id: formData.final_product_id,
         category: formData.category,
         hasImage: !!formData.image
       });
@@ -105,7 +107,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
@@ -117,7 +119,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         name: formData.name,
         description: formData.description,
         price: formData.price,
-        stock_quantity: formData.stock_quantity,
+        final_product_id: formData.final_product_id,
         category: formData.category,
         hasImage: !!formData.image
       });
@@ -155,6 +157,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
+    setShowProductForm(true);
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -263,25 +266,63 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
           {/* Main content */}
           <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
-            {/* Final Products Table */}
-            <div className="mb-6">
+            {/* Header with Create Button */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Product Management</h2>
+              <button
+                onClick={() => setShowProductForm(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md hover:shadow-lg"
+              >
+                + Create New Product
+              </button>
+            </div>
+
+            {/* Final Products Table - Reduced Width */}
+            <div className="mb-6 max-w-4xl">
               <FinalProductsTable />
             </div>
             
-            <div className="catalog-content flex gap-6">
-              <ProductForm
-                editingProduct={editingProduct}
-                onAddProduct={handleAddProduct}
-                onUpdateProduct={handleUpdateProduct}
-                onCancelEdit={handleCancelEdit}
-              />
-              
+            {/* Product Grid - Full Width */}
+            <div className="w-full">
               <ProductGrid
                 products={products}
                 onEditProduct={handleEditProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
             </div>
+
+            {/* Product Form Modal */}
+            {showProductForm && (
+              <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                  <div className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {editingProduct ? 'Edit Product' : 'Add New Product'}
+                      </h3>
+                      <button
+                        onClick={() => {
+                          setShowProductForm(false);
+                          setEditingProduct(null);
+                        }}
+                        className="text-gray-500 hover:text-gray-700 text-2xl"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <ProductForm
+                      editingProduct={editingProduct}
+                      onAddProduct={handleAddProduct}
+                      onUpdateProduct={handleUpdateProduct}
+                      onCancelEdit={() => {
+                        setShowProductForm(false);
+                        setEditingProduct(null);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       } />

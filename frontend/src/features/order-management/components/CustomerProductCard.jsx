@@ -87,9 +87,22 @@ const CustomerProductCard = ({ product }) => {
           <span className="text-lg font-bold text-blue-600">
             LKR {product.price}
           </span>
-          <span className="text-xs text-gray-500">
-            Stock: {product.stock_quantity}
-          </span>
+          <div className="flex flex-col items-end">
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+              product.stock_quantity === 0 
+                ? 'bg-red-100 text-red-800' 
+                : product.stock_quantity <= 10 
+                ? 'bg-yellow-100 text-yellow-800' 
+                : 'bg-green-100 text-green-800'
+            }`}>
+              {product.stock_quantity === 0 
+                ? 'Out of Stock' 
+                : product.stock_quantity <= 10 
+                ? `Low Stock (${product.stock_quantity})` 
+                : `In Stock (${product.stock_quantity})`
+              }
+            </span>
+          </div>
         </div>
         
         {/* Category */}
@@ -117,7 +130,7 @@ const CustomerProductCard = ({ product }) => {
             </span>
             <button
               onClick={increaseQuantity}
-              disabled={quantity >= product.stock_quantity}
+              disabled={quantity >= product.stock_quantity || isOutOfStock}
               className="w-6 h-6 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-110"
             >
               +
@@ -125,13 +138,38 @@ const CustomerProductCard = ({ product }) => {
           </div>
         </div>
         
+        {/* Stock Warning */}
+        {product.stock_quantity > 0 && product.stock_quantity <= 10 && (
+          <div className="mb-3">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+              <div className="flex items-center">
+                <span className="text-yellow-600 text-xs">⚠️</span>
+                <span className="text-yellow-800 text-xs ml-1">
+                  Only {product.stock_quantity} left in stock!
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
           disabled={isOutOfStock || quantity > product.stock_quantity}
-          className="w-full py-2 px-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+          className={`w-full py-2 px-3 text-xs font-medium rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+            isOutOfStock 
+              ? 'bg-gray-400 cursor-not-allowed text-white' 
+              : quantity > product.stock_quantity
+              ? 'bg-red-400 cursor-not-allowed text-white'
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          }`}
         >
-          {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+          {isOutOfStock 
+            ? 'Out of Stock' 
+            : quantity > product.stock_quantity 
+            ? `Only ${product.stock_quantity} available` 
+            : 'Add to Cart'
+          }
         </button>
       </div>
     </div>

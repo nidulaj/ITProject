@@ -53,7 +53,7 @@ const FinalProductsTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden mb-6">
+    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
         <h3 className="text-lg font-bold text-gray-800 text-center">Final Products Inventory</h3>
@@ -64,13 +64,13 @@ const FinalProductsTable = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                 ID
               </th>
               <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Product Name
               </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                 Quantity
               </th>
             </tr>
@@ -85,13 +85,13 @@ const FinalProductsTable = () => {
             ) : (
               finalProducts.map((product, index) => (
                 <tr key={product.fproduct_id || index} className="hover:bg-gray-50">
-                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-3 py-2 text-center text-sm font-medium text-gray-900">
                     {product.fproduct_id}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 py-2 text-sm text-gray-900">
                     {product.pname}
                   </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-3 py-2 text-center">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                       product.quantity > 50 
                         ? 'bg-green-100 text-green-800' 
