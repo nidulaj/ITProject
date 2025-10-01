@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
 
 const PubuduHomepage = ({ hideHeader = false }) => {
+  const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -142,12 +144,17 @@ const PubuduHomepage = ({ hideHeader = false }) => {
               <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
                 <Heart className="w-5 h-5 text-gray-600" />
               </button>
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
+              <button 
+                onClick={() => navigate('/login')}
+                className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors"
+              >
                 <User className="w-5 h-5 text-gray-600" />
               </button>
-              <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors relative">
+              <button 
+                onClick={() => navigate('/login')}
+                className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors"
+              >
                 <ShoppingCart className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
               </button>
               
               {/* Mobile menu button */}
@@ -199,7 +206,10 @@ const PubuduHomepage = ({ hideHeader = false }) => {
                   {heroSlides[currentSlide].subtitle}
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl">
+                  <button 
+                    onClick={() => navigate('/login')}
+                    className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl"
+                  >
                     {heroSlides[currentSlide].cta}
                   </button>
                   <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
@@ -300,7 +310,10 @@ const PubuduHomepage = ({ hideHeader = false }) => {
 
                     <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-blue-600">{product.price}</span>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm">
+                    <button 
+                      onClick={() => navigate('/login')}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm"
+                    >
                         Add to Cart
                     </button>
                     </div>
@@ -354,7 +367,10 @@ const PubuduHomepage = ({ hideHeader = false }) => {
 
                     <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-blue-600">{product.price}</span>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm">
+                    <button 
+                      onClick={() => navigate('/login')}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm"
+                    >
                         Customized Now
                     </button>
                     </div>
@@ -378,7 +394,10 @@ const PubuduHomepage = ({ hideHeader = false }) => {
               with our wide selection of flavors, toppings, and healthy additions.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl">
+              <button 
+                onClick={() => navigate('/login')}
+                className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl"
+              >
                 Start Customizing
               </button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">

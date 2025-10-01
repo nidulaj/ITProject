@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 
 const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEdit }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -13,6 +15,8 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
   const [imagePreview, setImagePreview] = useState(null);
   const [finalProducts, setFinalProducts] = useState([]);
   const [loadingFinalProducts, setLoadingFinalProducts] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch final products for dropdown
   const fetchFinalProducts = async () => {
@@ -38,6 +42,84 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
   useEffect(() => {
     fetchFinalProducts();
   }, []);
+
+  // Validation functions
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Product name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Product name must be at least 2 characters';
+    } else if (formData.name.trim().length > 100) {
+      newErrors.name = 'Product name must be less than 100 characters';
+    }
+
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.description = 'Product description is required';
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = 'Product description must be at least 10 characters';
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = 'Product description must be less than 500 characters';
+    }
+
+    // Price validation
+    if (!formData.price) {
+      newErrors.price = 'Price is required';
+    } else {
+      const price = parseFloat(formData.price);
+      if (isNaN(price)) {
+        newErrors.price = 'Price must be a valid number';
+      } else if (price <= 0) {
+        newErrors.price = 'Price must be greater than 0';
+      } else if (price > 999999) {
+        newErrors.price = 'Price must be less than 1,000,000';
+      }
+    }
+
+    // Category validation
+    if (!formData.category.trim()) {
+      newErrors.category = 'Category is required';
+    } else if (formData.category.trim().length < 2) {
+      newErrors.category = 'Category must be at least 2 characters';
+    } else if (formData.category.trim().length > 50) {
+      newErrors.category = 'Category must be less than 50 characters';
+    }
+
+    // Final product validation
+    if (!formData.final_product_id) {
+      newErrors.final_product_id = 'Please select a final product';
+    }
+
+    // Image validation (optional but if provided, validate)
+    if (formData.image) {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (formData.image.size > maxSize) {
+        newErrors.image = 'Image size must be less than 5MB';
+      }
+      
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(formData.image.type)) {
+        newErrors.image = 'Image must be JPG, PNG, or GIF format';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Clear specific error when user starts typing
+  const clearError = (field) => {
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
 
   // Update form when editing product changes
   useEffect(() => {
@@ -75,20 +157,33 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
       ...prev,
       [name]: value
     }));
+    
+    // Clear error for this field when user starts typing
+    clearError(name);
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Clear any existing image error
+      clearError('image');
+      
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file');
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!allowedTypes.includes(file.type)) {
+        setErrors(prev => ({
+          ...prev,
+          image: 'Please select a valid image file (JPG, PNG, or GIF)'
+        }));
         return;
       }
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
+        setErrors(prev => ({
+          ...prev,
+          image: 'Image size must be less than 5MB'
+        }));
         return;
       }
 
@@ -122,24 +217,30 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Prevent double submission
+    if (isSubmitting) return;
+    
     console.log('🚀 Form submission started');
     console.log('📝 Form data:', formData);
-    console.log('🔍 Final products available:', finalProducts.length);
     
-    if (!formData.name || !formData.description || !formData.price || !formData.category || !formData.final_product_id) {
-      console.log('❌ Validation failed - missing fields');
-      console.log('name:', formData.name, 'description:', formData.description, 'price:', formData.price, 'category:', formData.category, 'final_product_id:', formData.final_product_id);
-      alert('Please fill in all required fields (name, description, price, category, and final product)');
+    // Validate form
+    if (!validateForm()) {
+      console.log('❌ Validation failed');
       return;
     }
     
     console.log('✅ All fields validated');
+    setIsSubmitting(true);
 
     try {
       if (editingProduct) {
         await onUpdateProduct(formData);
+        // For editing, just close the modal
+        onCancelEdit();
       } else {
         await onAddProduct(formData);
+        // For adding new product, close the modal
+        onCancelEdit();
       }
       
       // Reset form only if operation was successful
@@ -152,6 +253,8 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
         image: null
       });
       setImagePreview(null);
+      setErrors({});
+      
       // Reset file input
       const fileInput = document.getElementById('image');
       if (fileInput) {
@@ -159,30 +262,64 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
       }
     } catch (error) {
       // Error handling is done in parent component
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="left-panel shadow-2xl transform perspective-1000 flex-shrink-0">
-      <div className="p-6 pb-4">
-        <h2 className="panel-title drop-shadow-lg">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-        <form onSubmit={handleSubmit} className="product-form">
-        <div className="form-group">
-          <label htmlFor="name" className="form-label">Product Name:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            placeholder="Enter product name"
-            required
-            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-          />
+    <div className="w-full">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Row 1: Product Name and Price */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="form-group">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Product Name:</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Enter product name"
+              required
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+                errors.name 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">Price (LKR):</label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleInputChange}
+              placeholder="Enter price"
+              step="0.01"
+              min="0"
+              required
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+                errors.price 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+            />
+            {errors.price && (
+              <p className="text-red-500 text-xs mt-1">{errors.price}</p>
+            )}
+          </div>
         </div>
 
+        {/* Row 2: Description */}
         <div className="form-group">
-          <label htmlFor="description" className="form-label">Description:</label>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Description:</label>
           <textarea
             id="description"
             name="description"
@@ -191,88 +328,105 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
             placeholder="Enter product description"
             rows="3"
             required
-            className="form-input form-textarea shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+              errors.description 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+            }`}
           ></textarea>
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="price" className="form-label">Price (LKR):</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleInputChange}
-            placeholder="Enter price"
-            step="0.01"
-            min="0"
-            required
-            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="final_product_id" className="form-label">Final Product:</label>
-          <select
-            id="final_product_id"
-            name="final_product_id"
-            value={formData.final_product_id}
-            onChange={handleInputChange}
-            required
-            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-            disabled={loadingFinalProducts}
-          >
-            <option value="">Select a final product</option>
-            {finalProducts.map((product) => (
-              <option key={product.fproduct_id} value={product.fproduct_id}>
-                ID: {product.fproduct_id} - {product.pname} (Qty: {product.quantity})
-              </option>
-            ))}
-          </select>
-          {loadingFinalProducts && (
-            <small className="text-blue-500 text-xs mt-1">Loading final products...</small>
+          {errors.description && (
+            <p className="text-red-500 text-xs mt-1">{errors.description}</p>
           )}
-          <small className="text-gray-500 text-xs mt-1">
-            Select the final product from inventory to link stock.
-          </small>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="category" className="form-label">Category:</label>
-          <input
-            type="text"
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleInputChange}
-            placeholder="Enter category"
-            required
-            className="form-input shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-          />
+        {/* Row 3: Final Product and Category */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="form-group">
+            <label htmlFor="final_product_id" className="block text-sm font-medium text-gray-700 mb-2">Final Product:</label>
+            <select
+              id="final_product_id"
+              name="final_product_id"
+              value={formData.final_product_id}
+              onChange={handleInputChange}
+              required
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+                errors.final_product_id 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+              disabled={loadingFinalProducts}
+            >
+              <option value="">Select a final product</option>
+              {finalProducts.map((product) => (
+                <option key={product.fproduct_id} value={product.fproduct_id}>
+                  ID: {product.fproduct_id} - {product.pname} (Qty: {product.quantity})
+                </option>
+              ))}
+            </select>
+            {errors.final_product_id && (
+              <p className="text-red-500 text-xs mt-1">{errors.final_product_id}</p>
+            )}
+            {loadingFinalProducts && (
+              <small className="text-blue-500 text-xs mt-1">Loading final products...</small>
+            )}
+            <small className="text-gray-500 text-xs mt-1">
+              Select the final product from inventory to link stock.
+            </small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">Category:</label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              placeholder="Enter category"
+              required
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+                errors.category 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-blue-500'
+              }`}
+            />
+            {errors.category && (
+              <p className="text-red-500 text-xs mt-1">{errors.category}</p>
+            )}
+          </div>
         </div>
 
+        {/* Row 4: Image Upload */}
         <div className="form-group">
-          <label htmlFor="image" className="form-label">Product Image:</label>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">Product Image:</label>
           <input
             type="file"
             id="image"
             name="image"
             accept="image/*"
             onChange={handleImageChange}
-            className="file-input"
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:border-transparent ${
+              errors.image 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+            }`}
           />
-          <small className="file-help">Supported formats: JPG, PNG, GIF (Max: 5MB)</small>
+          {errors.image && (
+            <p className="text-red-500 text-xs mt-1">{errors.image}</p>
+          )}
+          <small className="text-xs text-gray-500 mt-1">Supported formats: JPG, PNG, GIF (Max: 5MB)</small>
         </div>
 
+        {/* Image Preview */}
         {imagePreview && (
-          <div className="image-preview-container">
-            <label className="form-label">Image Preview:</label>
-            <div className="image-preview">
-              <img src={imagePreview} alt="Product preview" />
+          <div className="form-group">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Image Preview:</label>
+            <div className="relative inline-block">
+              <img src={imagePreview} alt="Product preview" className="w-32 h-32 object-cover rounded-lg border border-gray-300" />
               <button 
                 type="button" 
                 onClick={removeImage}
-                className="remove-image-btn"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition-colors"
                 title="Remove image"
               >
                 ×
@@ -281,18 +435,41 @@ const ProductForm = ({ editingProduct, onAddProduct, onUpdateProduct, onCancelEd
           </div>
         )}
 
-        <div className="form-buttons">
-          <button type="submit" className="btn-primary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-            {editingProduct ? 'Update Product' : 'Add Product'}
+        {/* Form Buttons */}
+        <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className={`px-6 py-2 rounded-md font-medium transition-colors duration-200 shadow-md ${
+              isSubmitting 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-500 hover:bg-blue-600 hover:shadow-lg'
+            } text-white`}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {editingProduct ? 'Updating...' : 'Adding...'}
+              </span>
+            ) : (
+              editingProduct ? 'Update Product' : 'Add Product'
+            )}
           </button>
           {editingProduct && (
-            <button type="button" onClick={onCancelEdit} className="btn-secondary shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <button 
+              type="button" 
+              onClick={onCancelEdit} 
+              disabled={isSubmitting}
+              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200 shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
               Cancel
             </button>
           )}
         </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 };

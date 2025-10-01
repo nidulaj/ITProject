@@ -6,7 +6,7 @@ import NotificationProvider from '../../../contexts/NotificationContext';
 import OrderStats from '../components/OrderStats';
 import OrderTable from '../components/OrderTable';
 import OrderDetailsModal from '../components/OrderDetailsModal';
-import Sidebar from '../components/Sidebar';
+import UnifiedSidebar from '../components/UnifiedSidebar';
 import Header from '../components/Header';
 import UserProfile from '../../user-management/components/UserProfile';
 
@@ -285,7 +285,7 @@ const OrderDashboard = () => {
         <Route path="/" element={
           <div className="flex min-h-screen">
             {/* Left sidebar navigation */}
-            <Sidebar />
+            <UnifiedSidebar title="Order Management" />
 
             {/* Main content */}
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
@@ -359,7 +359,7 @@ const OrderDashboard = () => {
         <Route path="/profile" element={
           <div className="flex min-h-screen">
             {/* Left sidebar navigation */}
-            <Sidebar />
+            <UnifiedSidebar title="Order Management" />
 
             {/* Main content */}
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
