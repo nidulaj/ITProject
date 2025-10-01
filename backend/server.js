@@ -39,7 +39,7 @@ const ingredientTotalsRoutes = require("./routes/ingredientTotalsRoutes");
 
 const notificationProductionRoutes = require('./routes/notificationProductionRoutes'); //Rahmika
 
-
+const ingredientReport=require('./routes/ingredientReport');
 
 
 app.use(cors({
@@ -85,6 +85,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/ingredient-totals", ingredientTotalsRoutes);
 
 app.use('/api/notifications', notificationProductionRoutes); //Rashmika
+ 
+app.use("/api/ingredientReport", ingredientReport);
 
 
 server.listen(5000, () => {

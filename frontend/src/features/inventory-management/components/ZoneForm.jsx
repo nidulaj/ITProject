@@ -11,11 +11,10 @@ const ZoneManager = () => {
   // Fetch zones from backend
   const fetchZones = async () => {
     try {
-      //const res = await axios.get("http://localhost:5000/api/store");
       const res = await authFetch({
-                        method: "get",
-                        url: "http://localhost:5000/api/store",
-                      });
+        method: "get",
+        url: "http://localhost:5000/api/store",
+      });
       setZones(res.data.zone || []);
     } catch (err) {
       console.error("Error fetching zones:", err);
@@ -31,12 +30,11 @@ const ZoneManager = () => {
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      //await axios.post("http://localhost:5000/api/store", form);
-          const res = await authFetch({
-                               method: "post",
-                               url: "http://localhost:5000/api/store",
-                               data: form,
-                             });
+      const res = await authFetch({
+        method: "post",
+        url: "http://localhost:5000/api/store",
+        data: form,
+      });
       alert("Zone added successfully!");
       setForm({ zone_name: "", capacity: "" });
       fetchZones();
@@ -58,16 +56,15 @@ const ZoneManager = () => {
       return alert("Capacity cannot be smaller than used capacity!");
     }
     try {
-     const res = await authFetch({
-      method: "put",
-      url: `http://localhost:5000/api/store/${editingZone.storage_zone_id}`,
-      data: {
-        zone_name: form.zone_name,
-        capacity: form.capacity,
-        used_capacity: editingZone.used_capacity,
-      },
-    });
-
+      const res = await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/store/${editingZone.storage_zone_id}`,
+        data: {
+          zone_name: form.zone_name,
+          capacity: form.capacity,
+          used_capacity: editingZone.used_capacity,
+        },
+      });
       alert("Zone updated successfully!");
       setShowModal(false);
       setEditingZone(null);
@@ -81,11 +78,10 @@ const ZoneManager = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this zone?")) return;
     try {
-      //await axios.delete(`http://localhost:5000/api/store/${id}`);
       const res = await authFetch({
-                            method: "delete",
-                            url: `http://localhost:5000/api/store/${id}`,
-                            });
+        method: "delete",
+        url: `http://localhost:5000/api/store/${id}`,
+      });
       alert("Zone deleted successfully!");
       fetchZones();
     } catch (err) {
@@ -94,13 +90,36 @@ const ZoneManager = () => {
     }
   };
 
+  // PDF Download function
+  const handleDownloadPDF = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/store/pdf",
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "zones.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+      alert("Error generating PDF");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto mt-8">
-
       {/* Add Zone Form */}
-      <form onSubmit={handleAdd} className="bg-white p-6 rounded-lg shadow-md border border-gray-400 mb-6">
+      <form
+        onSubmit={handleAdd}
+        className="bg-white p-6 rounded-lg shadow-md border border-gray-400 mb-6"
+      >
         <h2 className="text-2xl font-bold mb-4 text-gray-900">Add New Zone</h2>
-
         <div className="mb-3">
           <label className="block text-gray-800 mb-1 font-semibold">Zone Name</label>
           <input
@@ -112,7 +131,6 @@ const ZoneManager = () => {
             className="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-gray-800 mb-1 font-semibold">Capacity</label>
           <input
@@ -124,7 +142,6 @@ const ZoneManager = () => {
             className="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
-
         <button
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition"
@@ -135,7 +152,16 @@ const ZoneManager = () => {
 
       {/* Zones Table */}
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-400">
-        <h2 className="text-xl font-bold mb-4 text-gray-900">Storage Zones</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Storage Zones</h2>
+          <button
+            onClick={handleDownloadPDF}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md"
+          >
+            Download PDF
+          </button>
+        </div>
+
         <table className="w-full border border-gray-600 text-gray-900">
           <thead>
             <tr className="bg-blue-700 text-white">
@@ -155,7 +181,9 @@ const ZoneManager = () => {
                   <td className="border border-gray-600 px-4 py-2">{zone.zone_name}</td>
                   <td className="border border-gray-600 px-4 py-2">{zone.capacity}</td>
                   <td className="border border-gray-600 px-4 py-2">{zone.used_capacity}</td>
-                  <td className="border border-gray-600 px-4 py-2">{zone.created_at ? new Date(zone.created_at).toLocaleDateString() : ""}</td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {zone.created_at ? new Date(zone.created_at).toLocaleDateString() : ""}
+                  </td>
                   <td className="border border-gray-600 px-4 py-2 space-x-2">
                     <button
                       onClick={() => handleEdit(zone)}
@@ -230,7 +258,6 @@ const ZoneManager = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
