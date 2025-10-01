@@ -17,6 +17,7 @@ const OrderDashboard = () => {
   const [orderItems, setOrderItems] = useState([]);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
     packingOrders: 0,
@@ -196,6 +197,57 @@ const OrderDashboard = () => {
     }
   };
 
+  // Function to generate order summary report
+  const handleGenerateOrderSummaryReport = async () => {
+    try {
+      setGeneratingReport(true);
+      console.log('Generating order summary report...');
+      
+      const response = await authFetch({
+        method: 'get',
+        url: `${API_BASE_URL}/summary/report`,
+        responseType: 'blob' // Important for PDF files
+      });
+      
+      console.log('Order summary report response received:', response);
+      
+      // Create blob from response
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `order-summary-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('Order summary report downloaded successfully');
+    } catch (error) {
+      console.error('Error generating order summary report:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      
+      let errorMessage = 'Failed to generate order summary report. ';
+      if (error.response?.status === 500) {
+        errorMessage += 'Server error. Please try again later.';
+      } else if (error.response?.status === 401) {
+        errorMessage += 'Authentication required. Please log in again.';
+      } else {
+        errorMessage += 'Please check your connection and try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
 
 
   if (error) {
@@ -252,7 +304,30 @@ const OrderDashboard = () => {
               {/* Recent Orders Table */}
               <div className="bg-white rounded-xl shadow-lg border border-blue-200 transform perspective-1000 hover:shadow-xl transition-all duration-300">
                 <div className="px-6 py-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
-                  <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
+                    <button
+                      onClick={handleGenerateOrderSummaryReport}
+                      disabled={generatingReport}
+                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                        generatingReport 
+                          ? 'bg-gray-400 text-white cursor-not-allowed' 
+                          : 'bg-green-600 hover:bg-green-700 text-white hover:shadow-lg'
+                      }`}
+                      title={generatingReport ? "Generating report..." : "Generate Order Summary Report"}
+                    >
+                      {generatingReport ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      )}
+                      <span className="text-sm font-medium">
+                        {generatingReport ? 'Generating...' : 'Export Report'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
                 
                 <OrderTable 
