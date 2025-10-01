@@ -12,6 +12,7 @@ import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon, X } fr
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import { Routes, Route } from "react-router-dom";
 import UserProfile from '../../user-management/components/UserProfile';
+import { jsPDF } from "jspdf";
 
 const API = 'http://localhost:5000';
 
@@ -130,6 +131,51 @@ const ProductionDashboard = () => {
       setReqRows([]);
     }
   };
+const generatePDF = () => {
+  const doc = new jsPDF();
+
+  // Add title with larger font
+  doc.setFontSize(22);
+  doc.text("Production Report", 20, 20);
+
+  // Add Production Details heading
+  doc.setFontSize(16);
+  doc.text("Production Details:", 20, 30);
+
+  // Set up table formatting
+  const columnHeaders = ["Batch ID", "Recipe No", "Quantity", "Status", "Created At"];
+  const productionDetails = productions.map((p) => [
+    String(p.batch_id),
+    String(p.recipe_no),
+    String(p.quantity),
+    String(p.status),
+    new Date(p.created_at).toLocaleString(),
+  ]);
+
+  // Set font and style for table
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+
+  // Table headers
+  const headerY = 40;
+  const colWidth = [30, 40, 30, 30, 50]; // Column widths for each column
+  columnHeaders.forEach((header, index) => {
+    doc.text(header, 20 + colWidth.slice(0, index).reduce((a, b) => a + b, 0), headerY);
+  });
+
+  // Table rows
+  let yPosition = headerY + 10;
+  productionDetails.forEach((detail) => {
+    colWidth.forEach((width, index) => {
+      doc.text(detail[index], 20 + colWidth.slice(0, index).reduce((a, b) => a + b, 0), yPosition);
+    });
+    yPosition += 10;
+  });
+
+  // Save the document
+  doc.save("production_report.pdf");
+};
+
 
   // ===== Returns (PM data) =====
   const fetchReturns = async () => {
@@ -438,6 +484,13 @@ const ProductionDashboard = () => {
                 </ActionButton>
                 <ActionButton variant="secondary" icon={Plus} onClick={() => openModal('custom_batch')}>
                   New Custom Batch
+                </ActionButton>
+                <ActionButton
+                  icon={Package}
+                  onClick={generatePDF}
+                  className="justify-center"
+                >
+                  Download PDF Report
                 </ActionButton>
               </div>
             </div>
