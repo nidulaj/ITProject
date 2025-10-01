@@ -15,11 +15,27 @@ export function initSocket(server) {
   io.on("connection", (socket) => {
     console.log(`⚡ Socket connected: ${socket.id}`);
 
-    // --- join a room by customer_code ---
+    // --- join a room by user_code ---
     socket.on("join_room", (userCode) => {
       if (!userCode) return;
       socket.join(userCode);
       console.log(`✅ Socket ${socket.id} joined room ${userCode}`);
+    });
+
+    // --- join customer notification room ---
+    socket.on("join_customer_room", (customerId) => {
+      if (!customerId) return;
+      const roomName = `customer_${customerId}`;
+      socket.join(roomName);
+      console.log(`🔔 Socket ${socket.id} joined customer room ${roomName}`);
+    });
+
+    // --- leave customer notification room ---
+    socket.on("leave_customer_room", (customerId) => {
+      if (!customerId) return;
+      const roomName = `customer_${customerId}`;
+      socket.leave(roomName);
+      console.log(`🚪 Socket ${socket.id} left customer room ${roomName}`);
     });
 
     // --- leave a room (e.g. logout / user switch) ---

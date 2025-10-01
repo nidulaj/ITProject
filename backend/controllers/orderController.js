@@ -10,6 +10,7 @@ const {
 } = require('../models/orderModel');
 
 const { createNotification } = require('../models/notificationModel');
+const { getIo } = require('../utils/socket');
 
 
 // Create a new order
@@ -185,22 +186,48 @@ const updateOrderStatusController = async (req, res) => {
     }
 
     // Create notification for the customer
+    console.log(`🔔 STARTING NOTIFICATION CREATION for order ${order_id} with status: ${order_status}`);
+    console.log(`🔔 Updated order object:`, updatedOrder);
+    console.log(`🔔 Customer ID from order: ${updatedOrder.cus_id}`);
+    
     try {
       console.log(`🔔 Creating notification for order ${order_id} with status: ${order_status}`);
-      console.log(`🔔 Customer ID: ${updatedOrder.customer_id}`);
+      console.log(`🔔 Customer ID: ${updatedOrder.cus_id}`);
       
       const notificationMessage = `Order #${String(order_id).padStart(3, '0')} is ${order_status.toLowerCase()}.`;
       console.log(`🔔 Notification message: ${notificationMessage}`);
       
+      console.log(`🔔 About to call createNotification with:`, {
+        cus_id: updatedOrder.cus_id,
+        order_id: order_id,
+        notification: notificationMessage,
+        notification_type: 'order_update'
+      });
+      
       const notification = await createNotification(
-        updatedOrder.customer_id,
+        updatedOrder.cus_id,
         order_id,
         notificationMessage,
         'order_update'
       );
       
       console.log(`✅ Notification created successfully:`, notification);
-      console.log(`📧 Notification sent to customer ${updatedOrder.customer_id} for order ${order_id}: ${notificationMessage}`);
+      console.log(`📧 Notification sent to customer ${updatedOrder.cus_id} for order ${order_id}: ${notificationMessage}`);
+      
+      // Emit real-time notification via Socket.IO
+      try {
+        const io = getIo();
+        io.to(`customer_${updatedOrder.cus_id}`).emit('new_notification', {
+          notification: notification,
+          message: notificationMessage,
+          order_id: order_id,
+          customer_id: updatedOrder.cus_id
+        });
+        console.log(`🚀 Real-time notification emitted to customer ${updatedOrder.cus_id}`);
+      } catch (socketError) {
+        console.error('❌ Error emitting socket notification:', socketError);
+        // Don't fail the notification creation if socket fails
+      }
     } catch (notificationError) {
       console.error('❌ Error creating notification:', notificationError);
       console.error('❌ Full error details:', notificationError);
