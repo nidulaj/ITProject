@@ -9,7 +9,8 @@ const {
   updateOrderStatusController, 
   updatePaymentStatusController,
   deleteOrderController,
-  generateOrderInvoice
+  generateOrderInvoice,
+  generateOrderSummaryReport
 } = require('../controllers/orderController');
 
 // Create new order
@@ -26,6 +27,9 @@ router.get('/customer/:customer_id', authMiddleware, getCustomerOrders);
 
 // Generate PDF invoice for order (must be before /:order_id route)
 router.get('/:order_id/invoice', authMiddleware, generateOrderInvoice);
+
+// Generate order summary report
+router.get('/summary/report', authMiddleware, generateOrderSummaryReport);
 
 // Get single order by ID
 router.get('/:order_id', authMiddleware, getSingleOrder);
