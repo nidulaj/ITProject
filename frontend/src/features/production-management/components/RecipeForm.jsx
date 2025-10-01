@@ -33,6 +33,8 @@ function RecipeForm() {
   const [requestingRecipe, setRequestingRecipe] = useState(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState(''); // Search query state
+
   const handleRequestClick = (recipe) => {
     setRequestingRecipe(recipe);
     setIsRequestModalOpen(true);
@@ -42,9 +44,19 @@ function RecipeForm() {
     fetchRecipes();
   }, []);
 
+  useEffect(() => {
+    // If searchQuery changes, filter the recipes
+    const filteredRecipes = recipes.filter((recipe) => {
+      return (
+        recipe.recipe_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        recipe.order_no.toLowerCase().includes(searchQuery.toLowerCase()) // Add more fields for search if needed
+      );
+    });
+    setRecipes(filteredRecipes);
+  }, [searchQuery]); // Re-run filtering whenever searchQuery changes
+
   const fetchRecipes = async () => {
     try {
-      //const res = await axios.get("http://localhost:5000/api/recipe");
       const res = await authFetch({
         method:"get",
         url:"http://localhost:5000/api/recipe",
@@ -92,8 +104,7 @@ function RecipeForm() {
     }
 
     try {
-      //const res = await axios.post("http://localhost:5000/api/recipe", payload);
-       const res = await authFetch({
+      const res = await authFetch({
         method:"post",
         url:"http://localhost:5000/api/recipe",
         data:payload,
@@ -125,7 +136,6 @@ function RecipeForm() {
     if (!confirmDelete) return;
 
     try {
-      // await axios.delete(`http://localhost:5000/api/recipe/${id}`);
       await authFetch({
         method: "delete",
         url: `http://localhost:5000/api/recipe/${id}`,
@@ -220,6 +230,18 @@ function RecipeForm() {
       {/* Recipe Table */}
       <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
         <h2 className="text-xl font-bold mb-4 text-gray-800">All Recipes</h2>
+        
+        {/* Search bar */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search recipes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="p-2 border rounded-md w-full"
+          />
+        </div>
+        
         <div className="overflow-x-auto">
           <table className="w-full border border-gray-200 rounded-lg">
             <thead className="bg-blue-100">
