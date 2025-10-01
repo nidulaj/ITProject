@@ -8,7 +8,8 @@ const {
   getSingleOrder, 
   updateOrderStatusController, 
   updatePaymentStatusController,
-  deleteOrderController
+  deleteOrderController,
+  generateOrderInvoice
 } = require('../controllers/orderController');
 
 // Create new order
@@ -22,6 +23,9 @@ router.get('/all', getOrders);
 
 // Get orders by customer ID
 router.get('/customer/:customer_id', authMiddleware, getCustomerOrders);
+
+// Generate PDF invoice for order (must be before /:order_id route)
+router.get('/:order_id/invoice', authMiddleware, generateOrderInvoice);
 
 // Get single order by ID
 router.get('/:order_id', authMiddleware, getSingleOrder);
