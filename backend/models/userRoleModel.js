@@ -51,10 +51,17 @@ const updateRole = async (roleId, roleName, description) => {
   return result.rows[0];
 };
 
+const getUserRoleCount = async() => {
+  const query = `SELECT COUNT(*) FROM user_roles`;
+  const result = await pool.query(query);
+  return result.rows[0].count;
+};
+
 module.exports = {
   createRole,
   getAllRoles,
   deleteRole,
   getRoleById,
   updateRole,
+  getUserRoleCount
 };

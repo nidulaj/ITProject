@@ -26,7 +26,9 @@ const {
   uploadStaffProfilePhoto,
   removeStaffProfilePhoto,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getActiveStaffCount,
+  getStaffCountByAdmin
 } = require("../controllers/staffAuthController");
 
 const upload = require("../middlewares/uploadMiddleware");
@@ -53,5 +55,6 @@ router.post("/uploadProfilePhoto", staffAuthMiddleware, upload.single("profilePh
 router.delete("/removeProfilePhoto", staffAuthMiddleware, removeStaffProfilePhoto);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
-
+router.get("/activeStaffCount", staffAuthMiddleware, getActiveStaffCount);
+router.get("/staffCount", staffAuthMiddleware, getStaffCountByAdmin);
 module.exports = router;

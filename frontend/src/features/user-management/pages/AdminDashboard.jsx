@@ -9,14 +9,18 @@ import LoadingScreen from "../../../components/LoadingScreen";
 const StaffManagement = lazy(() => import("../components/StaffManagement"));
 const RolesAccess = lazy(() => import("../components/RoleAccess"));
 const LogsMonitoring = lazy(() => import("../components/LogsMonitoring"));
-const Complaints = lazy(() => import("../components/Complaints"));
 const Chat = lazy(() => import("../components/Chat"));
-const ProfileSecurity = lazy(() => import("../components/ProfileSecurity"));
 const RoleInfo = lazy(() => import("../components/RoleInfo"));
 const StaffUserInfo = lazy(() => import("../components/staffUserInfo"));
-const CustomerManagement = lazy(() => import("../components/customerManagement"));
+const CustomerManagement = lazy(() =>
+  import("../components/customerManagement")
+);
 const UserProfile = lazy(() => import("../components/UserProfile"));
 const CustomerInfo = lazy(() => import("../components/CustomerInfo"));
+
+const CustomersPieChart = lazy(() => import("../components/CustomersPieChart"));
+const StaffPieChart = lazy(() => import("../components/StaffPieChart"));
+const Summary = lazy(() => import("../components/Summary"));
 export default function AdminDashboard() {
   const [userInfo, setUserInfo] = useState(null);
 
@@ -46,9 +50,13 @@ export default function AdminDashboard() {
             <Route
               path="/"
               element={
-                <h2 className="text-lg font-bold">
-                  Welcome to Admin Dashboard
-                </h2>
+                <>
+                <Summary />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <CustomersPieChart />
+                  <StaffPieChart />
+                </div>
+                </>
               }
             />
             <Route path="staff" element={<StaffManagement />} />
@@ -58,9 +66,7 @@ export default function AdminDashboard() {
             <Route path="rolesAccess" element={<RolesAccess />} />
             <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
             <Route path="logsMonitoring" element={<LogsMonitoring />} />
-            <Route path="complaints" element={<Complaints />} />
             <Route path="chat" element={<Chat />} />
-            <Route path="profileSecurity" element={<ProfileSecurity />} />
             <Route path="userProfile" element={<UserProfile />} />
           </Routes>
         </Suspense>

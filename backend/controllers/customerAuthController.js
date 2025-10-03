@@ -23,7 +23,9 @@ const {
   updateProfilePhoto,
   removeProfilePhoto,
   removeUser,
-  changeAccountStatus
+  changeAccountStatus,
+  getCustomerActivationCount,
+  getCustomersCount
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
@@ -703,6 +705,26 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const getActiveCustomersCount = async (req,res) =>{
+  try{
+    const activationCounts = await getCustomerActivationCount();
+    res.status(200).json(activationCounts);
+  }catch(error){
+    console.error("Error fetching activation counts:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const getCustomersCountByAdmin = async (req, res) => {
+  try {
+    const count = await getCustomersCount();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error("Error fetching customer count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerCustomer,
   loginCustomer,
@@ -729,5 +751,7 @@ module.exports = {
   change2FASettingByAdmin,
   changeCustomerDetailsByAdmin,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getActiveCustomersCount,
+  getCustomersCountByAdmin
 };
