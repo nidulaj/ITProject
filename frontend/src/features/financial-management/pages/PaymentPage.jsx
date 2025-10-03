@@ -138,7 +138,7 @@ const PaymentPage = ({ onUpdateStats }) => {
                 className="text-blue-600 underline hover:text-blue-800"
                 onClick={() => setSelectedProof(payment.payment_proof)}
               >
-                View
+                View receipt
               </button>
             ) : (
               <span className="text-gray-400">None</span>

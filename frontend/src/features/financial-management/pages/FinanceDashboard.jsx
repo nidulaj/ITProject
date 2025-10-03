@@ -7,10 +7,9 @@ import PaymentPage from "./PaymentPage";
 import DashboardCard from "../components/DashboardCard";
 import StatCard from "../components/StatCard";
 import { Clock, CheckCircle, Percent, Tag, CreditCard } from "lucide-react";
-import axios from "axios";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
 import Header from "../components/Header";
-import UserProfile from "../../user-management/components/UserProfile"
+import UserProfile from "../../user-management/components/UserProfile";
 
 const FinanceDashboard = () => {
   const [stats, setStats] = useState({
@@ -19,31 +18,29 @@ const FinanceDashboard = () => {
     total_discounts: 0,
   });
 
-    const [userInfo, setUserInfo] = useState(null);
-
+  const [userInfo, setUserInfo] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
 
-    useEffect(() => {
-      const fetchUserInfo = async () => {
+  useEffect(() => {
+    const fetchUserInfo = async () => {
       try {
-          const res = await authFetch({
-            method: "get",
-            url: `http://localhost:5000/api/staff/auth/userInfo`,
-          });
-          setUserInfo(res.data);
-    } catch (error) {
-      console.error("Error fetching user info:", error);
-    }
-  };
-  fetchUserInfo();
- 
+        const res = await authFetch({
+          method: "get",
+          url: `http://localhost:5000/api/staff/auth/userInfo`,
+        });
+        setUserInfo(res.data);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+    fetchUserInfo();
   }, []);
 
   const fetchStats = async () => {
     try {
       const res = await authFetch({
-        method: 'get',
-        url: "http://localhost:5000/api/finance/stats"
+        method: "get",
+        url: "http://localhost:5000/api/finance/stats",
       });
       setStats(res.data);
     } catch (err) {
@@ -52,16 +49,16 @@ const FinanceDashboard = () => {
   };
 
   const fetchRecentActivity = async () => {
-  try {
-    const res = await authFetch({
-      method: 'get',
-      url: "http://localhost:5000/api/finance/recent-activity"
-    });
-    setRecentActivity(res.data);
-  } catch (err) {
-    console.error("Error fetching activity:", err);
-  }
-};
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/finance/recent-activity",
+      });
+      setRecentActivity(res.data);
+    } catch (err) {
+      console.error("Error fetching activity:", err);
+    }
+  };
 
   useEffect(() => {
     fetchStats();
@@ -69,7 +66,7 @@ const FinanceDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-8">
       <Header userInfo={userInfo} />
 
       <Routes>
@@ -77,7 +74,9 @@ const FinanceDashboard = () => {
           path="/"
           element={
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 <StatCard
                   title="Pending Payments"
                   value={stats.pending_payments}
@@ -98,6 +97,7 @@ const FinanceDashboard = () => {
                 />
               </div>
 
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <DashboardCard
                   title="Manage Discounts"
@@ -111,40 +111,49 @@ const FinanceDashboard = () => {
                   route="payments"
                   icon={<CreditCard />}
                 />
-
-
-
               </div>
 
+              
+              <div className="bg-white p-6 rounded-2xl shadow-lg mt-6">
+                <h2 className="text-2xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+                  📋 Recent Activity
+                </h2>
 
-            <div className="mt-10 bg-gradient-to-br from-white to-blue-50 p-6 rounded-2xl shadow-lg">
-              <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center gap-2">
-                📋 Recent Activity
-              </h2>
-
-              {recentActivity.length > 0 ? (
-                <ul className="space-y-4">
-                  {recentActivity.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-start gap-3 bg-white p-4 rounded-xl shadow hover:shadow-md transition duration-200 border-l-4 border-blue-500"
-                    >
-                      <div className="text-blue-500 text-xl">🔹</div>
-                      <p className="text-gray-800 font-medium">{item.message}</p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-500">No recent activity yet.</p>
-              )}
-            </div>
+                {recentActivity.length > 0 ? (
+                  <ul className="space-y-4">
+                    {recentActivity.map((item) => (
+                      <li
+                        key={item.id}
+                        className="flex items-start gap-3 bg-blue-50 p-4 rounded-xl shadow hover:shadow-md transition duration-200 border-l-4 border-blue-500"
+                      >
+                        <div className="text-blue-500 text-xl">🔹</div>
+                        <p className="text-gray-800 font-medium">
+                          {item.message}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500">No recent activity yet.</p>
+                )}
+              </div>
             </>
           }
         />
 
-        
-        <Route path="/discounts" element={<DiscountPage onUpdateStats={fetchStats} onUpdateRecentActivity={fetchRecentActivity}/>} />
-        <Route path="/payments" element={<PaymentPage onUpdateStats={fetchStats} />} />
+        <Route
+          path="/discounts"
+          element={
+            <DiscountPage
+              onUpdateStats={fetchStats}
+              onUpdateRecentActivity={fetchRecentActivity}
+            />
+          }
+        />
+        <Route
+          path="/payments"
+          element={<PaymentPage onUpdateStats={fetchStats} />}
+        />
         <Route path="userProfile" element={<UserProfile />} />
       </Routes>
     </div>
