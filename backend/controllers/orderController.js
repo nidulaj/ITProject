@@ -357,8 +357,11 @@ const generateOrderInvoice = async (req, res) => {
     const orderItems = await getOrderItemsByOrderId(order_id);
     
     // Get customer information
+    console.log(`Order customer ID: ${order.cus_id}`);
     const customer = await findUserById(order.cus_id);
+    console.log(`Found customer:`, customer);
     const customerName = customer ? `${customer.first_name} ${customer.last_name}` : `Customer ${order.cus_id}`;
+    console.log(`Customer name for PDF: ${customerName}`);
     
     // Create PDF document
     const doc = new PDFDocument({ margin: 50 });
