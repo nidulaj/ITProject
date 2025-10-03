@@ -9,14 +9,13 @@ import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer
 const CustomerCatalog = () => {
   console.log('CustomerCatalog component rendering...');
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { showSuccess, showError } = useNotification();
   const { currentCustomer, setCustomer } = useCustomer();
   const { addToCart } = useCart();
   
-  console.log('CustomerCatalog state:', { products, loading, currentCustomer });
+  console.log('CustomerCatalog state:', { products, currentCustomer });
 
   const API_BASE_URL = 'http://localhost:5000/api/products';
 
@@ -27,7 +26,6 @@ const CustomerCatalog = () => {
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
       console.log('Fetching products from:', API_BASE_URL);
       const response = await authFetchCustomer({
         method: 'get',
@@ -40,8 +38,6 @@ const CustomerCatalog = () => {
       showError('Failed to fetch products');
       // Set empty products array to prevent blank page
       setProducts([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -116,12 +112,7 @@ const CustomerCatalog = () => {
           </div>
 
           {/* Products Grid */}
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Loading products...</p>
-            </div>
-          ) : filteredProducts.length === 0 ? (
+          {filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-600 text-lg">No products found</div>
             </div>

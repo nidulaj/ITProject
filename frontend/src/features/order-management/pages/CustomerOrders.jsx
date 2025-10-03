@@ -4,7 +4,6 @@ import { useCustomer } from '../../../contexts/CustomerContext';
 
 const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState({});
   const [allOrderItems, setAllOrderItems] = useState({});
@@ -21,14 +20,16 @@ const CustomerOrders = () => {
 
   const fetchCustomerOrders = async () => {
     try {
-      setLoading(true);
       setError(null);
+      
+      console.log('Current customer in CustomerOrders:', currentCustomer);
       
       if (!currentCustomer?.id) {
         setError('Customer not found');
         return;
       }
 
+      console.log(`Fetching orders for customer ID: ${currentCustomer.id}`);
       const response = await authFetchCustomer({
         method: 'get',
         url: `${API_BASE_URL}/customer/${currentCustomer.id}`
@@ -73,8 +74,6 @@ const CustomerOrders = () => {
     } catch (error) {
       console.error('Error fetching customer orders:', error);
       setError('Failed to fetch orders');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -141,6 +140,7 @@ const CustomerOrders = () => {
     try {
       setGeneratingPDF(orderId);
       console.log(`Generating PDF invoice for order ${orderId}`);
+      console.log(`Current customer when generating PDF:`, currentCustomer);
       
       const response = await authFetchCustomer({
         method: 'get',
@@ -226,16 +226,6 @@ const CustomerOrders = () => {
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-gray-600">Loading your orders...</div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
