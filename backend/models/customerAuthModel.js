@@ -185,6 +185,18 @@ const changeAccountStatus = async (customerId, isActive, deactivatedUntil) => {
   return result;
 };
 
+const getCustomerActivationCount = async () => {
+  const query = `SELECT is_active, COUNT(*) AS count FROM customers GROUP BY is_active`;
+  const result = await pool.query(query);
+  return result.rows;
+};
+
+const getCustomersCount = async() => {
+  const query = `SELECT COUNT(*) FROM customers`;
+  const result = await pool.query(query);
+  return result.rows[0].count;
+}
+
 module.exports = {
   createCustomer,
   findCustomerByEmail,
@@ -206,5 +218,7 @@ module.exports = {
   updateProfilePhoto,
   removeProfilePhoto,
   removeUser,
-  changeAccountStatus
+  changeAccountStatus,
+  getCustomerActivationCount,
+  getCustomersCount
 };

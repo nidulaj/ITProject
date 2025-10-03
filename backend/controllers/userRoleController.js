@@ -1,4 +1,4 @@
-const {createRole, getAllRoles, deleteRole, getRoleById, updateRole} = require("../models/userRoleModel");
+const {createRole, getAllRoles, deleteRole, getRoleById, updateRole, getUserRoleCount} = require("../models/userRoleModel");
 
 const addRole = async (req, res) => {
   const { role_name, description } = req.body;
@@ -65,6 +65,16 @@ const updateUserRole = async (req, res) => {
   }
 };
 
+const getUserRoleCountByAdmin = async (req, res) => {
+  try {
+    const count = await getUserRoleCount();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error("Error fetching user role count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 
 module.exports = {
@@ -73,4 +83,5 @@ module.exports = {
   deleteUserRole,
   getUserRoleInfoById,
   updateUserRole,
+  getUserRoleCountByAdmin
 };

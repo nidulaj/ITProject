@@ -172,6 +172,18 @@ const removeProfilePhoto = async (staffId) => {
   return result.rows[0];
 };
 
+const getStaffActivationCount = async () => {
+  const query = `SELECT is_active, COUNT(*) AS count FROM staff GROUP BY is_active`;
+  const result = await pool.query(query);
+  return result.rows;
+};
+
+const getStaffCount = async() => {
+  const query = `SELECT COUNT(*) FROM staff`;
+  const result = await pool.query(query);
+  return result.rows[0].count;
+}
+
 module.exports = {
   createStaff,
   staffLogin,
@@ -191,5 +203,7 @@ module.exports = {
   changePassword,
   getCurrentPassword,
   updateProfilePhoto,
-  removeProfilePhoto
+  removeProfilePhoto,
+  getStaffActivationCount,
+  getStaffCount
 };
