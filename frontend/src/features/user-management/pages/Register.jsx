@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { useNavigate, Link, Navigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
   const [userData, setUserData] = React.useState({
@@ -10,17 +10,72 @@ export default function Register() {
     phone: "",
     address: "",
     password: "",
+    confirmPassword: "",
   });
 
-  const navigate = useNavigate()
+  const [passwordError, setPasswordError] = React.useState("");
+  const [passwordStrength, setPasswordStrength] = React.useState(0);
 
-  const handleChange = (e) => {
+  const navigate = useNavigate();
+
+
+  const calculateStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 6) strength += 1; 
+    if (/[A-Z]/.test(password)) strength += 1; 
+    if (/[a-z]/.test(password)) strength += 1; 
+    if (/[0-9]/.test(password)) strength += 1; 
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1; 
+    return strength;
+  };
+
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  setUserData((prev) => {
+    const newUserData = { ...prev, [name]: value };
+
+
+    if (name === "password") {
+      setPasswordStrength(calculateStrength(value));
+    }
+
+    if (name === "password" || name === "confirmPassword") {
+      if (newUserData.password && newUserData.confirmPassword && newUserData.password !== newUserData.confirmPassword) {
+        setPasswordError("Passwords do not match");
+      } else {
+        setPasswordError("");
+      }
+    }
+
+    return newUserData;
+  });
+};
+
+
+
+  const handleNameChange = (e) => {
     const { name, value } = e.target;
-    setUserData((prev) => ({ ...prev, [name]: value }));
+    console.log(value);
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (passwordError || passwordStrength < 4) {
+      alert("Please fix the errors before submitting");
+      return;
+    }
+
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/register",
@@ -37,182 +92,180 @@ export default function Register() {
     }
   };
 
-  const handleNameChange = (e) => {
-    const { name, value } = e.target;
-    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
-    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
-  };
-
-  const handlePhoneChange = (e) => {
-    const { name, value } = e.target;
-    const filteredValue = value.replace(/(?!^\+)\D/g, "");
-    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
-  };
-
+  const isPasswordValid = passwordStrength >= 4 && userData.password === userData.confirmPassword;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-10 w-full max-w-md">
-        {/* Heading */}
-        <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-4">
-          Register
-        </h2>
-        <p className="text-sm text-center text-gray-500 dark:text-gray-400 mb-6">
-          Create your Smart Dairy account
-        </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-all duration-700 px-4 py-8">
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 w-full max-w-md transition-all duration-500 hover:shadow-3xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">
+            Join Smart Dairy today
+          </p>
+        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* First Name */}
-          <div>
-            <label
-              htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               First Name
             </label>
             <input
               type="text"
-              id="firstName"
               name="firstName"
               required
               onChange={handleNameChange}
               placeholder="John"
               value={userData.firstName}
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Last Name */}
-          <div>
-            <label
-              htmlFor="lastName"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Last Name
             </label>
             <input
               type="text"
-              id="lastName"
               name="lastName"
               required
               onChange={handleNameChange}
               placeholder="Doe"
               value={userData.lastName}
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Email
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Email Address
             </label>
             <input
               type="email"
-              id="email"
               name="email"
               required
               onChange={handleChange}
               placeholder="your@email.com"
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              value={userData.email}
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Phone */}
-          <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
-              Phone
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Phone Number
             </label>
             <input
               type="text"
-              id="phone"
               name="phone"
               required
               onChange={handlePhoneChange}
               placeholder="+94 7xxxxxxx"
               value={userData.phone}
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Address */}
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Address
             </label>
             <input
               type="text"
-              id="address"
               name="address"
               required
               onChange={handleChange}
               placeholder="123 Main St"
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              value={userData.address}
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Password */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Password
             </label>
             <input
               type="password"
-              id="password"
               name="password"
               required
               onChange={handleChange}
               placeholder="Enter your password"
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              value={userData.password}
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
+
+            {/* Password Strength Bar */}
+            <div className="h-2 w-full bg-gray-200 rounded mt-1">
+              <div
+                className={`h-2 rounded ${
+                  passwordStrength <= 2
+                    ? "bg-red-500"
+                    : passwordStrength === 3
+                    ? "bg-yellow-400"
+                    : passwordStrength >= 4
+                    ? "bg-green-500"
+                    : ""
+                }`}
+                style={{ width: `${(passwordStrength / 5) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-sm text-gray-600 mt-1">
+              {passwordStrength <= 2
+                ? "Weak"
+                : passwordStrength === 3
+                ? "Medium"
+                : passwordStrength >= 4
+                ? "Strong"
+                : ""}
+            </p>
           </div>
 
           {/* Confirm Password */}
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-            >
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
               Confirm Password
             </label>
             <input
               type="password"
-              id="confirmPassword"
               name="confirmPassword"
               required
               onChange={handleChange}
               placeholder="Re-enter your password"
-              className="w-full mt-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-800 dark:text-gray-200"
+              value={userData.confirmPassword}
+              className="w-full pl-4 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500"
             />
+            {passwordError && (
+              <p className="text-red-500 text-sm">{passwordError}</p>
+            )}
           </div>
 
-          {/* Register Button */}
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
+            disabled={!isPasswordValid}
+            className={`w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 ${
+              !isPasswordValid ? "opacity-50 cursor-not-allowed" : "hover:scale-[1.02]"
+            }`}
           >
-            Register
+            Create Account
           </button>
         </form>
 
-        {/* Footer Link */}
-        <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login
+          <Link
+            to="/login"
+            className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+          >
+            Sign in now
           </Link>
         </p>
       </div>
