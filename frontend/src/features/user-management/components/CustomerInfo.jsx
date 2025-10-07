@@ -22,6 +22,26 @@ export default function CustomerInfo() {
 
   const navigate = useNavigate();
 
+  // Handler for name fields - only allows letters and spaces
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Handler for phone field - allows + at start and digits only
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Handler for address field
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
@@ -49,7 +69,6 @@ export default function CustomerInfo() {
 
     fetchCustomer();
   }, [customerId]);
-
 
   const handleChangeAccountStatus = async (e) => {
     e.preventDefault();
@@ -205,7 +224,6 @@ export default function CustomerInfo() {
                 </p>
               </div>
             </div>
-
           </div>
 
           {/* Right Side */}
@@ -388,89 +406,127 @@ export default function CustomerInfo() {
 
       {/* Edit Details Modal */}
       {isEditOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Edit Staff Details
-            </h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative mx-4 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setIsEditOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-            <form onSubmit={handleEditCustomerDetails} className="space-y-3">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Edit Customer Details
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Update customer information
+              </p>
+            </div>
+
+            <form onSubmit={handleEditCustomerDetails} className="space-y-4">
               {/* First Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   First Name
                 </label>
                 <input
                   type="text"
+                  name="first_name"
                   value={editForm.first_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      first_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="John"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Last Name
                 </label>
                 <input
                   type="text"
+                  name="last_name"
                   value={editForm.last_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      last_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="Doe"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Phone
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Phone Number
                 </label>
                 <input
                   type="text"
+                  name="phone"
                   value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Address
-                </label>
-                <input
-                  type="text"
-                  value={editForm.address}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, address: e.target.value }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePhoneChange}
+                  required
+                  placeholder="+94 7xxxxxxx"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 pt-4">
+              {/* Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Address
+                </label>
+                <textarea
+                  name="address"
+                  value={editForm.address}
+                  onChange={handleAddressChange}
+                  required
+                  placeholder="123 Main Street, City"
+                  rows="3"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                 >
                   Save Changes
                 </button>

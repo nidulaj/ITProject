@@ -23,6 +23,20 @@ export default function staffUserInfo() {
 
   const navigate = useNavigate();
 
+  // Handler for name fields - only allows letters and spaces
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Handler for phone field - allows + at start and digits only
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
   useEffect(() => {
     const fetchStaff = async () => {
       try {
@@ -438,24 +452,64 @@ export default function staffUserInfo() {
 
       {/* Edit Role Modal */}
       {isEditRoleOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Change Role
-            </h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative mx-4">
+            <button
+              onClick={() => setIsEditRoleOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-indigo-600 dark:text-indigo-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Change Role
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Assign a new role to this staff member
+              </p>
+            </div>
 
             <form
               onSubmit={(e) => handleRoleChange(e, selectedRoleId)}
-              className="space-y-3"
+              className="space-y-4"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Select New Role
                 </label>
                 <select
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   onChange={(e) => setSelectedRoleId(e.target.value)}
                   value={selectedRoleId || ""}
+                  required
                 >
                   <option value="">Select a role</option>
                   {roles.map((role) => (
@@ -466,18 +520,17 @@ export default function staffUserInfo() {
                 </select>
               </div>
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsEditRoleOpen(false)}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                 >
                   Save Changes
                 </button>
@@ -489,76 +542,111 @@ export default function staffUserInfo() {
 
       {/* Edit Details Modal */}
       {isEditOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Edit Staff Details
-            </h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative mx-4">
+            <button
+              onClick={() => setIsEditOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-            <form onSubmit={handleEditStaffDetails} className="space-y-3">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Edit Staff Details
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Update personal information
+              </p>
+            </div>
+
+            <form onSubmit={handleEditStaffDetails} className="space-y-4">
               {/* First Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   First Name
                 </label>
                 <input
                   type="text"
+                  name="first_name"
                   value={editForm.first_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      first_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="John"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               {/* Last Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Last Name
                 </label>
                 <input
                   type="text"
+                  name="last_name"
                   value={editForm.last_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      last_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="Doe"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               {/* Phone Number */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Phone
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Phone Number
                 </label>
                 <input
                   type="text"
+                  name="phone"
                   value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePhoneChange}
+                  required
+                  placeholder="+94 7xxxxxxx"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                 >
                   Save Changes
                 </button>

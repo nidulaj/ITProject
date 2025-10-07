@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, Send, User } from "lucide-react";
 import io from "socket.io-client";
 import axios from "axios";
@@ -11,6 +11,9 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ ref for auto-scrolling
+  const messagesEndRef = useRef(null);
 
   // fetch users who have chats
   useEffect(() => {
@@ -54,27 +57,33 @@ export default function Chat() {
   }, [selectedUser]);
 
   // listen for ALL incoming messages
-useEffect(() => {
-  socket.emit("join_room", "admin"); // join admin room once
+  useEffect(() => {
+    socket.emit("join_room", "admin");
 
-  socket.on("receive_message", (msg) => {
-    if (selectedUser?.user_code === msg.user_code) {
-      setMessages((prev) => [...prev, msg]);
-    } else {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.user_code === msg.user_code ? { ...u, unread: true } : u
-        )
-      );
+    socket.on("receive_message", (msg) => {
+      if (selectedUser?.user_code === msg.user_code) {
+        setMessages((prev) => [...prev, msg]);
+      } else {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.user_code === msg.user_code ? { ...u, unread: true } : u
+          )
+        );
+      }
+    });
+
+    return () => {
+      socket.off("receive_message");
+      socket.emit("leave_room", "admin");
+    };
+  }, [selectedUser]);
+
+  // ✅ Auto scroll to bottom on new messages or when user changes
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  });
-
-  return () => {
-    socket.off("receive_message");
-    socket.emit("leave_room", "admin");
-  };
-}, [selectedUser]);
-
+  }, [messages, selectedUser]);
 
   // send message
   const sendMessage = async () => {
@@ -85,8 +94,6 @@ useEffect(() => {
       sender: "admin",
       message: newMessage,
     };
-
-    //socket.emit("sendMessage", msg);
 
     try {
       await axios.post("http://localhost:5000/api/chat/send", msg);
@@ -107,10 +114,11 @@ useEffect(() => {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Sidebar - Users List */}
       <aside className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-        {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Messages</h2>
-          
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+            Messages
+          </h2>
+
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -141,12 +149,10 @@ useEffect(() => {
                     : ""
                 }`}
               >
-                {/* Avatar */}
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                   <User className="w-6 h-6" />
                 </div>
 
-                {/* User Info */}
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-gray-800 dark:text-white truncate">
@@ -216,6 +222,9 @@ useEffect(() => {
                   </div>
                 </div>
               ))}
+
+              {/* ✅ Auto-scroll anchor */}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
@@ -244,7 +253,9 @@ useEffect(() => {
               <Search className="w-12 h-12" />
             </div>
             <p className="text-lg font-medium">Select a conversation</p>
-            <p className="text-sm mt-1">Choose a user from the list to start chatting</p>
+            <p className="text-sm mt-1">
+              Choose a user from the list to start chatting
+            </p>
           </div>
         )}
       </main>
