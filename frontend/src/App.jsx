@@ -25,7 +25,7 @@ const LoadingScreen = lazy(() => import("./components/LoadingScreen"))
 
 const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage")) //Rashmika
 const IngReqAccTable = lazy(() => import ("./features/production-management/components/IngReqAccTable")) //Rahmika
-const PubuduHomepage = lazy(() => import ("./features/production-management/pages/PubuduHomePage")) //Rashmika
+const PubuduHomepage = lazy(() => import ("./features/production-management/pages/PubuduHomepage")) //Rashmika
 const ResetPasswordStaff = lazy(() => import ("./features/user-management/pages/ResetPasswordStaff"))
 
 const DashboardLayout = ({ children }) => <div>{children}</div>;
@@ -130,7 +130,7 @@ function AppContent() {
           }
         />
 
-        {/* Customer-facing discount view */}
+        
         <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
 
         {/* Fallback 404 */}

@@ -16,15 +16,15 @@ const PaymentForm = ({ onUpdateStats }) => {
   const location = useLocation();
   const { showInfo, notifications, removeNotification } = useNotification();
 
-  // Clear any existing notifications when component mounts
+  
   useEffect(() => {
-    // Clear all existing notifications to prevent stacking
+    
     notifications.forEach(notification => {
       removeNotification(notification.id);
     });
   }, []);
 
-  // Pre-populate form with order data if available
+  
   useEffect(() => {
     if (location.state) {
       const { orderData, totalAmount, customerName: passedCustomerName, orderId: passedOrderId, showToast, toastMessage } = location.state;
@@ -33,14 +33,13 @@ const PaymentForm = ({ onUpdateStats }) => {
       console.log('Order ID from state:', passedOrderId);
       console.log('Order data:', orderData);
       
-      // Show toast message if provided (only once)
+      
       if (showToast && toastMessage && !toastShown) {
         console.log('Showing toast message in payment form:', toastMessage);
-        showInfo(toastMessage, 5000); // Reduced duration to 5 seconds
+        showInfo(toastMessage, 5000);
         setToastShown(true);
       }
       
-      // Try to extract order ID from orderData if not passed directly
       let extractedOrderId = passedOrderId;
       if (!extractedOrderId && orderData) {
         extractedOrderId = orderData.order_id || orderData.id || orderData.orderId || orderData.orderID;
@@ -59,34 +58,18 @@ const PaymentForm = ({ onUpdateStats }) => {
         setAmount(totalAmount.toString());
       }
       
-      // Set today's date as default
+  
       const today = new Date().toISOString().split('T')[0];
       setPaymentDate(today);
     }
   }, [location.state, showInfo]);
 
-  // Test middleware function
-  /*const testMiddleware = async () => {
-    try {
-      console.log('Testing payment middleware...');
-      const response = await authFetchCustomer({
-        method: 'get',
-        url: 'http://localhost:5000/api/payments/test'
-      });
-      console.log('Middleware test successful:', response.data);
-    } catch (error) {
-      console.error('Middleware test failed:', error);
-    }
-  };*/
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       console.log('Submitting payment with order_id:', orderId);
-      
-      // Test middleware first
-      //await testMiddleware();
       
       const formData = new FormData();
       formData.append("order_id", orderId);
@@ -102,7 +85,7 @@ const PaymentForm = ({ onUpdateStats }) => {
         payment_date: paymentDate
       });
       
-      // Debug FormData contents
+      
       console.log('FormData entries:');
       for (let [key, value] of formData.entries()) {
         console.log(`${key}: ${value}`);
@@ -126,7 +109,7 @@ const PaymentForm = ({ onUpdateStats }) => {
       setPaymentDate("");
       setPaymentProof(null);
 
-      // Redirect to customer orders page
+      
       navigate("/dashboard/orders");
 
     } catch (error) {
