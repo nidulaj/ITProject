@@ -1,80 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
-import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
-
+import Header from "../../../components/CustomerHeader"
 const PubuduHomepage = ({ hideHeader = false }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [realProducts, setRealProducts] = useState([]);
 
-  // Fetch real products from database for main section only
-  useEffect(() => {
-    fetchRealProducts();
-  }, []);
-
-  const fetchRealProducts = async () => {
-    try {
-      const response = await authFetchCustomer({
-        method: 'get',
-        url: 'http://localhost:5000/api/products'
-      });
-      const fetchedProducts = response.data.products || [];
-      
-      // Transform database products to match the expected format
-      const transformedProducts = fetchedProducts.map(product => ({
-        id: product.product_id.toString(),
-        name: product.name,
-        price: `Rs. ${product.price}`,
-        image: product.image || "/images_sadi/ad1.jpg",
-        description: product.description,
-        rating: 4.5, // Default rating for real products
-      }));
-      
-      setRealProducts(transformedProducts);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      setRealProducts([]);
-    }
-  };
-
-  // Hardcoded customized products (keep this section unchanged)
-  const customizedProducts = [
-    {
-      id: "low-fat-yogurt",
-      name: "Mix Fruit Nectar",
-      price: "Rs. 300+",
-      image: "/images_sadi/cuz1.png",
-      description: "Fresh fruits with natural sweetness",
-      rating: 4.6,
-    },
-    {
-      id: "low-fat-yogurt2",
-      name: "Mix Fruit Nectar",
-      price: "Rs. 300+",
-      image: "/images_sadi/cuz2.png",
-      description: "Fresh fruits with natural sweetness",
-      rating: 4.6,
-    },
-    {
-      id: "low-fat-yogurt3",
-      name: "Mix Fruit Nectar",
-      price: "Rs. 300+",
-      image: "/images_sadi/cuz3.png",
-      description: "Fresh fruits with natural sweetness",
-      rating: 4.6,
-    },
-    {
-      id: "low-fat-yogurt4",
-      name: "Mix Fruit Nectar",
-      price: "Rs. 300+",
-      image: "/images_sadi/cuz4.png",
-      description: "Fresh fruits with natural sweetness",
-      rating: 4.6,
-    },
-  ];
-
-  // Featured Products (fallback for main section)
+  // Featured Products
   const products = [
     {
       id: "classic-yogurt",
@@ -176,72 +108,7 @@ const PubuduHomepage = ({ hideHeader = false }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      {!hideHeader && (
-      <header className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div>
-                <img 
-                  src="/images_sadi/logoPubudu.png" 
-                  alt="Pubudu Logo" 
-                  className="w-25 h-12 object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-blue-600">Pubudu</h1>
-                <p className="text-xs text-gray-500 -mt-1">Milk Products</p>
-              </div>
-            </div>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-              <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
-              <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
-              <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
-            </nav>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-3">
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-                <Heart className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-                <User className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors">
-                <ShoppingCart className="w-5 h-5 text-white" />
-              </button>
-              
-              {/* Mobile menu button */}
-              <button 
-                className="md:hidden p-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {isMenuOpen && (
-            <nav className="md:hidden mt-4 pb-4 border-t pt-4">
-              <div className="flex flex-col space-y-3">
-                <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-                <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
-                <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
-                <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
-                <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
-              </div>
-            </nav>
-          )}
-        </div>
-      </header>
-      )}
+      <Header userInfo={null} />
 
       {/* Hero Section */}
       <section id="home" className="relative overflow-hidden">
@@ -330,27 +197,19 @@ const PubuduHomepage = ({ hideHeader = false }) => {
             </p>
             </div>
 
-            {/* First 4 Products - Real Products from Database */}
+            {/* First 4 Products */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {(realProducts.length > 0 ? realProducts : products.slice(0, 4)).slice(0, 4).map((product) => (
+            {products.slice(0, 4).map((product) => (
                 <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
                 >
                 <div className="aspect-square overflow-hidden relative">
-                    {product.image ? (
-                      <img
-                        src={product.image.startsWith('data:') 
-                          ? product.image 
-                          : `data:image/jpeg;base64,${product.image}`}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <span className="text-gray-400 text-4xl">📷</span>
-                      </div>
-                    )}
+                    <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    />
                 </div>
 
                 <div className="p-5">
@@ -392,9 +251,9 @@ const PubuduHomepage = ({ hideHeader = false }) => {
             </p>
             </div>
 
-            {/* Last 4 Products - Hardcoded Customized Products */}
+            {/* Last 4 Products */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {customizedProducts.map((product) => (
+            {products.slice(4).map((product) => (
                 <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
