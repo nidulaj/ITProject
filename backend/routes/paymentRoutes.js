@@ -31,17 +31,14 @@ router.get("/download/pdf", staffAuthMiddleware, async (req, res) => {
     const result = await pool.query("SELECT * FROM payments ORDER BY payment_id DESC");
     const payments = result.rows;
 
-    // ✅ 1. Create a new PDF document
+    
     const doc = new PDFDocument();
 
-    // ✅ 2. Set headers before piping
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", "attachment; filename=payment_records.pdf");
 
-    // ✅ 3. Pipe the PDF into the response
     doc.pipe(res);
 
-    // ✅ 4. Add content
     doc.fontSize(20).text("Payment Records Report", { align: "center" });
     doc.moveDown(2);
 
@@ -58,7 +55,6 @@ router.get("/download/pdf", staffAuthMiddleware, async (req, res) => {
       doc.moveDown(1);
     });
 
-    // ✅ 5. End the document (very important)
     doc.end();
   } catch (err) {
     console.error("PDF generation error:", err);

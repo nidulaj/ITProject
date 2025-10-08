@@ -112,7 +112,7 @@ const deleteDiscount = async (discount_id) => {
   }
 };
 
-// Get discount by code
+
 const getDiscountByCode = async (discount_code) => {
   try {
     const result = await pool.query(

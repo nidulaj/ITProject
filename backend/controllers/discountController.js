@@ -5,7 +5,7 @@ const createDiscountController = async (req, res) => {
   try {
     const { discount_name, discount_type, value, eligibility_criteria, valid_from, valid_to, discount_code } = req.body;
     
-    // Validate that discount_code is provided
+    
     if (!discount_code) {
       return res.status(400).json({ message: "Discount code is required" });
     }
@@ -102,12 +102,12 @@ function calculateBestDiscount(totalPrice, discounts) {
   let bestFinalPrice = totalPrice;
 
   discounts.forEach(discount => {
-    // Check if discount is active (has valid dates)
+    
     if (discount.valid_from && discount.valid_to && !isDiscountActive(discount)) {
       return;
     }
 
-    // Check eligibility criteria
+    
     if (isEligible(totalPrice, discount)) {
       let discountAmount = 0;
       let finalPrice = totalPrice;
@@ -116,11 +116,11 @@ function calculateBestDiscount(totalPrice, discounts) {
         discountAmount = totalPrice * (discount.value / 100);
         finalPrice = totalPrice - discountAmount;
       } else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
-        discountAmount = Math.min(discount.value, totalPrice); // Can't discount more than total
+        discountAmount = Math.min(discount.value, totalPrice); 
         finalPrice = totalPrice - discountAmount;
       }
 
-      // Choose the discount that gives the largest discount amount
+      
       if (discountAmount > bestDiscountAmount) {
         bestDiscountAmount = discountAmount;
         bestDiscount = discount;
@@ -156,7 +156,7 @@ const applyBestDiscount = async (req, res) => {
   }
 };
 
-// Validate and apply discount code
+
 const validateDiscountCode = async (req, res) => {
   try {
     const { discount_code, totalPrice } = req.body;
@@ -167,7 +167,7 @@ const validateDiscountCode = async (req, res) => {
 
     console.log("🔍 Validating discount code:", discount_code, "for total:", totalPrice);
 
-    // Get discount by code
+    
     const discount = await getDiscountByCode(discount_code);
     
     if (!discount) {
@@ -179,22 +179,9 @@ const validateDiscountCode = async (req, res) => {
 
     console.log("📊 Found discount:", discount.discount_name);
 
-    // Check if discount is active - DISABLED FOR TESTING
+   
     console.log("📅 Date validation disabled for testing");
     
-    // Skip date validation for now
-    // const today = new Date();
-    // const validFrom = new Date(discount.valid_from);
-    // const validTo = new Date(discount.valid_to);
-    // 
-    // if (today < validFrom || today > validTo) {
-    //   return res.status(400).json({ 
-    //     valid: false, 
-    //     error: "Discount code has expired" 
-    //   });
-    // }
-
-    // Check eligibility
     const criteria = discount.eligibility_criteria;
     let isEligible = true;
 
@@ -210,29 +197,8 @@ const validateDiscountCode = async (req, res) => {
       });
     }
 
-    // Calculate discount amount
-    /*let discountAmount = 0;
-    let finalPrice = totalPrice;
-
-    if (discount.discount_type === "percentage" || discount.discount_type === "Percentage") {
-      const percentageValue = parseFloat(discount.value);
-      discountAmount = totalPrice * (percentageValue / 100);
-      finalPrice = totalPrice - discountAmount;
-    } else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
-      const fixedValue = parseFloat(discount.value);
-      discountAmount = Math.min(fixedValue, totalPrice);
-      finalPrice = totalPrice - discountAmount;
-    }
-
-    console.log("💰 Discount calculation:", {
-      originalPrice: totalPrice,
-      discountAmount,
-      finalPrice,
-      discountName: discount.discount_name
-    });*/
 
 
-    // ✅ Calculate discount amount
       let discountAmount = 0;
       let finalPrice = totalPrice;
 
@@ -243,7 +209,7 @@ const validateDiscountCode = async (req, res) => {
       } 
       else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
 
-        // ✅ Check: fixed discount should not exceed total
+        
         const fixedValue = parseFloat(discount.value);
         if (fixedValue > totalPrice) {
           return res.status(400).json({
