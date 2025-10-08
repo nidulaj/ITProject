@@ -14,7 +14,7 @@ const IngredientManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // --- search bar additions ---
+  //search bar 
   const [searchTerm, setSearchTerm] = useState("");
 
   // Edit form
@@ -246,13 +246,13 @@ const IngredientManager = () => {
         </button>
       </form>
 
-      {/* Ingredient Table */}
+      {/* report*/}
       <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Ingredient List</h2>
           <button
             onClick={downloadReport}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg"
+            className="bg-blue-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg"
           >
             Download Report
           </button>
