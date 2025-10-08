@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../../components/AuthContext";
 import { MessageCircle, X, Send } from "lucide-react";
@@ -12,6 +12,9 @@ export default function SupportWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
+  // ✅ Ref for auto scroll
+  const messagesEndRef = useRef(null);
 
   // --- Initialize socket ---
   useEffect(() => {
@@ -37,22 +40,27 @@ export default function SupportWidget() {
   // --- Handle login/logout (room join/leave + clear messages) ---
   useEffect(() => {
     if (!userId) {
-      // user logged out → clear messages + leave room
       setMessages([]);
       if (socket) socket.emit("leave_room", userId);
       return;
     }
 
-    // new user logged in → clear messages + join their room
     setMessages([]);
     if (socket) socket.emit("join_room", userId);
 
-    // fetch chat history for this user
+    // fetch chat history
     fetch(`http://localhost:5000/api/chat/user/${userId}`)
       .then((res) => res.json())
       .then((data) => setMessages(data))
       .catch((err) => console.error("Error fetching messages:", err));
   }, [userId]);
+
+  // ✅ Scroll to bottom when messages change or when opened
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isOpen]);
 
   // --- Send message ---
   const sendMessage = async () => {
@@ -66,7 +74,7 @@ export default function SupportWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg),
       });
-      setInput(""); // clear input only
+      setInput("");
     } catch (err) {
       console.error("Error sending message:", err);
     }
@@ -125,38 +133,43 @@ export default function SupportWidget() {
                 </p>
               </div>
             ) : (
-              messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`flex ${
-                    m.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div className="max-w-[75%]">
-                    <div
-                      className={`px-4 py-2 rounded-2xl shadow-sm ${
-                        m.sender === "user"
-                          ? "bg-blue-500 text-white rounded-br-none"
-                          : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-bl-none border border-gray-200 dark:border-gray-700"
-                      }`}
-                    >
-                      <p className="text-sm break-words">{m.message}</p>
+              <>
+                {messages.map((m) => (
+                  <div
+                    key={m.id}
+                    className={`flex ${
+                      m.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div className="max-w-[75%]">
+                      <div
+                        className={`px-4 py-2 rounded-2xl shadow-sm ${
+                          m.sender === "user"
+                            ? "bg-blue-500 text-white rounded-br-none"
+                            : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white rounded-bl-none border border-gray-200 dark:border-gray-700"
+                        }`}
+                      >
+                        <p className="text-sm break-words">{m.message}</p>
+                      </div>
+                      <p
+                        className={`text-xs mt-1 px-1 ${
+                          m.sender === "user"
+                            ? "text-right text-gray-500"
+                            : "text-left text-gray-500"
+                        }`}
+                      >
+                        {new Date(m.created_at).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
                     </div>
-                    <p
-                      className={`text-xs mt-1 px-1 ${
-                        m.sender === "user"
-                          ? "text-right text-gray-500"
-                          : "text-left text-gray-500"
-                      }`}
-                    >
-                      {new Date(m.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
                   </div>
-                </div>
-              ))
+                ))}
+
+                {/* ✅ Auto-scroll anchor */}
+                <div ref={messagesEndRef} />
+              </>
             )}
           </div>
 

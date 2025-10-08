@@ -23,6 +23,20 @@ export default function StaffManagement() {
     setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handler for name fields - only allows letters and spaces
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Handler for phone field - allows + at start and digits only
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setUserData((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
   const fetchStaffList = async () => {
     try {
       const res = await authFetch({
@@ -76,7 +90,7 @@ export default function StaffManagement() {
     fetchUserRoles();
   }, []);
 
-  // 🔎 Filtering logic
+  // Filtering logic
   const filteredStaff = staffList.filter((user) => {
     const matchesSearch =
       user.staff_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,7 +139,7 @@ export default function StaffManagement() {
         </button>
       </div>
 
-      {/* 🔎 Search + Filter */}
+      {/* Search + Filter */}
       <div className="flex gap-3 mb-6">
         <div className="flex-1 relative">
           <svg
@@ -286,10 +300,11 @@ export default function StaffManagement() {
                     First Name
                   </label>
                   <input
-                    onChange={handleChange}
+                    onChange={handleNameChange}
                     value={userData.firstName}
                     type="text"
                     name="firstName"
+                    required
                     placeholder="John"
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
@@ -299,10 +314,11 @@ export default function StaffManagement() {
                     Last Name
                   </label>
                   <input
-                    onChange={handleChange}
+                    onChange={handleNameChange}
                     value={userData.lastName}
                     type="text"
                     name="lastName"
+                    required
                     placeholder="Doe"
                     className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
@@ -318,6 +334,7 @@ export default function StaffManagement() {
                   value={userData.email}
                   type="email"
                   name="email"
+                  required
                   placeholder="john.doe@example.com"
                   className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
@@ -328,11 +345,12 @@ export default function StaffManagement() {
                   Phone Number
                 </label>
                 <input
-                  onChange={handleChange}
+                  onChange={handlePhoneChange}
                   value={userData.phone}
                   type="text"
                   name="phone"
-                  placeholder="+1 (555) 000-0000"
+                  required
+                  placeholder="+94 7xxxxxxx"
                   className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
@@ -345,6 +363,7 @@ export default function StaffManagement() {
                   name="role"
                   value={userData.role}
                   onChange={handleChange}
+                  required
                   className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
                   <option value="">Select a role</option>
