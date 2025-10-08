@@ -4,6 +4,7 @@ import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
 import FinalProductsTable from '../components/FinalProductsTable';
 import UnifiedSidebar from '../components/UnifiedSidebar';
+import Header from '../components/Header';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import './ProductCatalog.css';
@@ -12,6 +13,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showProductForm, setShowProductForm] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const { showSuccess, showError } = useNotification();
   const navigate = useNavigate();
 
@@ -20,6 +22,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   // Fetch all products on component mount
   useEffect(() => {
     fetchProducts();
+    fetchUserInfo();
   }, []);
 
   // Listen for custom event to open create product modal
@@ -55,6 +58,18 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       console.error('Error fetching products:', error);
       // Don't show error notification, just set empty products
       setProducts([]);
+    }
+  };
+
+  const fetchUserInfo = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/staff/auth/userInfo",
+      });
+      setUserInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
     }
   };
 
@@ -241,11 +256,11 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
           <UnifiedSidebar title="Product Management" />
 
           {/* Main content */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
             {/* Header */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Product Management</h2>
-            </div>
+            <Header userInfo={userInfo} />
+            
+            <div className="p-6">
 
             {/* Final Products Table - Centered */}
             <div className="mb-6 flex justify-center">
@@ -295,6 +310,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
                 </div>
               </div>
             )}
+            </div>
           </div>
         </div>
       } />

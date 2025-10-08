@@ -97,7 +97,7 @@ const PaymentPage = ({ onUpdateStats }) => {
   onClick={downloadPDF}
   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow"
 >
-  📄 Download PDF
+  📄 Download Payment Report
 </button>
 
       
@@ -138,7 +138,7 @@ const PaymentPage = ({ onUpdateStats }) => {
                 className="text-blue-600 underline hover:text-blue-800"
                 onClick={() => setSelectedProof(payment.payment_proof)}
               >
-                View
+                View receipt
               </button>
             ) : (
               <span className="text-gray-400">None</span>

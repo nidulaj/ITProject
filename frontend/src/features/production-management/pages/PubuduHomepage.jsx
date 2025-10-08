@@ -1,12 +1,80 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
+import { authFetchCustomer } from '../../user-management/utils/authFetchCustomer';
 
 const PubuduHomepage = ({ hideHeader = false }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [realProducts, setRealProducts] = useState([]);
 
-  // Featured Products
+  // Fetch real products from database for main section only
+  useEffect(() => {
+    fetchRealProducts();
+  }, []);
+
+  const fetchRealProducts = async () => {
+    try {
+      const response = await authFetchCustomer({
+        method: 'get',
+        url: 'http://localhost:5000/api/products'
+      });
+      const fetchedProducts = response.data.products || [];
+      
+      // Transform database products to match the expected format
+      const transformedProducts = fetchedProducts.map(product => ({
+        id: product.product_id.toString(),
+        name: product.name,
+        price: `Rs. ${product.price}`,
+        image: product.image || "/images_sadi/ad1.jpg",
+        description: product.description,
+        rating: 4.5, // Default rating for real products
+      }));
+      
+      setRealProducts(transformedProducts);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setRealProducts([]);
+    }
+  };
+
+  // Hardcoded customized products (keep this section unchanged)
+  const customizedProducts = [
+    {
+      id: "low-fat-yogurt",
+      name: "Mix Fruit Nectar",
+      price: "Rs. 300+",
+      image: "/images_sadi/cuz1.png",
+      description: "Fresh fruits with natural sweetness",
+      rating: 4.6,
+    },
+    {
+      id: "low-fat-yogurt2",
+      name: "Mix Fruit Nectar",
+      price: "Rs. 300+",
+      image: "/images_sadi/cuz2.png",
+      description: "Fresh fruits with natural sweetness",
+      rating: 4.6,
+    },
+    {
+      id: "low-fat-yogurt3",
+      name: "Mix Fruit Nectar",
+      price: "Rs. 300+",
+      image: "/images_sadi/cuz3.png",
+      description: "Fresh fruits with natural sweetness",
+      rating: 4.6,
+    },
+    {
+      id: "low-fat-yogurt4",
+      name: "Mix Fruit Nectar",
+      price: "Rs. 300+",
+      image: "/images_sadi/cuz4.png",
+      description: "Fresh fruits with natural sweetness",
+      rating: 4.6,
+    },
+  ];
+
+  // Featured Products (fallback for main section)
   const products = [
     {
       id: "classic-yogurt",
@@ -262,19 +330,27 @@ const PubuduHomepage = ({ hideHeader = false }) => {
             </p>
             </div>
 
-            {/* First 4 Products */}
+            {/* First 4 Products - Real Products from Database */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.slice(0, 4).map((product) => (
+            {(realProducts.length > 0 ? realProducts : products.slice(0, 4)).slice(0, 4).map((product) => (
                 <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"
                 >
                 <div className="aspect-square overflow-hidden relative">
-                    <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    />
+                    {product.image ? (
+                      <img
+                        src={product.image.startsWith('data:') 
+                          ? product.image 
+                          : `data:image/jpeg;base64,${product.image}`}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400 text-4xl">📷</span>
+                      </div>
+                    )}
                 </div>
 
                 <div className="p-5">
@@ -316,9 +392,9 @@ const PubuduHomepage = ({ hideHeader = false }) => {
             </p>
             </div>
 
-            {/* Last 4 Products */}
+            {/* Last 4 Products - Hardcoded Customized Products */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.slice(4).map((product) => (
+            {customizedProducts.map((product) => (
                 <div
                 key={product.id}
                 className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 overflow-hidden"

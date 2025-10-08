@@ -169,7 +169,7 @@ const PaymentForm = ({ onUpdateStats }) => {
       </div>
 
       <div>
-        <label className="block text-gray-700">Amount</label>
+        <label className="block text-gray-700">Final Price</label>
         <input
           type="number"
           value={amount}
@@ -191,7 +191,7 @@ const PaymentForm = ({ onUpdateStats }) => {
       </div>
 
       <div>
-        <label className="block text-gray-700">Upload Proof</label>
+        <label className="block text-gray-700">Upload Payment Receipt</label>
         <input
           type="file"
           name="payment_proof"
