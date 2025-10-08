@@ -29,6 +29,13 @@ const ZoneManager = () => {
 
   const handleAdd = async (e) => {
     e.preventDefault();
+
+    // ✅ Validation: prevent negative or zero capacity
+    if (Number(form.capacity) <= 0) {
+      alert("Capacity must be a positive number!");
+      return;
+    }
+
     try {
       const res = await authFetch({
         method: "post",
@@ -52,9 +59,18 @@ const ZoneManager = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    // ✅ Validation: prevent negative or zero capacity
+    if (Number(form.capacity) <= 0) {
+      alert("Capacity must be a positive number!");
+      return;
+    }
+
+    // ✅ Prevent setting smaller than used capacity
     if (editingZone.used_capacity > form.capacity) {
       return alert("Capacity cannot be smaller than used capacity!");
     }
+
     try {
       const res = await authFetch({
         method: "put",
@@ -139,6 +155,7 @@ const ZoneManager = () => {
             value={form.capacity}
             onChange={handleChange}
             required
+            min="1" // ✅ HTML-level validation
             className="w-full px-3 py-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
@@ -236,6 +253,7 @@ const ZoneManager = () => {
                   value={form.capacity}
                   onChange={handleChange}
                   required
+                  min="1" // ✅ Prevents negative input
                   className="w-full px-3 py-2 border border-gray-500 rounded-md"
                 />
               </div>

@@ -17,11 +17,10 @@ const TableFinalProductForm = () => {
   // Fetch all products
   const fetchFinalProducts = async () => {
     try {
-      //const res = await axios.get("http://localhost:5000/api/final");
       const res = await authFetch({
-                  method: "get",
-                  url: "http://localhost:5000/api/final",
-                });
+        method: "get",
+        url: "http://localhost:5000/api/final",
+      });
 
       setFinalProducts(res.data.finalProduct || []);
     } catch (err) {
@@ -38,17 +37,35 @@ const TableFinalProductForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validation checks
+    const today = new Date().toISOString().split("T")[0];
+
+    if (form.quantity <= 0) {
+      alert(" Quantity must be greater than 0.");
+      return;
+    }
+
+    if (form.expiry_date < today) {
+      alert(" Expiry date cannot be in the past.");
+      return;
+    }
+
     try {
-     // await axios.post("http://localhost:5000/api/final", form);
+      const res = await authFetch({
+        method: "post",
+        url: "http://localhost:5000/api/final",
+        data: form,
+      });
 
-     const res = await authFetch({
-                         method: "post",
-                         url: "http://localhost:5000/api/final",
-                         data: form,
-                       });
-
-      alert("Product added successfully!");
-      setForm({ pname: "", batch_no: "", quantity: "", expiry_date: "", storage_zone_id: "" });
+      alert(" Product added successfully!");
+      setForm({
+        pname: "",
+        batch_no: "",
+        quantity: "",
+        expiry_date: "",
+        storage_zone_id: "",
+      });
       fetchFinalProducts();
     } catch (err) {
       console.error("Error saving product:", err);
@@ -65,21 +82,35 @@ const TableFinalProductForm = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    try {
-    const res = await authFetch({
-    method: "put",
-    url: `http://localhost:5000/api/final/${editProduct.fproduct_id}`,
-    data: {
-    fproduct_id: editProduct.fproduct_id,
-    pname: editProduct.pname,
-    batch_no: editProduct.batch_no,
-    quantity: editProduct.quantity,
-    expiry_date: editProduct.expiry_date,
-    storage_zone_id: editProduct.storage_zone_id,
-  },
-});
 
-      alert("Product updated successfully!");
+    // Validation for update form
+    const today = new Date().toISOString().split("T")[0];
+
+    if (editProduct.quantity <= 0) {
+      alert(" Quantity must be greater than 0.");
+      return;
+    }
+
+    if (editProduct.expiry_date < today) {
+      alert(" Expiry date cannot be in the past.");
+      return;
+    }
+
+    try {
+      const res = await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/final/${editProduct.fproduct_id}`,
+        data: {
+          fproduct_id: editProduct.fproduct_id,
+          pname: editProduct.pname,
+          batch_no: editProduct.batch_no,
+          quantity: editProduct.quantity,
+          expiry_date: editProduct.expiry_date,
+          storage_zone_id: editProduct.storage_zone_id,
+        },
+      });
+
+      alert(" Product updated successfully!");
       setEditProduct(null);
       fetchFinalProducts();
     } catch (err) {
@@ -91,11 +122,10 @@ const TableFinalProductForm = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      //await axios.delete(`http://localhost:5000/api/final/${id}`);
       const res = await authFetch({
-                      method: "delete",
-                      url: `http://localhost:5000/api/final/${id}`,
-                      });
+        method: "delete",
+        url: `http://localhost:5000/api/final/${id}`,
+      });
       alert("Product deleted successfully!");
       fetchFinalProducts();
     } catch (err) {
@@ -147,6 +177,7 @@ const TableFinalProductForm = () => {
               name="quantity"
               value={form.quantity}
               onChange={handleChange}
+              min="1" // prevent negative/zero
               required
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -159,6 +190,7 @@ const TableFinalProductForm = () => {
               name="expiry_date"
               value={form.expiry_date}
               onChange={handleChange}
+              min={new Date().toISOString().split("T")[0]} // prevent past date
               required
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
@@ -198,7 +230,9 @@ const TableFinalProductForm = () => {
               <th className="border border-gray-600 px-4 py-2">Batch No</th>
               <th className="border border-gray-600 px-4 py-2">Quantity</th>
               <th className="border border-gray-600 px-4 py-2">Expiry Date</th>
-              <th className="border border-gray-600 px-4 py-2">Storage Zone ID</th>
+              <th className="border border-gray-600 px-4 py-2">
+                Storage Zone ID
+              </th>
               <th className="border border-gray-600 px-4 py-2">Created At</th>
               <th className="border border-gray-600 px-4 py-2">Actions</th>
             </tr>
@@ -210,14 +244,26 @@ const TableFinalProductForm = () => {
                   key={p.fproduct_id}
                   className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
                 >
-                  <td className="border border-gray-600 px-4 py-2">{p.fproduct_id}</td>
-                  <td className="border border-gray-600 px-4 py-2">{p.pname}</td>
-                  <td className="border border-gray-600 px-4 py-2">{p.batch_no}</td>
-                  <td className="border border-gray-600 px-4 py-2">{p.quantity}</td>
-                  <td className="border border-gray-600 px-4 py-2">{p.expiry_date?.split("T")[0]}</td>
-                  <td className="border border-gray-600 px-4 py-2">{p.storage_zone_id}</td>
                   <td className="border border-gray-600 px-4 py-2">
-                    {p.created_at ? new Date(p.created_at).toLocaleDateString() : ""}
+                    {p.fproduct_id}
+                  </td>
+                  <td className="border border-gray-600 px-4 py-2">{p.pname}</td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {p.batch_no}
+                  </td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {p.quantity}
+                  </td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {p.expiry_date?.split("T")[0]}
+                  </td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {p.storage_zone_id}
+                  </td>
+                  <td className="border border-gray-600 px-4 py-2">
+                    {p.created_at
+                      ? new Date(p.created_at).toLocaleDateString()
+                      : ""}
                   </td>
                   <td className="border border-gray-600 px-4 py-2 space-x-2">
                     <button
@@ -237,7 +283,10 @@ const TableFinalProductForm = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-4 text-gray-800 font-medium">
+                <td
+                  colSpan="8"
+                  className="text-center py-4 text-gray-800 font-medium"
+                >
                   🚫 No final products available
                 </td>
               </tr>
@@ -250,13 +299,17 @@ const TableFinalProductForm = () => {
       {editProduct && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Update Final Product</h2>
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
+              Update Final Product
+            </h2>
             <form onSubmit={handleUpdate} className="space-y-4">
               <input
                 type="text"
                 name="pname"
                 value={editProduct.pname}
-                onChange={(e) => setEditProduct({ ...editProduct, pname: e.target.value })}
+                onChange={(e) =>
+                  setEditProduct({ ...editProduct, pname: e.target.value })
+                }
                 className="w-full px-3 py-2 border rounded-md"
                 required
               />
@@ -264,23 +317,34 @@ const TableFinalProductForm = () => {
                 type="text"
                 name="batch_no"
                 value={editProduct.batch_no}
-                onChange={(e) => setEditProduct({ ...editProduct, batch_no: e.target.value })}
+                onChange={(e) =>
+                  setEditProduct({ ...editProduct, batch_no: e.target.value })
+                }
                 className="w-full px-3 py-2 border rounded-md"
                 required
               />
               <input
                 type="number"
                 name="quantity"
+                min="1" // prevent negative/zero in edit form
                 value={editProduct.quantity}
-                onChange={(e) => setEditProduct({ ...editProduct, quantity: e.target.value })}
+                onChange={(e) =>
+                  setEditProduct({ ...editProduct, quantity: e.target.value })
+                }
                 className="w-full px-3 py-2 border rounded-md"
                 required
               />
               <input
                 type="date"
                 name="expiry_date"
+                min={new Date().toISOString().split("T")[0]} // prevent past date in edit form
                 value={editProduct.expiry_date}
-                onChange={(e) => setEditProduct({ ...editProduct, expiry_date: e.target.value })}
+                onChange={(e) =>
+                  setEditProduct({
+                    ...editProduct,
+                    expiry_date: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border rounded-md"
                 required
               />
@@ -288,7 +352,12 @@ const TableFinalProductForm = () => {
                 type="text"
                 name="storage_zone_id"
                 value={editProduct.storage_zone_id}
-                onChange={(e) => setEditProduct({ ...editProduct, storage_zone_id: e.target.value })}
+                onChange={(e) =>
+                  setEditProduct({
+                    ...editProduct,
+                    storage_zone_id: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 border rounded-md"
                 required
               />

@@ -71,6 +71,13 @@ const IngredientManager = () => {
       setError("Expiry date cannot be in the past.");
       return;
     }
+
+    // Validation: quantity
+    if (form.quantity <= 0) {
+      setError("Quantity must be greater than 0.");
+      return;
+    }
+
     setError("");
 
     try {
@@ -120,6 +127,13 @@ const IngredientManager = () => {
       setEditError("Expiry date cannot be in the past.");
       return;
     }
+
+    // Validation: quantity
+    if (editForm.quantity <= 0) {
+      setEditError("Quantity must be greater than 0.");
+      return;
+    }
+
     setEditError("");
 
     try {
@@ -133,27 +147,27 @@ const IngredientManager = () => {
       alert("Error updating ingredient");
     }
   };
+
   // Download Report
-const downloadReport = async () => {
-  try {
-    const res = await fetch("http://localhost:5000/api/ingredientReport", {
-      method: "GET",
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+  const downloadReport = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/ingredientReport", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "ingredients_report.pdf";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (err) {
-    console.error("Error downloading report:", err);
-  }
-};
-
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ingredients_report.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error("Error downloading report:", err);
+    }
+  };
 
   // --- filter ingredients by search term ---
   const filteredIngredients = ingredients.filter(
@@ -196,6 +210,7 @@ const downloadReport = async () => {
               value={form.quantity}
               onChange={handleChange}
               required
+              min="1"
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
@@ -234,15 +249,14 @@ const downloadReport = async () => {
       {/* Ingredient Table */}
       <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-6">
         <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Ingredient List</h2>
-            <button
-              onClick={downloadReport}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg"
-            >
-              Download Report
-            </button>
-          </div>
-
+          <h2 className="text-2xl font-bold">Ingredient List</h2>
+          <button
+            onClick={downloadReport}
+            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg"
+          >
+            Download Report
+          </button>
+        </div>
 
         {/* --- Search bar --- */}
         <div className="mb-4">
@@ -339,6 +353,7 @@ const downloadReport = async () => {
                 onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
+                min="1"
               />
               <input
                 type="date"
