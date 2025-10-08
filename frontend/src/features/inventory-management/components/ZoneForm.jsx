@@ -173,7 +173,7 @@ const ZoneManager = () => {
           <h2 className="text-xl font-bold text-gray-900">Storage Zones</h2>
           <button
             onClick={handleDownloadPDF}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md"
+            className="bg-blue-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md"
           >
             Download PDF
           </button>
