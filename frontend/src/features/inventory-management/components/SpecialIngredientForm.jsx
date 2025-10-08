@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
-
 
 const SpecialIngredientManager = () => {
   const [form, setForm] = useState({
@@ -25,13 +23,10 @@ const SpecialIngredientManager = () => {
 
   const fetchSpecialIngredients = async () => {
     try {
-      // const res = await axios.get("http://localhost:5000/api/special");
-
-           const res = await authFetch({
-            method: "get",
-            url: "http://localhost:5000/api/special",
-          });
-
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/special",
+      });
 
       if (res.data.specialIngredient) {
         setSpecialIngredients(res.data.specialIngredient);
@@ -52,16 +47,28 @@ const SpecialIngredientManager = () => {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Validation helper
+  const isFutureDate = (dateStr) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // set to start of today
+    const inputDate = new Date(dateStr);
+    return inputDate >= today;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      //await axios.post("http://localhost:5000/api/special", form);
 
+    if (!isFutureDate(form.expiry_date)) {
+      alert("Expiry date cannot be in the past!");
+      return;
+    }
+
+    try {
       const res = await authFetch({
-                    method: "post",
-                    url: "http://localhost:5000/api/special",
-                    data: form,
-                  });
+        method: "post",
+        url: "http://localhost:5000/api/special",
+        data: form,
+      });
 
       alert("Special ingredient added!");
       setForm({ name: "", quantity: "", expiry_date: "", storage_zone_id: "" });
@@ -75,13 +82,11 @@ const SpecialIngredientManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
       try {
-        //await axios.delete(`http://localhost:5000/api/special/${id}`);
+        await authFetch({
+          method: "delete",
+          url: `http://localhost:5000/api/special/${id}`,
+        });
 
-         const res = await authFetch({
-                method: "delete",
-                url: `http://localhost:5000/api/special/${id}`,
-                });
-        
         alert("Special ingredient deleted!");
         fetchSpecialIngredients();
       } catch (err) {
@@ -104,19 +109,21 @@ const SpecialIngredientManager = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    if (!isFutureDate(editForm.expiry_date)) {
+      alert("Expiry date cannot be in the past!");
+      return;
+    }
+
     try {
-      // await axios.put(`http://localhost:5000/api/special/${editId}`, {
-      //   special_id: editId,
-      //   ...editForm,
-      // });
-      const res = await authFetch({
-              method: "put",
-              url: `http://localhost:5000/api/special/${editId}`,
-              data: {
-              special_id: editId,
-              ...editForm,
-              },
-            });
+      await authFetch({
+        method: "put",
+        url: `http://localhost:5000/api/special/${editId}`,
+        data: {
+          special_id: editId,
+          ...editForm,
+        },
+      });
 
       alert("Special ingredient updated!");
       setShowEditModal(false);
@@ -177,6 +184,7 @@ const SpecialIngredientManager = () => {
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              min={new Date().toISOString().split("T")[0]} // prevent selecting past date
             />
           </div>
 
@@ -290,6 +298,7 @@ const SpecialIngredientManager = () => {
                 onChange={(e) => setEditForm({ ...editForm, expiry_date: e.target.value })}
                 className="w-full px-4 py-2 border rounded-lg"
                 required
+                min={new Date().toISOString().split("T")[0]} // prevent past date
               />
               <input
                 type="text"
