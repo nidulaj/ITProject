@@ -81,7 +81,7 @@ const PubuduHomepage = ({ hideHeader = false }) => {
     {
       title: "Pure Ceylon Milk Goodness",
       subtitle: "Farm Fresh • Naturally Delicious • Always Pure",
-      image: "/images_sadi/cow5.png",
+      image: "/images_sadi/products.png",
       cta: "Shop Now"
     },
     {
