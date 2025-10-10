@@ -4,6 +4,7 @@ import { authFetch } from "../../user-management/utils/authFetchStaff";
 const PaymentPage = ({ onUpdateStats }) => {
   const [payments, setPayments] = useState([]);
   const [selectedProof, setSelectedProof] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchPayments = async () => {
     try {
@@ -36,11 +37,73 @@ const PaymentPage = ({ onUpdateStats }) => {
     }
   };
 
+  const filteredPayments = payments.filter((payment) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      payment.customer_name?.toLowerCase().includes(query) ||
+      payment.order_id?.toString().includes(query) ||
+      payment.payment_status?.toLowerCase().includes(query) ||
+      new Date(payment.payment_date)
+        .toLocaleDateString()
+        .toLowerCase()
+        .includes(query)
+    );
+  });
+
+  const downloadPDF = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/api/payments/download/pdf", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "payment_records.pdf";
+    document.body.appendChild(link);
+    link.click();
+
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("❌ Error downloading PDF:", err);
+    alert("Failed to download PDF. Check console for details.");
+  }
+};
+
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Payments</h1>
-      </div>
+      <div className="mb-6">
+      <div className="flex justify-between items-center">
+      <h1 className="text-3xl font-bold text-blue-700">Payments</h1>
+      <div className="flex items-center space-x-3">
+      <input
+        type="text"
+        placeholder="Search by order ID, customer, status or date"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="border border-blue-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <button
+  onClick={downloadPDF}
+  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow"
+>
+  📄 Download Payment Report
+</button>
+
+      
+    </div>
+  </div>
+</div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-xl overflow-hidden">
@@ -57,7 +120,7 @@ const PaymentPage = ({ onUpdateStats }) => {
         </thead>
 
         <tbody className="divide-y divide-blue-100 text-gray-700 text-sm">
-        {payments.map((payment) => (
+        {filteredPayments.map((payment) => (
           <tr
             key={payment.payment_id}
             className="hover:bg-blue-50 transition-all duration-200"
@@ -75,7 +138,7 @@ const PaymentPage = ({ onUpdateStats }) => {
                 className="text-blue-600 underline hover:text-blue-800"
                 onClick={() => setSelectedProof(payment.payment_proof)}
               >
-                View
+                View receipt
               </button>
             ) : (
               <span className="text-gray-400">None</span>
@@ -159,6 +222,19 @@ const PaymentPage = ({ onUpdateStats }) => {
 };
 
 export default PaymentPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -3,11 +3,8 @@ import ProductCard from './ProductCard';
 const ProductGrid = ({ products, onEditProduct, onDeleteProduct }) => {
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Product Catalog</h2>
-        <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-          {products.length} {products.length === 1 ? 'product' : 'products'}
-        </span>
+      <div className="flex flex-col items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 text-center">Product Catalog</h2>
       </div>
       
       {products.length === 0 ? (

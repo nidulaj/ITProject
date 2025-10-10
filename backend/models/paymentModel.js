@@ -1,5 +1,5 @@
 
-const { pool } = require('../db/dbConnect'); // your db connection file
+const { pool } = require('../db/dbConnect');
 
 
 const createPayment = async (order_id, customer_name, amount, payment_status, payment_date, payment_proof) => {
@@ -23,7 +23,7 @@ const createPayment = async (order_id, customer_name, amount, payment_status, pa
 };
 
 
-// Get all payments
+
 const getAllPayments = async () => {
   const result = await pool.query("SELECT * FROM payments ORDER BY payment_id DESC");
   return result.rows;

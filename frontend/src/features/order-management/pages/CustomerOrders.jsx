@@ -4,12 +4,12 @@ import { useCustomer } from '../../../contexts/CustomerContext';
 
 const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [products, setProducts] = useState({});
   const [allOrderItems, setAllOrderItems] = useState({});
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(null);
   const { currentCustomer } = useCustomer();
 
   const API_BASE_URL = 'http://localhost:5000/api/orders';
@@ -20,14 +20,16 @@ const CustomerOrders = () => {
 
   const fetchCustomerOrders = async () => {
     try {
-      setLoading(true);
       setError(null);
+      
+      console.log('Current customer in CustomerOrders:', currentCustomer);
       
       if (!currentCustomer?.id) {
         setError('Customer not found');
         return;
       }
 
+      console.log(`Fetching orders for customer ID: ${currentCustomer.id}`);
       const response = await authFetchCustomer({
         method: 'get',
         url: `${API_BASE_URL}/customer/${currentCustomer.id}`
@@ -72,8 +74,6 @@ const CustomerOrders = () => {
     } catch (error) {
       console.error('Error fetching customer orders:', error);
       setError('Failed to fetch orders');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,6 +135,60 @@ const CustomerOrders = () => {
     setSelectedOrder(null);
   };
 
+  // Function to generate PDF invoice
+  const handleGenerateInvoice = async (orderId) => {
+    try {
+      setGeneratingPDF(orderId);
+      console.log(`Generating PDF invoice for order ${orderId}`);
+      console.log(`Current customer when generating PDF:`, currentCustomer);
+      
+      const response = await authFetchCustomer({
+        method: 'get',
+        url: `http://localhost:5000/api/orders/${orderId}/invoice`,
+        responseType: 'blob' // Important for PDF files
+      });
+      
+      console.log('PDF response received:', response);
+      
+      // Create blob from response
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${orderId}.pdf`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log(`PDF invoice downloaded for order ${orderId}`);
+    } catch (error) {
+      console.error('Error generating PDF invoice:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      
+      let errorMessage = 'Failed to generate PDF invoice. ';
+      if (error.response?.status === 404) {
+        errorMessage += 'Order not found.';
+      } else if (error.response?.status === 500) {
+        errorMessage += 'Server error. Please try again later.';
+      } else if (error.response?.status === 401) {
+        errorMessage += 'Authentication required. Please log in again.';
+      } else {
+        errorMessage += 'Please check your connection and try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setGeneratingPDF(null);
+    }
+  };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -172,16 +226,6 @@ const CustomerOrders = () => {
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-gray-600">Loading your orders...</div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -348,10 +392,23 @@ const CustomerOrders = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
                             </button>
-                            <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 group-hover:bg-white/80">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
+                            <button 
+                              onClick={() => handleGenerateInvoice(order.order_id)}
+                              disabled={generatingPDF === order.order_id}
+                              className={`p-2 rounded-lg transition-all duration-200 group-hover:bg-white/80 ${
+                                generatingPDF === order.order_id 
+                                  ? 'text-green-600 bg-green-50 cursor-not-allowed' 
+                                  : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                              }`}
+                              title={generatingPDF === order.order_id ? "Generating PDF..." : "Generate PDF invoice"}
+                            >
+                              {generatingPDF === order.order_id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              )}
                             </button>
                           </div>
                         </td>

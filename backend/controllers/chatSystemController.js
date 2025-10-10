@@ -6,6 +6,7 @@ const {
   createMessageByAdmin,
   markMessagesAsReadToAdmin,
   getUsersWithUnread,
+  getUnreadMessageCount
 } = require("../models/chatSystemModel");
 const { getIo } = require("../utils/socket");
 
@@ -89,6 +90,16 @@ const getUsersWithUnreadCount = async (req, res) => {
   }
 };
 
+const getUnreadMessageCountByAdmin = async (req, res) => {
+  try {
+    const count = await getUnreadMessageCount();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error("Error fetching unread message count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   sendMessage,
   getUserMessages,
@@ -96,4 +107,5 @@ module.exports = {
   getUsers,
   markMessagesAsReadToAdminView,
   getUsersWithUnreadCount,
+  getUnreadMessageCountByAdmin
 };

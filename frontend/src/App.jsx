@@ -21,7 +21,7 @@ const PaymentFormPage = lazy(() => import("./features/financial-management/pages
 const ResetPassword = lazy(() => import ("./features/user-management/pages/ResetPassword"))
 const CustomerDiscountPage = lazy(() => import("./features/financial-management/pages/CustomerDiscountPage"));
 const SupportWidget = lazy(() => import("./features/user-management/components/SupportWidget"));
-
+const LoadingScreen = lazy(() => import("./components/LoadingScreen"))
 
 const YogurtLandingPage = lazy(() => import ("./features/production-management/pages/YogurtLandingPage")) //Rashmika
 const IngReqAccTable = lazy(() => import ("./features/production-management/components/IngReqAccTable")) //Rahmika
@@ -134,11 +134,11 @@ function AppContent() {
           }
         />
 
-        {/* Customer-facing discount view */}
+        
         <Route path="/customer-discounts" element={<CustomerDiscountPage />} />
 
         {/* Fallback 404 */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
       {/* Show SupportWidget everywhere except admin dashboard */}
@@ -152,7 +152,7 @@ function App() {
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <Router>
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<LoadingScreen />}>
             <AppContent />
           </Suspense>
         </Router>

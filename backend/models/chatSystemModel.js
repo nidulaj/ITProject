@@ -61,4 +61,10 @@ const getUsersWithUnread = async () => {
     return result.rows;
 };
 
-module.exports = { createMessage, getMessagesByUserCode, getAll, getUniqueUsers, createMessageByAdmin, markMessagesAsReadToAdmin, getUsersWithUnread };
+const getUnreadMessageCount = async() => {
+  const query = `SELECT COUNT(*) FROM chat_system WHERE is_read = false`;
+  const result = await pool.query(query);
+  return result.rows[0].count;
+};
+
+module.exports = { createMessage, getMessagesByUserCode, getAll, getUniqueUsers, createMessageByAdmin, markMessagesAsReadToAdmin, getUsersWithUnread, getUnreadMessageCount };

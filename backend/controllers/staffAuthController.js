@@ -18,7 +18,9 @@ const {
   changePassword,
   getCurrentPassword,
   updateProfilePhoto,
-  removeProfilePhoto
+  removeProfilePhoto,
+  getStaffActivationCount,
+  getStaffCount
 } = require("../models/staffAuthModel");
 const {
   generateAccessTokenStaff,
@@ -524,6 +526,27 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const getActiveStaffCount = async (req,res) =>{
+  try{
+    const activationCounts = await getStaffActivationCount();
+    console.log("Activation counts:", activationCounts);
+    res.status(200).json(activationCounts);
+  }catch(error){
+    console.error("Error fetching activation counts:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getStaffCountByAdmin = async (req, res) => {
+  try {
+    const count = await getStaffCount();
+    res.status(200).json(count);
+  } catch (error) {
+    console.error("Error fetching staff count:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   registerStaff,
   loginStaff,
@@ -546,5 +569,7 @@ module.exports = {
   uploadStaffProfilePhoto,
   removeStaffProfilePhoto,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getActiveStaffCount,
+  getStaffCountByAdmin
 };
