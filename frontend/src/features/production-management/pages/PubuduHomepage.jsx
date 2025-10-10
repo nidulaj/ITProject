@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
+import { Link } from 'react-router-dom'; 
 import Header from "../../../components/CustomerHeader"
+
 const PubuduHomepage = ({ hideHeader = false }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -288,9 +290,11 @@ const PubuduHomepage = ({ hideHeader = false }) => {
 
                     <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-blue-600">{product.price}</span>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm">
-                        Customized Now
-                    </button>
+                    <Link to="/yogurt-landing">
+                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-full font-semibold transition-all hover:scale-[1.05] shadow-lg">
+                        Customize Now
+                      </button>
+                    </Link>
                     </div>
                 </div>
                 </div>

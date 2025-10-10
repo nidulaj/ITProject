@@ -53,6 +53,10 @@ function AppContent() {
         <Route path="/reset-password-staff" element={<ResetPasswordStaff />} />
         <Route path="/YogurtLandingPage" element={<YogurtLandingPage />} />
 
+
+        <Route path="/IngReqAccTable" element={<IngReqAccTable />} />
+        <Route path="/yogurt-landing" element={<YogurtLandingPage />} />
+
         {/* Customer dashboards */}
         <Route
           path="/dashboard/*"

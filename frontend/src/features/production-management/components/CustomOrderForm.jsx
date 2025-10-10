@@ -220,7 +220,7 @@ export default function CustomOrderForm({
               <input
                 type="number"
                 min="1"
-                max="10"
+                max="50"
                 className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 focus:outline-none transition-all duration-200 hover:border-gray-300"
                 value={value.quantity || ""}
                 onChange={(e) => set("quantity", e.target.value)}
