@@ -8,6 +8,9 @@ import ActionButton from '../components/ActionButton';
 import Modal from '../components/Modal';
 import RecipeForm from '../components/RecipeForm';
 import RequestIngredientsForm from '../components/RequestIngredientsForm';
+import BarChartCard from '../components/BarChartCard';
+import PieChartCard from '../components/PieChartCard';
+
 import { Package, ShoppingCart, RotateCcw, Factory, Plus, DollarSignIcon, X } from 'lucide-react';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import { Routes, Route } from "react-router-dom";
@@ -282,7 +285,13 @@ const generatePDF = () => {
     const completed = rows.filter((p) => (p.status || '').toLowerCase() === 'completed').length;
 
     return [
-      { title: 'Normal Yogurt Stock', value: '1,247', subtitle: 'Current Stock', status: 'Good', icon: Package },
+      {
+        title: 'Yogurt Stock',
+        value: productions.reduce((total, p) => total + (p.quantity || 0), 0).toLocaleString(),
+        subtitle: 'Total Production Quantity',
+        status: 'Good',
+        icon: Package,
+      },
       { title: 'Custom Orders', value: String(pendingCO.length), subtitle: 'Pending Review', status: pendingCO.length > 0 ? 'High' : 'Low', icon: ShoppingCart },
       { title: 'Completed Batches', value: String(completed), subtitle: 'Last 40 mins window', status: completed > 0 ? 'Good' : 'Low', icon: DollarSignIcon },
       { title: 'Active Batches', value: String(active), subtitle: 'In Production', status: active > 2 ? 'High' : 'Low', icon: Factory },
@@ -409,7 +418,7 @@ const generatePDF = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+        {/* <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ActionButton icon={Plus} onClick={() => openModal('normal_batch')} className="justify-center">
@@ -422,7 +431,29 @@ const generatePDF = () => {
               Request Ingredients
             </ActionButton>
           </div>
+        </div> */}
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <BarChartCard
+              data={productions.slice(-8).map((p) => ({
+              recipe_no: p.recipe_no,
+              quantity: p.quantity,
+              }))}
+            />
+
+          <PieChartCard
+            data={[
+              { status: 'In Production', value: productions.filter(p => p.status.toLowerCase() === 'in production').length },
+              { status: 'Completed', value: productions.filter(p => p.status.toLowerCase() === 'completed').length },
+              { status: 'Pending', value: productions.filter(p => p.status.toLowerCase() === 'pending').length },
+              { status: 'Other', value: productions.filter(p =>
+                  !['in production','completed','pending'].includes(p.status.toLowerCase())
+                ).length },
+            ]}
+          />
         </div>
+
 
         {/* Ongoing Productions (real) — actions hidden */}
         <ProductionTable title="Ongoing Productions" data={prodRows} columns={dashProdCols} actions={false} />
