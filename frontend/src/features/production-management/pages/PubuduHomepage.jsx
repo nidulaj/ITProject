@@ -315,10 +315,13 @@ const PubuduHomepage = ({ hideHeader = false }) => {
               Why settle for ordinary when you can create extraordinary? Design your own custom yogurt 
               with our wide selection of flavors, toppings, and healthy additions.
             </p>
+            
             <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/yogurt-landing">
               <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl">
                 Start Customizing
               </button>
+              </Link>
               <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
                 View Examples
               </button>
