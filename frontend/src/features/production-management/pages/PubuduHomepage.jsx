@@ -3,7 +3,7 @@ import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, Map
 import { Link } from 'react-router-dom'; 
 import Header from "../../../components/CustomerHeader"
 
-const PubuduHomepage = ({ hideHeader = false }) => {
+const PubuduHomePage = ({ hideHeader = false }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -403,4 +403,4 @@ const PubuduHomepage = ({ hideHeader = false }) => {
   );
 };
 
-export default PubuduHomepage;
+export default PubuduHomePage;
