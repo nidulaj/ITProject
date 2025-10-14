@@ -2,8 +2,10 @@
 const {
   createProductionFromRequest,
   listProductions,
+  updateProductionStatusModel,
 } = require("../models/productionModel");
 
+// Create production from an accepted request
 const startFromRequest = async (req, res) => {
   try {
     const { req_id } = req.params;
@@ -15,6 +17,7 @@ const startFromRequest = async (req, res) => {
   }
 };
 
+// List all productions
 const list = async (_req, res) => {
   try {
     const rows = await listProductions();
@@ -25,7 +28,26 @@ const list = async (_req, res) => {
   }
 };
 
+// Mark a production as delivered
+const markProductionDelivered = async (req, res) => {
+  const { batch_id } = req.params;
+
+  try {
+    const success = await updateProductionStatusModel(batch_id, 'delivered');
+
+    if (!success) {
+      return res.status(404).json({ success: false, error: "Production not found" });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error marking production as delivered:", err);
+    return res.status(500).json({ success: false, error: "Failed to mark delivered" });
+  }
+};
+
 module.exports = {
   startFromRequest,
   list,
+  markProductionDelivered,
 };

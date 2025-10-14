@@ -287,11 +287,15 @@ const generatePDF = () => {
     return [
       {
         title: 'Yogurt Stock',
-        value: productions.reduce((total, p) => total + (p.quantity || 0), 0).toLocaleString(),
+        value: productions
+          .filter(p => p.status?.toLowerCase() === 'completed') // only completed
+          .reduce((total, p) => total + (p.quantity || 0), 0)
+          .toLocaleString(),
         subtitle: 'Total Production Quantity',
         status: 'Good',
         icon: Package,
       },
+
       { title: 'Custom Orders', value: String(pendingCO.length), subtitle: 'Pending Review', status: pendingCO.length > 0 ? 'High' : 'Low', icon: ShoppingCart },
       { title: 'Completed Batches', value: String(completed), subtitle: 'Last 40 mins window', status: completed > 0 ? 'Good' : 'Low', icon: DollarSignIcon },
       { title: 'Active Batches', value: String(active), subtitle: 'In Production', status: active > 2 ? 'High' : 'Low', icon: Factory },
@@ -403,6 +407,21 @@ const generatePDF = () => {
         Actions: actionsEl,
       };
     });
+  
+    // handeling deliver button
+    const handleDelivered = async (batchId) => {
+      try {
+        await authFetch({
+          method: "patch",
+          url: `${API}/api/productions/delivered/${batchId}`,
+        });
+        // Remove locally
+        setProductions(prev => prev.filter(p => p.batch_id !== batchId));
+      } catch (err) {
+        alert("Error marking production as delivered");
+      }
+    };
+
 
   const renderDashboardContent = () => {
     const prodRows = mapProductionsForDashboard(productions);
@@ -418,20 +437,43 @@ const generatePDF = () => {
         </div>
 
         {/* Quick Actions */}
-        {/* <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionButton icon={Plus} onClick={() => openModal('normal_batch')} className="justify-center">
-              Create Normal Yogurt Batch
-            </ActionButton>
-            <ActionButton variant="secondary" icon={Plus} onClick={() => openModal('custom_batch')} className="justify-center">
-              Create Custom Batch
-            </ActionButton>
-            <ActionButton variant="outline" icon={Package} onClick={() => openModal('ingredient_request')} className="justify-center">
-              Request Ingredients
-            </ActionButton>
-          </div>
-        </div> */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 1. Refresh Productions (Gray) */}
+          <ActionButton
+            variant="outline"
+            icon={RotateCcw}
+            onClick={() => {
+              fetchProductions();
+              fetchRequestsSlim();
+              fetchReturns();
+              fetchPendingCustomOrders();
+            }}
+            className="justify-center bg-gray-200 text-gray-800 hover:bg-gray-300"
+          >
+            Refresh
+          </ActionButton>
+
+          <ActionButton
+            icon={Plus}
+            onClick={() => setActiveTab('recipes')}
+            className="justify-center bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Create New Recipe
+          </ActionButton>
+
+          <ActionButton
+            icon={Package}
+            onClick={generatePDF}
+            className="justify-center bg-green-500 text-white hover:bg-green-600"
+          >
+            Production Report
+          </ActionButton>
+        </div>
+      </div>
+
+
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -446,9 +488,9 @@ const generatePDF = () => {
             data={[
               { status: 'In Production', value: productions.filter(p => p.status.toLowerCase() === 'in production').length },
               { status: 'Completed', value: productions.filter(p => p.status.toLowerCase() === 'completed').length },
-              { status: 'Pending', value: productions.filter(p => p.status.toLowerCase() === 'pending').length },
+              { status: 'Delivered', value: productions.filter(p => p.status.toLowerCase() === 'delivered').length },
               { status: 'Other', value: productions.filter(p =>
-                  !['in production','completed','pending'].includes(p.status.toLowerCase())
+                  !['in production','completed','delivered'].includes(p.status.toLowerCase())
                 ).length },
             ]}
           />
@@ -475,15 +517,56 @@ const generatePDF = () => {
 
   // Productions tab table
   const mapProductionsToRows = (rows) =>
-    (rows || []).map((p) => ({
+  (rows || []).map((p) => {
+    let actionsEl;
+
+    if (p.status?.toLowerCase() === 'completed') {
+      // Show "Deliver Now" button if not yet delivered
+      actionsEl = (
+        <button
+          onClick={async () => {
+            try {
+              await authFetch({
+                method: "patch",
+                url: `${API}/api/productions/delivered/${p.batch_id}`,
+              });
+              // update the button text to "Delivered"
+              setProductions((prev) =>
+                prev.map((item) =>
+                  item.batch_id === p.batch_id
+                    ? { ...item, delivered: true }
+                    : item
+                )
+              );
+            } catch (err) {
+              alert("Error marking production as delivered");
+            }
+          }}
+          className={`px-3 py-1 rounded text-white text-sm ${
+            p.delivered ? "bg-gray-400 cursor-not-allowed" : "bg-yellow-500 hover:bg-yellow-600"
+          }`}
+          disabled={p.delivered}
+        >
+          {p.delivered ? "Delivered" : "Deliver Now"}
+        </button>
+      );
+    } else {
+      actionsEl = <span className="text-gray-400 text-sm">—</span>;
+    }
+
+    return {
       id: p.id,
       batch_id: p.batch_id,
       recipe_no: p.recipe_no,
       quantity: p.quantity,
       status: p.status,
       created_at: p.created_at ? new Date(p.created_at).toLocaleString() : '',
-    }));
-  const prodTabCols = ['id', 'batch_id', 'recipe_no', 'quantity', 'status', 'created_at'];
+      Actions: actionsEl,
+    };
+  });
+
+
+  const prodTabCols = ['id', 'batch_id', 'recipe_no', 'quantity', 'status', 'created_at', 'Actions'];
 
   const renderContent = () => {
     switch (activeTab) {
@@ -509,12 +592,6 @@ const generatePDF = () => {
                   className="justify-center"
                 >
                   {prodLoading ? 'Refreshing…' : 'Refresh'}
-                </ActionButton>
-                <ActionButton icon={Plus} onClick={() => openModal('normal_batch')}>
-                  New Normal Batch
-                </ActionButton>
-                <ActionButton variant="secondary" icon={Plus} onClick={() => openModal('custom_batch')}>
-                  New Custom Batch
                 </ActionButton>
                 <ActionButton
                   icon={Package}
