@@ -38,7 +38,7 @@ export default function DashboardHeader({ userInfo }) {
       logout();
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/");
       console.log("Logout successful");
     } catch (err) {
       console.error("Logout error:", err);
@@ -51,7 +51,7 @@ export default function DashboardHeader({ userInfo }) {
       logout();
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
-      navigate("/login");
+      navigate("/");
     }
   };
 
@@ -119,7 +119,7 @@ export default function DashboardHeader({ userInfo }) {
         </nav>
 
         {/* Right: Notifications + Cart + User + Logout */}
-        <div className="flex items-center space-x-4">
+          {userInfo ? <div className="flex items-center space-x-4">
           {/* Notification Icon */}
           <NotificationIcon customerId={1} />
           
@@ -168,12 +168,7 @@ export default function DashboardHeader({ userInfo }) {
           >
             <LogOut className="h-4 w-4" />
             <span>Logout</span>
-          </button>
-        </div>
-      </div>
-      
-      {/* Cart Sidebar */}
-      <CartSidebar
+          </button>  <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         cart={cart}
@@ -186,6 +181,24 @@ export default function DashboardHeader({ userInfo }) {
         }}
         total={getCartTotal()}
       />
+        </div> : <div className="flex items-center space-x-3">
+              <button
+                onClick={() => navigate("/login")}
+                className="text-blue-600 font-medium px-4 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register")}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                Sign Up
+              </button>
+            </div>}
+      </div>
+      
+      {/* Cart Sidebar */}
+     
     </header>
   );
 }
