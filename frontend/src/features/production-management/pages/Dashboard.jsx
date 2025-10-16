@@ -16,6 +16,7 @@ import { authFetch } from '../../user-management/utils/authFetchStaff';
 import { Routes, Route } from "react-router-dom";
 import UserProfile from '../../user-management/components/UserProfile';
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const API = 'http://localhost:5000';
 
@@ -134,51 +135,77 @@ const ProductionDashboard = () => {
       setReqRows([]);
     }
   };
+
+//pdf report for production
 const generatePDF = () => {
-  const doc = new jsPDF();
+  const doc = new jsPDF("p", "pt", "a4");
 
-  // Add title with larger font
-  doc.setFontSize(22);
-  doc.text("Production Report", 20, 20);
+  // === HEADER LOGO & TITLE ===
+  const logo = new Image();
+  logo.src = "/images_sadi/logo.png"; // make sure this is in public folder
 
-  // Add Production Details heading
-  doc.setFontSize(16);
-  doc.text("Production Details:", 20, 30);
+  logo.onload = () => {
+    doc.addImage(logo, "PNG", 40, 25, 60, 60); // x, y, width, height
 
-  // Set up table formatting
-  const columnHeaders = ["Batch ID", "Recipe No", "Quantity", "Status", "Created At"];
-  const productionDetails = productions.map((p) => [
-    String(p.batch_id),
-    String(p.recipe_no),
-    String(p.quantity),
-    String(p.status),
-    new Date(p.created_at).toLocaleString(),
-  ]);
+    // Company title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("Pubudu Yoghurt", 110, 50);
 
-  // Set font and style for table
-  doc.setFontSize(12);
-  doc.setTextColor(0);
+    // Subtitle
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text("Production Management Report", 110, 70);
 
-  // Table headers
-  const headerY = 40;
-  const colWidth = [30, 40, 30, 30, 50]; // Column widths for each column
-  columnHeaders.forEach((header, index) => {
-    doc.text(header, 20 + colWidth.slice(0, index).reduce((a, b) => a + b, 0), headerY);
-  });
+    // Divider line
+    doc.setDrawColor(200);
+    doc.line(40, 90, 550, 90);
 
-  // Table rows
-  let yPosition = headerY + 10;
-  productionDetails.forEach((detail) => {
-    colWidth.forEach((width, index) => {
-      doc.text(detail[index], 20 + colWidth.slice(0, index).reduce((a, b) => a + b, 0), yPosition);
+    // === TABLE ===
+    const tableData = productions.map((p) => [
+      String(p.batch_id),
+      String(p.recipe_no),
+      String(p.quantity),
+      String(p.status),
+      new Date(p.created_at).toLocaleString(),
+    ]);
+
+    autoTable(doc, {
+      startY: 110,
+      head: [["Batch ID", "Recipe No", "Quantity", "Status", "Created At"]],
+      body: tableData,
+      theme: "striped",
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontSize: 12,
+        halign: "center",
+      },
+      bodyStyles: {
+        textColor: 50,
+        fontSize: 11,
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245],
+      },
+      margin: { left: 40, right: 40 },
+      styles: { cellPadding: 6, overflow: "linebreak" },
     });
-    yPosition += 10;
-  });
 
-  // Save the document
-  doc.save("production_report.pdf");
+    // === FOOTER ===
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(10);
+    doc.setTextColor(150);
+    doc.text(
+      `Generated on ${new Date().toLocaleString()} | Smart Dairy System`,
+      40,
+      pageHeight - 30
+    );
+
+    // Save PDF
+    doc.save("Production_Report.pdf");
+  };
 };
-
 
   // ===== Returns (PM data) =====
   const fetchReturns = async () => {
