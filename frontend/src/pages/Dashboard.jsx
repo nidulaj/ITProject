@@ -6,7 +6,7 @@ import CustomerDiscountPage from "../features/financial-management/pages/Custome
 import CustomerCatalog from "../features/order-management/pages/CustomerCatalog";
 
 import CustomerOrders from "../features/order-management/pages/CustomerOrders";
-import PubuduHomepage from "../features/production-management/pages/PubuduHomepage";
+import PubuduHomepage from "../features/production-management/pages/PubuduHomePage";
 import UserProfile from "../pages/UserProfile"
 import ThemeProvider from "../contexts/ThemeContext";
 import NotificationProvider from "../contexts/NotificationContext";
