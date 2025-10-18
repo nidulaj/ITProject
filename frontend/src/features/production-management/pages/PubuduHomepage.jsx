@@ -403,4 +403,4 @@ const PubuduHomepage = ({ hideHeader = false, userInfo }) => {
   );
 };
 
-export default PubuduHomePage;
+export default PubuduHomepage;
