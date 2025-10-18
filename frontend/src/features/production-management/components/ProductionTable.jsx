@@ -13,6 +13,7 @@ const ProductionTable = ({ title, data, columns, actions = true }) => {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'processing': return 'bg-blue-100 text-blue-800';
       case 'reject': return 'bg-red-100 text-red-800';
+      case 'delivered': return 'bg-orange-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -44,6 +45,7 @@ const ProductionTable = ({ title, data, columns, actions = true }) => {
                       cell.toLowerCase().includes('completed') ||
                       cell.toLowerCase().includes('accept') ||
                       cell.toLowerCase().includes('reject') ||
+                      cell.toLowerCase().includes('delivered') ||
                       cell.toLowerCase().includes('processing')) ? (
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(cell)}`}>
                         {cell}

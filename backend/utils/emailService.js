@@ -331,6 +331,7 @@ const sendStaffRegistrationInfo = async (email, password) => {
   });
 };
 
+//rashmika
 const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   try {
     await transporter.sendMail({
@@ -338,11 +339,83 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
       to: userEmail,
       subject: `Your Order #${orderId} Status Update`,
       text: `Dear Customer,\n\nYour Customized order status has been updated to: ${status}.\n\nThank you for shopping with us!\nPubudu Yoghurt`,
+      html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <title>Order Status Update</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+          }
+          .header {
+            background-color: #2563eb;
+            color: #ffffff;
+            padding: 16px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+          }
+          .content {
+            padding: 20px;
+            color: #333333;
+            line-height: 1.6;
+          }
+          .highlight {
+            background-color: #f1f5f9;
+            border-left: 4px solid #2563eb;
+            padding: 10px;
+            margin: 12px 0;
+            border-radius: 4px;
+            font-family: monospace;
+          }
+          .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+            padding: 12px;
+            border-top: 1px solid #eeeeee;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Smart Dairy</div>
+          <div class="content">
+            <p>Dear Customer,</p>
+            <p>Your customized yoghurt order has been updated.</p>
+            <div class="highlight">
+              <p><strong>Order ID:</strong> ${orderId}</p>
+              <p><strong>Status:</strong> ${status}</p>
+            </div>
+            <p>Thank you for shopping with us!</p>
+            <p>Pubudu Yoghurt</p>
+          </div>
+          <div class="footer">
+            &copy; 2025 Smart Dairy. All rights reserved.
+          </div>
+        </div>
+      </body>
+      </html>
+      `,
     });
   } catch (err) {
     console.error("Error sending email:", err);
   }
 };
+
 
 module.exports = {
   send2FACode,
