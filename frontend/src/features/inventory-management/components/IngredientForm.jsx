@@ -147,27 +147,51 @@ const IngredientManager = () => {
       alert("Error updating ingredient");
     }
   };
-
   // Download Report
-  const downloadReport = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/ingredientReport", {
+const downloadReport = async () => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/ingredientReport?search=${encodeURIComponent(searchTerm)}`,
+      {
         method: "GET",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      }
+    );
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "ingredients_report.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (err) {
-      console.error("Error downloading report:", err);
-    }
-  };
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ingredients_report.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error("Error downloading report:", err);
+  }
+};
+
+
+  // // Download Report
+  // const downloadReport = async () => {
+  //   try {
+  //     const res = await fetch("http://localhost:5000/api/ingredientReport", {
+  //       method: "GET",
+  //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //     });
+
+  //     const blob = await res.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = "ingredients_report.pdf";
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //   } catch (err) {
+  //     console.error("Error downloading report:", err);
+  //   }
+  // };
 
   // --- filter ingredients by search term ---
   const filteredIngredients = ingredients.filter(
