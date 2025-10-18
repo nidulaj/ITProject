@@ -1,7 +1,11 @@
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const crypto = require("crypto")
+const crypto = require("crypto");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const { Parser } = require("json2csv");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
 const {
   createCustomer,
   findCustomerByEmail,
@@ -16,7 +20,7 @@ const {
   findUserByGoogleId,
   attachGoogleIdToUser,
   getAllCustomers,
- updateCustomerDetails,
+  updateCustomerDetails,
   getCurrentPassword,
   changePassword,
   change2FA,
@@ -25,14 +29,14 @@ const {
   removeUser,
   changeAccountStatus,
   getCustomerActivationCount,
-  getCustomersCount
+  getCustomersCount,
 } = require("../models/customerAuthModel");
 const {
   generateAccessToken,
   generateRefreshToken,
   generateTempToken,
   generateEmailVerificationToken,
-  generateResetPasswordToken
+  generateResetPasswordToken,
 } = require("../utils/token");
 const { sendSMS } = require("../utils/smsService");
 const {
@@ -41,7 +45,7 @@ const {
   sendResetPasswordLink,
 } = require("../utils/emailService");
 
-const {createLog} = require("../models/userManagementAuditLogModel");
+const { createLog } = require("../models/userManagementAuditLogModel");
 const { ref } = require("process");
 
 const registerCustomer = async (req, res) => {
@@ -72,7 +76,6 @@ const registerCustomer = async (req, res) => {
   }
 };
 
-
 const loginCustomer = async (req, res) => {
   const { email, password } = req.body;
 
@@ -85,7 +88,11 @@ const loginCustomer = async (req, res) => {
     }
 
     if (!customer.is_active) {
-      await createLog(customer.customer_code, "Disabled Account Login Attempt", req.ip);
+      await createLog(
+        customer.customer_code,
+        "Disabled Account Login Attempt",
+        req.ip
+      );
       return res.status(403).json({ message: "Account is disabled" });
     }
 
@@ -93,7 +100,9 @@ const loginCustomer = async (req, res) => {
       const verificationToken = generateEmailVerificationToken(customer);
       const verificationLink = `http://localhost:5000/api/auth/verify-email?token=${verificationToken}`;
       await sendVerificationLink(customer.email, verificationLink);
-      return res.status(403).json({ message: "Account not verified. Verification link sent." });
+      return res
+        .status(403)
+        .json({ message: "Account not verified. Verification link sent." });
     }
     console.log("Customer is 2FA enabled", customer.is_2FA_enabled);
 
@@ -112,7 +121,12 @@ const loginCustomer = async (req, res) => {
       });
       return res
         .status(200)
-        .json({ message: "2FA code sent to email", is_2FA_enabled: true, role: null, type: "customer" });
+        .json({
+          message: "2FA code sent to email",
+          is_2FA_enabled: true,
+          role: null,
+          type: "customer",
+        });
     }
 
     const accessToken = generateAccessToken(customer);
@@ -134,7 +148,13 @@ const loginCustomer = async (req, res) => {
     await createLog(customer.customer_code, "Logged In", req.ip);
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, refreshToken, role: null, user: customer });
+      .json({
+        message: "Login successful",
+        accessToken,
+        refreshToken,
+        role: null,
+        user: customer,
+      });
   } catch (error) {
     console.error("Error logging in customer:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -144,52 +164,61 @@ const loginCustomer = async (req, res) => {
 const googleLogin = async (req, res) => {
   console.log("Incoming Google login body:", req.body);
 
-  const {token} = req.body
+  const { token } = req.body;
 
-  if(!token){
-    return res.status(400).json({message: "No token provided"})
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
   }
 
-  try{
+  try {
     const ticket = await client.verifyIdToken({
       idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID
-    })
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
 
-    const payload = ticket.getPayload()
+    const payload = ticket.getPayload();
 
-    const email = payload.email
-    const googleId = payload.sub
-    const firstName = payload.given_name || ""
-    const lastName = payload.family_name || ""
+    const email = payload.email;
+    const googleId = payload.sub;
+    const firstName = payload.given_name || "";
+    const lastName = payload.family_name || "";
     const avatarUrl = payload.picture || null;
 
     const existingByGoogle = await findUserByGoogleId(googleId);
 
-    if(existingByGoogle){
-      var customer = existingByGoogle
-
-    }else{
+    if (existingByGoogle) {
+      var customer = existingByGoogle;
+    } else {
       const existingByEmail = await findCustomerByEmail(email);
 
-      if(existingByEmail){
+      if (existingByEmail) {
         customer = await attachGoogleIdToUser(existingByEmail.cus_id, googleId);
+      } else {
+        const randomPassword = crypto.randomBytes(16).toString("hex");
 
-      }else{
-        const randomPassword = crypto.randomBytes(16).toString("hex")
-      
-        customer = await createCustomer(firstName, lastName, email, null, null, randomPassword)
-        await emailVerification(customer.cus_id)
+        customer = await createCustomer(
+          firstName,
+          lastName,
+          email,
+          null,
+          null,
+          randomPassword
+        );
+        await emailVerification(customer.cus_id);
         customer = await attachGoogleIdToUser(customer.cus_id, googleId);
       }
     }
 
     if (!customer.is_active) {
-      await createLog(customer.customer_code, "Disabled Account Login Attempt", req.ip);
+      await createLog(
+        customer.customer_code,
+        "Disabled Account Login Attempt",
+        req.ip
+      );
       return res.status(403).json({ message: "Account is disabled" });
     }
 
-    if(customer.is_2FA_enabled){
+    if (customer.is_2FA_enabled) {
       const verificationCode = Math.floor(100000 + Math.random() * 900000);
       await send2FACode(customer.email, verificationCode);
       await storeVerificationCode(customer.cus_id, verificationCode);
@@ -224,12 +253,20 @@ const googleLogin = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     await createLog(customer.customer_code, "Logged In with Google", req.ip);
-    return res.status(200).json({message: "Login successful", accessToken, refreshToken, role: null, user: customer})
-  }catch(err){
+    return res
+      .status(200)
+      .json({
+        message: "Login successful",
+        accessToken,
+        refreshToken,
+        role: null,
+        user: customer,
+      });
+  } catch (err) {
     console.error("Google login failed:", err);
     return res.status(400).json({ message: "Google login failed" });
   }
-}
+};
 
 const updateUserProfile = async (req, res) => {
   const { id, firstName, lastName, phone, address } = req.body;
@@ -399,12 +436,12 @@ const verify2FACode = async (req, res) => {
     // remove temp token
     res.clearCookie("tempToken");
 
-    await createLog(customerFromDb.customer_code, "Logged In", req.ip, );
+    await createLog(customerFromDb.customer_code, "Logged In", req.ip);
 
     return res.status(200).json({
       message: "Login successful",
       role: customerFromDb.role || null,
-      user: customerFromDb
+      user: customerFromDb,
     });
   } catch (error) {
     console.error("Error verifying code:", error);
@@ -412,28 +449,26 @@ const verify2FACode = async (req, res) => {
   }
 };
 
-
 const verifyEmail = async (req, res) => {
   const token = req.query.token;
 
   try {
-  const user = jwt.verify(token, process.env.EMAIL_TOKEN_SECRET);
-  console.log("Email verification token valid for user:", user);
+    const user = jwt.verify(token, process.env.EMAIL_TOKEN_SECRET);
+    console.log("Email verification token valid for user:", user);
 
-  const customerId = user.id;
-  const customer = await findUserById(customerId);
+    const customerId = user.id;
+    const customer = await findUserById(customerId);
 
-  console.log("Calling emailVerification with customerId:", customerId);
+    console.log("Calling emailVerification with customerId:", customerId);
 
-  const newStatus = await emailVerification(customerId);
+    const newStatus = await emailVerification(customerId);
 
-  res.redirect("http://localhost:5173/verifyEmail");
-  await createLog(customer.customer_code, "Email Verified", req.ip);
-} catch (err) {
-  console.error("Error in verifyEmail:", err);
-  res.status(400).json({ message: "Invalid or expired token" });
-}
-
+    res.redirect("http://localhost:5173/verifyEmail");
+    await createLog(customer.customer_code, "Email Verified", req.ip);
+  } catch (err) {
+    console.error("Error in verifyEmail:", err);
+    res.status(400).json({ message: "Invalid or expired token" });
+  }
 };
 
 const resend2FACode = async (req, res) => {
@@ -458,11 +493,11 @@ const resend2FACode = async (req, res) => {
 
 const getAllCustomerDetails = async (req, res) => {
   try {
-      const customers = await getAllCustomers();
-      res.status(200).json(customers);
+    const customers = await getAllCustomers();
+    res.status(200).json(customers);
   } catch (error) {
-      console.error("Error fetching customer details:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error("Error fetching customer details:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -490,7 +525,7 @@ const updateUserDetails = async (req, res) => {
       first_name,
       last_name,
       phone,
-      address
+      address,
     });
     res.status(200).json(updatedUser);
   } catch (error) {
@@ -558,7 +593,9 @@ const uploadCustomerProfilePhoto = async (req, res) => {
     }
 
     const customerId = req.user.id;
-    const photoUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const photoUrl = `${req.protocol}://${req.get("host")}/uploads/${
+      req.file.filename
+    }`;
 
     const updatedUser = await updateProfilePhoto(customerId, photoUrl);
     console.log("Profile photo updated:", updatedUser);
@@ -586,7 +623,6 @@ const removeCustomerProfilePhoto = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const getCustomerDetailsForAdmin = async (req, res) => {
   const customerId = parseInt(req.params.id, 10);
@@ -643,7 +679,7 @@ const changeCustomerDetailsByAdmin = async (req, res) => {
       first_name,
       last_name,
       phone,
-      address
+      address,
     });
     res.status(200).json(updatedCustomer);
   } catch (error) {
@@ -695,8 +731,8 @@ const resetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-   const updatedUser = await changePassword(user.cus_id, newPassword);
-   await createLog(updatedUser.customer_code, "Password Reset", req.ip);
+    const updatedUser = await changePassword(user.cus_id, newPassword);
+    await createLog(updatedUser.customer_code, "Password Reset", req.ip);
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
@@ -705,15 +741,15 @@ const resetPassword = async (req, res) => {
   }
 };
 
-const getActiveCustomersCount = async (req,res) =>{
-  try{
+const getActiveCustomersCount = async (req, res) => {
+  try {
     const activationCounts = await getCustomerActivationCount();
     res.status(200).json(activationCounts);
-  }catch(error){
+  } catch (error) {
     console.error("Error fetching activation counts:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 const getCustomersCountByAdmin = async (req, res) => {
   try {
@@ -723,6 +759,222 @@ const getCustomersCountByAdmin = async (req, res) => {
     console.error("Error fetching customer count:", error);
     res.status(500).json({ message: "Internal server error" });
   }
+};
+
+const exportPDF = async (req, res) => {
+  const { customers } = req.body;
+
+  const doc = new PDFDocument({ margin: 40, size: "A4" });
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "attachment; filename=customers.pdf");
+  doc.pipe(res);
+
+  // Brand Color
+  const brandColor = "#0D6EFD";
+  const lightBlue = "#E7F1FF";
+  const textDark = "#1A1A1A";
+  const textGray = "#4A4A4A";
+
+  // --- 🎨 Header Background ---
+  doc.rect(0, 0, doc.page.width, 180).fill(brandColor);
+
+  // --- 🖼️ Logo ---
+  const logoPath = path.join(__dirname, "../assets/logoPubudu.png");
+  if (fs.existsSync(logoPath)) {
+    const logoWidth = 100;
+    const logoX = (doc.page.width - logoWidth) / 2;
+    doc.image(logoPath, logoX, 35, { width: logoWidth });
+    doc.moveDown(4);
+  }
+
+  // --- Title ---
+  doc
+    .fontSize(24)
+    .font("Helvetica-Bold")
+    .fillColor("#FFFFFF")
+    .text("Customer Report", { align: "center" });
+
+  const now = new Date();
+  const generatedDate = now.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const generatedTime = now.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  doc
+    .fontSize(11)
+    .font("Helvetica")
+    .fillColor("#FFFFFF")
+    .text(`Generated on ${generatedDate} at ${generatedTime}`, {
+      align: "center",
+    });
+
+  doc.moveDown(2.5);
+
+  // --- Column Layout ---
+  const startX = 50;
+  const tableWidth = doc.page.width - 70;
+  const colPositions = {
+    id: startX,
+    name: startX + 60,
+    email: startX + 200,
+    phone: startX + 360,
+    status: startX + 470,
+  };
+
+  // --- Table Header Background ---
+  const headerY = doc.y;
+  doc.roundedRect(startX - 10, headerY - 5, tableWidth, 28, 5).fill(lightBlue);
+
+  // --- Table Header Text ---
+  doc.fontSize(11).font("Helvetica-Bold").fillColor(brandColor);
+
+  const headerTextY = headerY + 3;
+  doc.text("ID", colPositions.id, headerTextY);
+  doc.text("Name", colPositions.name, headerTextY);
+  doc.text("Email", colPositions.email, headerTextY);
+  doc.text("Phone", colPositions.phone, headerTextY);
+  doc.text("Status", colPositions.status, headerTextY);
+
+  doc.moveDown(1.5);
+
+  // --- Table Rows ---
+  doc.font("Helvetica").fontSize(10).fillColor(textDark);
+  const rowHeight = 30;
+  let isAlternate = false;
+
+  customers.forEach((c, index) => {
+    // Add new page if needed (leave 100px margin at bottom)
+    if (doc.y > doc.page.height - 100) {
+      doc.addPage();
+      doc.y = 60;
+      isAlternate = false; // Reset alternating pattern on new page
+    }
+
+    const currentY = doc.y;
+
+    // Alternating row background
+    if (isAlternate) {
+      doc
+        .rect(startX - 10, currentY - 5, tableWidth, rowHeight - 5)
+        .fill("#F8F9FA");
+    }
+
+    // Row content
+    doc
+      .fillColor(textGray)
+      .text(c.customer_code || "-", colPositions.id, currentY, {
+        width: 50,
+        ellipsis: true,
+      });
+
+    doc
+      .fillColor(textDark)
+      .font("Helvetica")
+      .text(
+        `${c.first_name || ""} ${c.last_name || ""}`.trim() || "-",
+        colPositions.name,
+        currentY,
+        { width: 130, ellipsis: true }
+      );
+
+    doc.fillColor(textGray).text(c.email || "-", colPositions.email, currentY, {
+      width: 150,
+      ellipsis: true,
+    });
+
+    doc.text(c.phone || "-", colPositions.phone, currentY, {
+      width: 90,
+      ellipsis: true,
+    });
+
+    // Status badge
+    const statusX = colPositions.status;
+    const statusY = currentY;
+    const badgeWidth = 60;
+    const badgeHeight = 18;
+
+    if (c.is_active) {
+      doc
+        .roundedRect(statusX, statusY, badgeWidth, badgeHeight, 9)
+        .fill("#28A745");
+      doc
+        .fillColor("#FFFFFF")
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .text("Active", statusX, statusY + 4, {
+          width: badgeWidth,
+          align: "center",
+        });
+    } else {
+      doc
+        .roundedRect(statusX, statusY, badgeWidth, badgeHeight, 9)
+        .fill("#DC3545");
+      doc
+        .fillColor("#FFFFFF")
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .text("Inactive", statusX, statusY + 4, {
+          width: badgeWidth,
+          align: "center",
+        });
+    }
+
+    doc.moveDown(rowHeight / 12);
+    isAlternate = !isAlternate;
+  });
+
+  // --- Footer ---
+  const pageCount = doc.bufferedPageRange();
+  for (let i = 0; i < pageCount.count; i++) {
+    doc.switchToPage(i);
+
+    // Footer line
+    doc
+      .moveTo(50, doc.page.height - 50)
+      .lineTo(doc.page.width - 50, doc.page.height - 50)
+      .strokeColor(lightBlue)
+      .lineWidth(1)
+      .stroke();
+
+    // Footer text
+    doc
+      .fontSize(9)
+      .fillColor(textGray)
+      .text(`Page ${i + 1} of ${pageCount.count}`, 50, doc.page.height - 35, {
+        align: "center",
+      });
+  }
+
+  doc.end();
+};
+
+const exportCSV = async (req, res) => {
+  const { customers } = req.body;
+
+  const fields = [
+    { label: "Customer ID", value: "customer_code" },
+    {
+      label: "Name",
+      value: (row) => `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+    },
+    { label: "Email", value: "email" },
+    { label: "Phone", value: "phone" },
+    { label: "Status", value: (row) => (row.is_active ? "Active" : "Inactive") },
+  ];
+
+  const parser = new Parser({ fields });
+  const csv = parser.parse(customers);
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", "attachment; filename=customers.csv");
+  res.send(csv);
 };
 
 module.exports = {
@@ -740,7 +992,7 @@ module.exports = {
   googleLogin,
   getAllCustomerDetails,
   getCustomerDetails,
-   updateUserDetails,
+  updateUserDetails,
   updatePassword,
   change2FASetting,
   uploadCustomerProfilePhoto,
@@ -753,5 +1005,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getActiveCustomersCount,
-  getCustomersCountByAdmin
+  getCustomersCountByAdmin,
+  exportPDF,
+  exportCSV
 };
