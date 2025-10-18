@@ -7,7 +7,7 @@ let socket; // global socket instance
 
 export default function SupportWidget() {
   const { user } = useContext(AuthContext);
-  const userId = user?.customer_code ?? user?.staff_code;
+  const userId = user?.customer_code ?? user?.staff_code ?? `GUEST${Math.floor(Math.random() * 10000)}`;
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
