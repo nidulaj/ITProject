@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
 import { Link } from 'react-router-dom'; 
-import Header from "../../../components/CustomerHeader"
+import Header from "../../../components/DashboardHeader"
 
-const PubuduHomePage = ({ hideHeader = false }) => {
+const PubuduHomepage = ({ hideHeader = false, userInfo }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -110,8 +110,8 @@ const PubuduHomePage = ({ hideHeader = false }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <Header userInfo={null} />
 
+{userInfo===null ? <Header userInfo={null} /> : null}
       {/* Hero Section */}
       <section id="home" className="relative overflow-hidden">
         <div className="container mx-auto px-6 py-12">

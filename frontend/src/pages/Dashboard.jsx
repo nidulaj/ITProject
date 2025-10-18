@@ -84,7 +84,7 @@ export default function Dashboard() {
               {/* Nested Routes */}
               <main className="flex-1 p-4">
                 <Routes>
-                  <Route index element={<div className="-m-4"><PubuduHomepage hideHeader={true} /></div>} />
+                  <Route index element={<div className="-m-4"><PubuduHomepage hideHeader={true} userInfo={userInfo} /></div>} />
                   <Route path="products" element={<CustomerCatalog />} />
                   <Route path="products/cart" element={<CartSidebar />} />
                   <Route path="discounts" element={<CustomerDiscountPage />} />
