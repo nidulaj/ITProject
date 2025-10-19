@@ -344,10 +344,62 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   }
 };
 
+
+const sendPaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
+  try {
+    let subject, message;
+
+    if (status === "approved") {
+      subject = "Your Payment Has Been Approved ✅";
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#16a34a;text-align:center;">Payment Approved</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> has been approved.</p>
+            <p>Thank you for choosing Smart Dairy!</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
+    } else if (status === "declined") {
+      subject = "Your Payment Has Been Declined ❌";
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#dc2626;text-align:center;">Payment Declined</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> has been declined.</p>
+            <p>If you believe this is an error, please contact our Finance Team.</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
+    }
+
+    await transporter.sendMail({
+      from: `"Smart Dairy Finance" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject,
+      html: message,
+    });
+
+    console.log(`✅ Payment status email sent to ${email}`);
+  } catch (err) {
+    console.error("❌ Error sending payment status email:", err);
+  }
+};
+
+
 module.exports = {
   send2FACode,
   sendVerificationLink,
   sendResetPasswordLink,
   sendStaffRegistrationInfo,
   sendOrderStatusEmail,
+  sendPaymentStatusEmail,
 };

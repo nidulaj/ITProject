@@ -1,5 +1,6 @@
 const Payment = require("../models/paymentModel");
 const { pool } = require("../db/dbConnect");
+const { sendPaymentStatusEmail } = require("../utils/emailService");
 
 const addPayment = async (req, res) => {
   try {
@@ -49,7 +50,7 @@ const getPayments = async (req, res) => {
 };
 
 
-const updatePaymentStatus = async (req, res) => {
+/*const updatePaymentStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
@@ -74,7 +75,88 @@ const updatePaymentStatus = async (req, res) => {
     console.error("Error updating payment status:", error);
     res.status(500).json({ message: "Failed to update payment status." });
   }
+};*/
+
+
+const updatePaymentStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const result = await pool.query(
+      `UPDATE payments SET payment_status = $1 WHERE payment_id = $2 RETURNING *`,
+      [status, Number(id)]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Payment not found." });
+    }
+
+    const updatedPayment = result.rows[0];
+
+
+    /*const [firstName, lastName] = updatedPayment.customer_name.split(" ");
+
+    const customerEmailResult = await pool.query(
+      `SELECT email FROM customers 
+      WHERE LOWER(first_name) = LOWER($1)
+      AND (LOWER(last_name) = LOWER($2) OR $2 IS NULL)
+      LIMIT 1`,
+      [firstName, lastName || null]
+    );*/
+
+    const nameParts = updatedPayment.customer_name.trim().split(" ");
+const firstName = nameParts[0];
+const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : null;
+
+let customerEmailResult;
+
+if (lastName) {
+  // ✅ Two-part name
+  customerEmailResult = await pool.query(
+    `SELECT email FROM customers 
+     WHERE LOWER(first_name) = LOWER($1)
+     AND LOWER(last_name) = LOWER($2)
+     LIMIT 1`,
+    [firstName, lastName]
+  );
+} else {
+  // ✅ Single-part name
+  customerEmailResult = await pool.query(
+    `SELECT email FROM customers 
+     WHERE LOWER(first_name) = LOWER($1)
+     LIMIT 1`,
+    [firstName]
+  );
+}
+
+console.log("Customer email query result:", customerEmailResult.rows);
+
+
+    console.log("Customer email query result:", customerEmailResult.rows);
+
+    if (customerEmailResult.rows.length > 0) {
+      const customerEmail = customerEmailResult.rows[0].email;
+
+      // ✅ Send email when approved or declined
+      if (status === "approved" || status === "declined") {
+        await sendPaymentStatusEmail(
+          customerEmail,
+          updatedPayment.customer_name,
+          updatedPayment.amount,
+          updatedPayment.order_id,
+          status
+        );
+      }
+    }
+
+    res.status(200).json(updatedPayment);
+  } catch (error) {
+    console.error("Error updating payment status:", error);
+    res.status(500).json({ message: "Failed to update payment status." });
+  }
 };
+
 
 
 
