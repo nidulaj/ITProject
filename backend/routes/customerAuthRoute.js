@@ -34,7 +34,9 @@ const {
   forgotPassword,
   resetPassword,
   getActiveCustomersCount,
-  getCustomersCountByAdmin
+  getCustomersCountByAdmin,
+  exportPDF,
+  exportCSV
 } = require("../controllers/customerAuthController");
 
 const upload = require("../middlewares/uploadMiddleware");
@@ -100,4 +102,6 @@ router.delete(
 
 router.get("/activeCustomersCount", authMiddleware, getActiveCustomersCount);
 router.get("/customersCount", staffAuthMiddleware, getCustomersCountByAdmin);
+router.post("/exportPDF", staffAuthMiddleware, exportPDF);
+router.post("/exportCSV", staffAuthMiddleware, exportCSV);
 module.exports = router;

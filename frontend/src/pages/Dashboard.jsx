@@ -6,7 +6,7 @@ import CustomerDiscountPage from "../features/financial-management/pages/Custome
 import CustomerCatalog from "../features/order-management/pages/CustomerCatalog";
 
 import CustomerOrders from "../features/order-management/pages/CustomerOrders";
-import PubuduHomepage from "../features/production-management/pages/PubuduHomepage";
+import PubuduHomepage from "../features/production-management/pages/PubuduHomePage";
 import UserProfile from "../pages/UserProfile"
 import ThemeProvider from "../contexts/ThemeContext";
 import NotificationProvider from "../contexts/NotificationContext";
@@ -84,7 +84,7 @@ export default function Dashboard() {
               {/* Nested Routes */}
               <main className="flex-1 p-4">
                 <Routes>
-                  <Route index element={<div className="-m-4"><PubuduHomepage hideHeader={true} /></div>} />
+                  <Route index element={<div className="-m-4"><PubuduHomepage hideHeader={true} userInfo={userInfo} /></div>} />
                   <Route path="products" element={<CustomerCatalog />} />
                   <Route path="products/cart" element={<CartSidebar />} />
                   <Route path="discounts" element={<CustomerDiscountPage />} />

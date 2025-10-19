@@ -25,7 +25,7 @@ export default function CustomerManagement() {
     fetchCustomerList();
   }, []);
 
-  // Filtering logic
+
   const filteredCustomers = customerList.filter((user) => {
     // Search by customer_code, first/last name, or email
     const matchesSearch =
@@ -44,6 +44,46 @@ export default function CustomerManagement() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleExportPDF = async () => {
+  try {
+    const res = await authFetch({
+      method: "post",
+      url: "http://localhost:5000/api/auth/exportPDF",
+      data: { customers: filteredCustomers },
+      responseType: "blob",
+    });
+
+    const blob = new Blob([res.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "customers.pdf";
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Error exporting PDF:", err);
+  }
+};
+
+const handleExportCSV = async () => {
+  const res = await authFetch({
+    method: "POST",
+    url: "http://localhost:5000/api/auth/exportCSV",
+    data: { customers: filteredCustomers },
+    responseType: "blob",
+  });
+
+  const blob = new Blob([res.data], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "customers.csv";
+  a.click();
+};
+
+
+
+
   return (
     <section className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 relative">
       <div className="flex items-center justify-between mb-6">
@@ -54,6 +94,46 @@ export default function CustomerManagement() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             View and manage your customer accounts
           </p>
+        </div>
+        
+        {/* Export Button */}
+        <div className="relative group">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-150 shadow-sm">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            Export Data
+          </button>
+          
+          {/* Dropdown Menu */}
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+            <div className="py-1">
+              <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 transition-colors"
+                onClick={handleExportCSV}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export as CSV
+              </button>
+              <button className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 transition-colors"
+                onClick={handleExportPDF}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                Export as PDF
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

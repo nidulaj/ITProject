@@ -17,10 +17,10 @@ const CustomerManagement = lazy(() =>
 );
 const UserProfile = lazy(() => import("../components/UserProfile"));
 const CustomerInfo = lazy(() => import("../components/CustomerInfo"));
-
 const CustomersPieChart = lazy(() => import("../components/CustomersPieChart"));
 const StaffPieChart = lazy(() => import("../components/StaffPieChart"));
 const Summary = lazy(() => import("../components/Summary"));
+
 export default function AdminDashboard() {
   const [userInfo, setUserInfo] = useState(null);
 
@@ -41,36 +41,43 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      {/* 🟩 Sidebar */}
       <Sidebar />
 
-      <main className="flex-1 p-6 space-y-8 overflow-y-auto ml-64">
+      {/* 🟦 Main area */}
+      <div className="flex-1 ml-64">
+        {/* 🟨 Fixed Header (sits above main content) */}
         <Header userInfo={userInfo} />
-        <Suspense fallback={<LoadingScreen />}>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <>
-                <Summary />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <CustomersPieChart />
-                  <StaffPieChart />
-                </div>
-                </>
-              }
-            />
-            <Route path="staff" element={<StaffManagement />} />
-            <Route path="customers" element={<CustomerManagement />} />
-            <Route path="staff/:staffId" element={<StaffUserInfo />} />
-            <Route path="customers/:customerId" element={<CustomerInfo />} />
-            <Route path="rolesAccess" element={<RolesAccess />} />
-            <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
-            <Route path="logsMonitoring" element={<LogsMonitoring />} />
-            <Route path="chat" element={<Chat />} />
-            <Route path="userProfile" element={<UserProfile />} />
-          </Routes>
-        </Suspense>
-      </main>
+
+        {/* 🟧 Scrollable content below header */}
+        <main className="pt-25 px-6 space-y-8 overflow-y-auto">
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <Summary />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <CustomersPieChart />
+                      <StaffPieChart />
+                    </div>
+                  </>
+                }
+              />
+              <Route path="staff" element={<StaffManagement />} />
+              <Route path="customers" element={<CustomerManagement />} />
+              <Route path="staff/:staffId" element={<StaffUserInfo />} />
+              <Route path="customers/:customerId" element={<CustomerInfo />} />
+              <Route path="rolesAccess" element={<RolesAccess />} />
+              <Route path="rolesAccess/:roleId" element={<RoleInfo />} />
+              <Route path="logsMonitoring" element={<LogsMonitoring />} />
+              <Route path="chat" element={<Chat />} />
+              <Route path="userProfile" element={<UserProfile />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
     </div>
   );
 }

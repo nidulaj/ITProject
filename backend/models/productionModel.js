@@ -1,4 +1,3 @@
-// models/productionModel.js
 const { pool } = require("../db/dbConnect");
 
 // auto mark >40min in-production as completed
@@ -36,7 +35,6 @@ const createProductionFromRequest = async (req_id) => {
       [rq.recipe_no, rq.quantity]
     );
 
-    // optional: move request to 'processing' to indicate it's being used
     await client.query(
       `UPDATE req_ingredients SET status='processing' WHERE req_id=$1`,
       [rq.req_id]
@@ -60,7 +58,19 @@ const listProductions = async () => {
   return rows;
 };
 
+const updateProductionStatusModel = async (batchId, status) => {
+  const { rowCount } = await pool.query(
+    `UPDATE productions
+     SET status = $1
+     WHERE batch_id = $2`,
+    [status, batchId]
+  );
+  return rowCount > 0; // returns true if a row was updated
+};
+
+
 module.exports = {
   createProductionFromRequest,
   listProductions,
+  updateProductionStatusModel,
 };
