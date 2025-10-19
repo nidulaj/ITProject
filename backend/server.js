@@ -1,5 +1,5 @@
-const express = require('express');
 require('dotenv').config();
+const express = require('express');
 const cors = require('cors');
 const {connectDB} = require('./db/dbConnect');
 const { createServer } = require("http");
@@ -89,6 +89,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/ingredient-totals", ingredientTotalsRoutes);
 
 app.use('/api/notifications', notificationProductionRoutes); //Rashmika
+
 
 
 server.listen(5000, () => {

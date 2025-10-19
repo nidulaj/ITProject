@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+
 
 const PaymentPage = ({ onUpdateStats }) => {
   const [payments, setPayments] = useState([]);
@@ -50,34 +54,65 @@ const PaymentPage = ({ onUpdateStats }) => {
     );
   });
 
-  const downloadPDF = async () => {
-  try {
-    const response = await fetch("http://localhost:5000/api/payments/download/pdf", {
-      method: "GET",
-      credentials: "include",
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+
+const downloadPDF = () => {
+  try {
+    const doc = new jsPDF();
+    const isFiltered = searchQuery.trim() !== "";
+    const recordsToExport = isFiltered ? filteredPayments : payments;
+
+    if (!recordsToExport.length) {
+      alert("No records to export.");
+      return;
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-    const url = window.URL.createObjectURL(blob);
+    
+    doc.setFontSize(16);
+    doc.text(
+      isFiltered ? "Filtered Payment Records" : "Payment Records Report",
+      14,
+      20
+    );
+    doc.setFontSize(10);
+    doc.text(`Exported on: ${new Date().toLocaleDateString()}`, 14, 28);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "payment_records.pdf";
-    document.body.appendChild(link);
-    link.click();
+    
+    const columns = ["Order ID", "Customer", "Amount", "Date", "Status"];
+    const rows = recordsToExport.map((p) => [
+      p?.order_id ?? "-",
+      p?.customer_name ?? "-",
+      `Rs. ${p?.amount ?? 0}`,
+      new Date(p?.payment_date).toLocaleDateString(),
+      p?.payment_status ?? "-",
+    ]);
 
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 35,
+      headStyles: { fillColor: [41, 128, 185] },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      styles: { fontSize: 10 },
+    });
+
+    
+    doc.save(
+      isFiltered
+        ? `filtered_payments_${new Date().toISOString().slice(0, 10)}.pdf`
+        : `payment_records_${new Date().toISOString().slice(0, 10)}.pdf`
+    );
   } catch (err) {
-    console.error("❌ Error downloading PDF:", err);
-    alert("Failed to download PDF. Check console for details.");
+    console.error("❌ Error generating PDF:", err);
+    alert(
+      isFiltered
+        ? "Failed to export filtered records."
+        : "Failed to export full records."
+    );
   }
 };
+
 
   return (
     <div className="p-8">
@@ -93,14 +128,13 @@ const PaymentPage = ({ onUpdateStats }) => {
         className="border border-blue-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <button
+<button
   onClick={downloadPDF}
   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow"
 >
   📄 Download Payment Report
 </button>
-
-      
+     
     </div>
   </div>
 </div>

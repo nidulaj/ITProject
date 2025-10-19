@@ -2,11 +2,36 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 5000, // Reduced to 5 seconds for faster connection
+  greetingTimeout: 5000, // Reduced to 5 seconds
+  socketTimeout: 5000, // Reduced to 5 seconds
+  pool: false, // Disable pooling for immediate sending
+  maxConnections: 1, // Single connection for immediate delivery
+  maxMessages: 1, // Send one message at a time
+  rateDelta: 0, // No rate limiting for immediate delivery
+  rateLimit: 0 // No rate limiting
 });
+
+// Test transporter connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter verification failed:", error);
+  } else {
+    console.log("✅ Email transporter is ready to send emails");
+  }
+});
+
+// Removed connection keep-alive to prevent delays
 
 const send2FACode = async (email, code) => {
   await transporter.sendMail({
@@ -417,10 +442,13 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
 };
 
 
+
 module.exports = {
   send2FACode,
   sendVerificationLink,
   sendResetPasswordLink,
   sendStaffRegistrationInfo,
   sendOrderStatusEmail,
+  sendPaymentStatusEmail,
+  sendImmediatePaymentStatusEmail,
 };
