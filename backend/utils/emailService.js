@@ -441,7 +441,123 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   }
 };
 
+// Legacy function - kept for backward compatibility
+const sendPaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
+  // Redirect to the optimized function
+  return sendImmediatePaymentStatusEmail(email, customerName, amount, orderId, status);
+};
 
+// Optimized function for immediate payment status emails
+const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
+  try {
+    console.log(`🚀 Sending immediate payment status email:`, {
+      email,
+      customerName,
+      amount,
+      orderId,
+      status
+    });
+
+    // Check if environment variables are set
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      throw new Error("EMAIL_USER or EMAIL_PASS environment variables are not set");
+    }
+
+    let subject, message;
+
+    // Normalize status for comparison
+    const normalizedStatus = status.toLowerCase();
+
+    if (normalizedStatus === "approved" || normalizedStatus === "completed") {
+      subject = "Your Payment Has Been Approved ✅";
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#16a34a;text-align:center;">Payment Approved</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> has been approved.</p>
+            <p>Thank you for choosing Smart Dairy!</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
+    } else if (normalizedStatus === "declined") {
+      subject = "Your Payment Has Been Declined ❌";
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#dc2626;text-align:center;">Payment Declined</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> has been declined.</p>
+            <p>If you believe this is an error, please contact our Finance Team.</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
+    } else {
+      // Handle any other status
+      subject = `Your Payment Status Update - ${status}`;
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#2563eb;text-align:center;">Payment Status Update</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> status has been updated to: <strong>${status}</strong>.</p>
+            <p>Thank you for choosing Smart Dairy!</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
+    }
+
+    // Create a new transporter for immediate sending (no pooling delays)
+    const immediateTransporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 2000, // 2 seconds for immediate connection
+      greetingTimeout: 2000,
+      socketTimeout: 2000,
+      pool: false, // No pooling for immediate delivery
+    });
+
+    // Send email with immediate delivery settings
+    const mailOptions = {
+      from: `"Smart Dairy Finance" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject,
+      html: message,
+      priority: 'high', // High priority for immediate delivery
+      headers: {
+        'X-Priority': '1', // High priority
+        'X-MSMail-Priority': 'High',
+        'Importance': 'high'
+      }
+    };
+
+    await immediateTransporter.sendMail(mailOptions);
+    immediateTransporter.close(); // Close connection immediately
+
+    console.log(`✅ Immediate payment status email sent to ${email}`);
+  } catch (err) {
+    console.error(`❌ Error sending immediate payment status email:`, err);
+    throw err;
+  }
+};
 
 module.exports = {
   send2FACode,
