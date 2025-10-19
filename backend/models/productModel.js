@@ -43,6 +43,62 @@ const createProduct = async (name, description, price, category, image, final_pr
   }
 };
 
+// Get a product by ID
+const getProductById = async (product_id) => {
+  try {
+    console.log(`Fetching product with ID: ${product_id}`);
+    const result = await pool.query(`
+      SELECT 
+        p.product_id, 
+        p.product_name, 
+        p.product_description, 
+        p.price, 
+        p.category, 
+        p.final_product_id, 
+        p.product_image, 
+        p.created_at, 
+        p.updated_at,
+        COALESCE(fp.quantity, 0) as stock_quantity
+      FROM products p
+      LEFT JOIN final_products fp ON p.final_product_id = fp.fproduct_id
+      WHERE p.product_id = $1
+    `, [product_id]);
+    
+    console.log(`Query result for product ${product_id}:`, result.rows);
+    
+    if (result.rows.length === 0) {
+      console.log(`No product found with ID: ${product_id}`);
+      return null;
+    }
+    
+    const product = result.rows[0];
+    console.log(`Found product:`, product);
+    
+    // Map database field names to frontend expected field names
+    const mappedProduct = {
+      product_id: product.product_id,
+      name: product.product_name,  // Map product_name to name
+      description: product.product_description,  // Map product_description to description
+      price: product.price,
+      category: product.category,
+      final_product_id: product.final_product_id,
+      stock_quantity: product.stock_quantity, // From joined final_products table
+      created_at: product.created_at,
+      updated_at: product.updated_at
+    };
+    
+    // Convert image buffer to base64 for frontend
+    if (product.product_image) {
+      mappedProduct.image = product.product_image.toString('base64');
+    }
+    
+    console.log(`Mapped product for ID ${product_id}:`, mappedProduct);
+    return mappedProduct;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error;
+  }
+};
 
 // Get all products (optional, but useful for viewing products)
 const getAllProducts = async () => {
@@ -165,7 +221,4 @@ const deleteProduct = async (product_id) => {
 };
 
 
-
-
-
-module.exports = { createProduct, getAllProducts,updateProduct,deleteProduct };
+module.exports = { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct };

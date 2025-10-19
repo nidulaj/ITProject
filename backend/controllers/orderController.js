@@ -18,9 +18,9 @@ const PDFDocument = require('pdfkit');
 // Create a new order
 const createOrderController = async (req, res) => {
   try {
-    const { customer_id, items, discount_id, discount_amount } = req.body;
+    const { customer_id, items, discount_id, discount_amount, delivery_address } = req.body;
     
-    console.log('Create order request:', { customer_id, items, discount_id, discount_amount });
+    console.log('Create order request:', { customer_id, items, discount_id, discount_amount, delivery_address });
     
     if (!customer_id || !items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ 
@@ -42,8 +42,9 @@ const createOrderController = async (req, res) => {
     console.log(`- Subtotal: ${subtotal}`);
     console.log(`- Discount: ${discountAmount}`);
     console.log(`- Final total: ${total_price}`);
+    console.log(`- Delivery address: ${delivery_address}`);
     
-    const newOrder = await createOrder(customer_id, total_price, items, discount_id, discountAmount);
+    const newOrder = await createOrder(customer_id, total_price, items, discount_id, discountAmount, delivery_address);
     
     console.log('Order created successfully:', newOrder);
     
@@ -354,7 +355,26 @@ const generateOrderInvoice = async (req, res) => {
     }
 
     // Get order items
-    const orderItems = await getOrderItemsByOrderId(order_id);
+    let orderItems = await getOrderItemsByOrderId(order_id);
+    console.log('Order items fetched:', orderItems);
+    
+    // Get product names for each item
+    const { getProductById } = require('../models/productModel');
+    for (let i = 0; i < orderItems.length; i++) {
+      const item = orderItems[i];
+      console.log(`Fetching product name for product ID: ${item.product_id}`);
+      try {
+        const product = await getProductById(item.product_id);
+        console.log(`Product fetched for ID ${item.product_id}:`, product);
+        item.product_name = product ? product.name : `Product ${item.product_id}`;
+        console.log(`Set product name for item ${item.product_id}:`, item.product_name);
+      } catch (error) {
+        console.error(`Error fetching product name for ID ${item.product_id}:`, error);
+        item.product_name = `Product ${item.product_id}`;
+      }
+    }
+    
+    console.log('Order items with product names:', orderItems);
     
     // Get customer information
     console.log(`Order customer ID: ${order.cus_id}`);
@@ -428,9 +448,12 @@ const generateOrderInvoice = async (req, res) => {
       const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
       subtotal += itemTotal;
       
+      const itemName = item.product_name || `Product ${item.product_id}`;
+      console.log(`Adding item to PDF: ${itemName}`);
+      
       doc.fontSize(10)
          .fillColor('#374151')
-         .text(item.product_name || `Product ${item.product_id}`, 50, currentY)
+         .text(itemName, 50, currentY)
          .text(item.quantity.toString(), 300, currentY)
          .text(`LKR ${parseFloat(item.price).toFixed(2)}`, 400, currentY)
          .text(`LKR ${itemTotal.toFixed(2)}`, 500, currentY);

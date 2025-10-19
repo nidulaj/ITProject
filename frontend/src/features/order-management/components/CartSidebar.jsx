@@ -11,6 +11,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
   const [userInfo, setUserInfo] = useState(null);
   const [discountInfo, setDiscountInfo] = useState(null);
   const [isLoadingDiscount, setIsLoadingDiscount] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const { showSuccess, showError, showInfo } = useNotification();
   const { currentCustomer } = useCustomer();
   const navigate = useNavigate();
@@ -62,10 +63,16 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       return;
     }
 
+    // Validate delivery address
+    if (!deliveryAddress.trim()) {
+      showError('Please enter a delivery address');
+      return;
+    }
+
     try {
       setIsProcessing(true);
       
-      // Prepare order data with discount information
+      // Prepare order data with discount information and delivery address
       const orderData = {
         customer_id: currentCustomer?.id || 1, // Use current customer ID
         items: cart.map(item => ({
@@ -74,7 +81,8 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
           price: item.price
         })),
         discount_id: appliedDiscount ? appliedDiscount.discount.id : null,
-        discount_amount: appliedDiscount ? appliedDiscount.discountAmount : 0
+        discount_amount: appliedDiscount ? appliedDiscount.discountAmount : 0,
+        delivery_address: deliveryAddress.trim()
       };
 
       console.log('Creating order:', orderData);
@@ -253,6 +261,24 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
         {/* Footer */}
         {cart.length > 0 && (
           <div className="border-t border-gray-200/50 p-6 space-y-4 bg-white/50 backdrop-blur-sm">
+            {/* Delivery Address Section */}
+            <div className="space-y-3 p-4 bg-gray-50/80 rounded-xl border border-gray-200/50">
+              <label className="block text-sm font-semibold text-gray-700">
+                Delivery Address *
+              </label>
+              <textarea
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                rows="3"
+                placeholder="Enter your delivery address"
+                required
+              />
+              <p className="text-xs text-gray-500">
+                Please provide your complete delivery address for order processing.
+              </p>
+            </div>
+
             {/* Discount Code Section */}
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-gray-700">
