@@ -2,11 +2,36 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 5000, // Reduced to 5 seconds for faster connection
+  greetingTimeout: 5000, // Reduced to 5 seconds
+  socketTimeout: 5000, // Reduced to 5 seconds
+  pool: false, // Disable pooling for immediate sending
+  maxConnections: 1, // Single connection for immediate delivery
+  maxMessages: 1, // Send one message at a time
+  rateDelta: 0, // No rate limiting for immediate delivery
+  rateLimit: 0 // No rate limiting
 });
+
+// Test transporter connection on startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter verification failed:", error);
+  } else {
+    console.log("✅ Email transporter is ready to send emails");
+  }
+});
+
+// Removed connection keep-alive to prevent delays
 
 const send2FACode = async (email, code) => {
   await transporter.sendMail({
@@ -345,11 +370,35 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
 };
 
 
+
 const sendPaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
+
+  return sendImmediatePaymentStatusEmail(email, customerName, amount, orderId, status);
+};
+
+
+
+const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
   try {
+    console.log(`Sending immediate payment status email:`, {
+      email,
+      customerName,
+      amount,
+      orderId,
+      status
+    });
+
+    
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      throw new Error("EMAIL_USER or EMAIL_PASS environment variables are not set");
+    }
+
     let subject, message;
 
-    if (status === "approved") {
+    
+    const normalizedStatus = status.toLowerCase();
+
+    if (normalizedStatus === "approved" || normalizedStatus === "completed") {
       subject = "Your Payment Has Been Approved ✅";
       message = `
         <!DOCTYPE html>
@@ -364,7 +413,7 @@ const sendPaymentStatusEmail = async (email, customerName, amount, orderId, stat
           </div>
         </body>
         </html>`;
-    } else if (status === "declined") {
+    } else if (normalizedStatus === "declined") {
       subject = "Your Payment Has Been Declined ❌";
       message = `
         <!DOCTYPE html>
@@ -379,21 +428,66 @@ const sendPaymentStatusEmail = async (email, customerName, amount, orderId, stat
           </div>
         </body>
         </html>`;
+    } else {
+      
+      subject = `Your Payment Status Update - ${status}`;
+      message = `
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width:500px;margin:auto;background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+            <h2 style="color:#2563eb;text-align:center;">Payment Status Update</h2>
+            <p>Dear ${customerName},</p>
+            <p>Your payment of <strong>LKR ${amount}</strong> for Order ID <strong>${orderId}</strong> status has been updated to: <strong>${status}</strong>.</p>
+            <p>Thank you for choosing Smart Dairy!</p>
+            <p style="color:#6b7280;font-size:12px;text-align:center;">&copy; 2025 Smart Dairy. All rights reserved.</p>
+          </div>
+        </body>
+        </html>`;
     }
 
-    await transporter.sendMail({
+    
+    const immediateTransporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false
+      },
+      connectionTimeout: 2000,
+      greetingTimeout: 2000,
+      socketTimeout: 2000,
+      pool: false,
+    });
+
+    
+    const mailOptions = {
       from: `"Smart Dairy Finance" <${process.env.EMAIL_USER}>`,
       to: email,
       subject,
       html: message,
-    });
+      priority: 'high', 
+      headers: {
+        'X-Priority': '1', 
+        'X-MSMail-Priority': 'High',
+        'Importance': 'high'
+      }
+    };
 
-    console.log(`✅ Payment status email sent to ${email}`);
+    await immediateTransporter.sendMail(mailOptions);
+    immediateTransporter.close(); 
+
+    console.log(`Immediate payment status email sent to ${email}`);
   } catch (err) {
-    console.error("❌ Error sending payment status email:", err);
+    console.error(`Error sending immediate payment status email:`, err);
+    throw err;
   }
 };
-
 
 module.exports = {
   send2FACode,
@@ -402,4 +496,5 @@ module.exports = {
   sendStaffRegistrationInfo,
   sendOrderStatusEmail,
   sendPaymentStatusEmail,
+  sendImmediatePaymentStatusEmail,
 };

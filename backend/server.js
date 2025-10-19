@@ -90,24 +90,6 @@ app.use("/api/ingredient-totals", ingredientTotalsRoutes);
 
 app.use('/api/notifications', notificationProductionRoutes); //Rashmika
 
-const { sendPaymentStatusEmail } = require("./utils/emailService");
-
-// ✅ Test Email Route (temporary)
-app.get("/test-email", async (req, res) => {
-  try {
-    await sendPaymentStatusEmail(
-      "minulijayasinghe04@gmail.com",   // replace with your personal email to test
-      "Test User",
-      500,
-      "TEST1",
-      "approved"
-    );
-    res.send("✅ Email test sent");
-  } catch (e) {
-    console.error("❌ Email failed:", e);
-    res.status(500).send("❌ Email failed");
-  }
-});
 
 
 server.listen(5000, () => {
