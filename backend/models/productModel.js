@@ -44,7 +44,7 @@ const createProduct = async (name, description, price, category, image, final_pr
 };
 
 
-// Get all products (optional, but useful for viewing products)
+// Get all products ()
 const getAllProducts = async () => {
   try {
     const result = await pool.query(`
