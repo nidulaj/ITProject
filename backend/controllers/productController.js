@@ -18,7 +18,7 @@ const addProduct = async (req, res) => {
   console.log('  category:', category, 'type:', typeof category);
   console.log('  final_product_id:', final_product_id, 'type:', typeof final_product_id);
 
-  //  validation 
+  // Basic validation for required fields
   if (!name || !description || !price || !category || !final_product_id) {
     console.log('❌ Validation failed - missing fields:');
     console.log('  name:', name, 'exists:', !!name);
