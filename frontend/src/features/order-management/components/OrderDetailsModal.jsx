@@ -65,6 +65,13 @@ const OrderDetailsModal = ({
                   {selectedOrder.order_status}
                 </span>
               </div>
+              {/* Delivery Address */}
+              {selectedOrder.delivery_address && (
+                <div className="md:col-span-2">
+                  <p className="text-sm text-gray-600">Delivery Address:</p>
+                  <p className="text-sm font-semibold whitespace-pre-wrap">{selectedOrder.delivery_address}</p>
+                </div>
+              )}
             </div>
           </div>
 
