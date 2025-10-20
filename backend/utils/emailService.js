@@ -12,17 +12,17 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  connectionTimeout: 5000, // Reduced to 5 seconds for faster connection
-  greetingTimeout: 5000, // Reduced to 5 seconds
-  socketTimeout: 5000, // Reduced to 5 seconds
-  pool: false, // Disable pooling for immediate sending
-  maxConnections: 1, // Single connection for immediate delivery
-  maxMessages: 1, // Send one message at a time
-  rateDelta: 0, // No rate limiting for immediate delivery
-  rateLimit: 0 // No rate limiting
+  connectionTimeout: 5000, 
+  greetingTimeout: 5000,
+  socketTimeout: 5000, 
+  pool: false,
+  maxConnections: 1, 
+  maxMessages: 1,
+  rateDelta: 0, 
+  rateLimit: 0
 });
 
-// Test transporter connection on startup
+
 transporter.verify((error, success) => {
   if (error) {
     console.error("❌ Email transporter verification failed:", error);
@@ -31,7 +31,7 @@ transporter.verify((error, success) => {
   }
 });
 
-// Removed connection keep-alive to prevent delays
+
 
 const send2FACode = async (email, code) => {
   await transporter.sendMail({
@@ -441,16 +441,17 @@ const sendOrderStatusEmail = async (userEmail, orderId, status) => {
   }
 };
 
-// Legacy function - kept for backward compatibility
+
 const sendPaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
-  // Redirect to the optimized function
+
   return sendImmediatePaymentStatusEmail(email, customerName, amount, orderId, status);
+
 };
 
 // Optimized function for immediate payment status emails
 const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orderId, status) => {
   try {
-    console.log(`🚀 Sending immediate payment status email:`, {
+    console.log(`Sending immediate payment status email:`, {
       email,
       customerName,
       amount,
@@ -465,7 +466,6 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
 
     let subject, message;
 
-    // Normalize status for comparison
     const normalizedStatus = status.toLowerCase();
 
     if (normalizedStatus === "approved" || normalizedStatus === "completed") {
@@ -483,6 +483,7 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
           </div>
         </body>
         </html>`;
+
     } else if (normalizedStatus === "declined") {
       subject = "Your Payment Has Been Declined ❌";
       message = `
@@ -498,8 +499,9 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
           </div>
         </body>
         </html>`;
+
     } else {
-      // Handle any other status
+      
       subject = `Your Payment Status Update - ${status}`;
       message = `
         <!DOCTYPE html>
@@ -516,7 +518,7 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
         </html>`;
     }
 
-    // Create a new transporter for immediate sending (no pooling delays)
+    
     const immediateTransporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
@@ -529,10 +531,10 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
       tls: {
         rejectUnauthorized: false
       },
-      connectionTimeout: 2000, // 2 seconds for immediate connection
+      connectionTimeout: 2000, 
       greetingTimeout: 2000,
       socketTimeout: 2000,
-      pool: false, // No pooling for immediate delivery
+      pool: false, 
     });
 
     // Send email with immediate delivery settings
@@ -541,16 +543,16 @@ const sendImmediatePaymentStatusEmail = async (email, customerName, amount, orde
       to: email,
       subject,
       html: message,
-      priority: 'high', // High priority for immediate delivery
+      priority: 'high', 
       headers: {
-        'X-Priority': '1', // High priority
+        'X-Priority': '1', 
         'X-MSMail-Priority': 'High',
         'Importance': 'high'
       }
     };
 
     await immediateTransporter.sendMail(mailOptions);
-    immediateTransporter.close(); // Close connection immediately
+    immediateTransporter.close();
 
     console.log(`✅ Immediate payment status email sent to ${email}`);
   } catch (err) {

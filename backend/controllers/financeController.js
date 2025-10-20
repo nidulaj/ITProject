@@ -85,8 +85,64 @@ const getRecentActivity = async (req, res) => {
   }
 };
 
+const getChartData = async (req, res) => {
+  try {
+    // Get weekly payment trend data (last 7 days)
+    const trendQuery = `
+      SELECT 
+        TO_CHAR(payment_date, 'Dy') as day,
+        COUNT(*) as payments
+      FROM payments 
+      WHERE payment_date >= CURRENT_DATE - INTERVAL '7 days'
+      GROUP BY TO_CHAR(payment_date, 'Dy'), payment_date
+      ORDER BY payment_date
+    `;
+
+    // Get payment status distribution
+    const statusQuery = `
+      SELECT 
+        payment_status,
+        COUNT(*) as count
+      FROM payments 
+      GROUP BY payment_status
+    `;
+
+    const [trendRes, statusRes] = await Promise.all([
+      pool.query(trendQuery),
+      pool.query(statusQuery)
+    ]);
+
+    // Format trend data for line chart
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const trendData = days.map(day => {
+      const found = trendRes.rows.find(row => row.day === day);
+      return {
+        day: day,
+        payments: found ? parseInt(found.payments) : 0
+      };
+    });
+
+    // Format status data for pie chart
+    const statusData = statusRes.rows.map(row => ({
+      name: row.payment_status === 'Completed' ? 'Completed' : 
+            row.payment_status === 'pending' ? 'Pending' : 
+            row.payment_status,
+      value: parseInt(row.count)
+    }));
+
+    res.status(200).json({
+      trend: trendData,
+      status: statusData
+    });
+  } catch (error) {
+    console.error("Error fetching chart data:", error.message);
+    res.status(500).json({ error: "Failed to fetch chart data" });
+  }
+};
+
 module.exports = {
   getFinanceStats,
-  getRecentActivity
+  getRecentActivity,
+  getChartData
 };
 
