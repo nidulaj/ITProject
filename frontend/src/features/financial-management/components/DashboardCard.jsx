@@ -24,15 +24,3 @@ const DashboardCard = ({ title, description, icon, onClick }) => {
 export default DashboardCard;
 
 
-
-
-
-
-
-
-
-
-
-
-
-

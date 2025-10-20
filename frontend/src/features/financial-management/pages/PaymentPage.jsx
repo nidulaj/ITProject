@@ -4,7 +4,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 
-const PaymentPage = ({ onUpdateStats }) => {
+const PaymentPage = ({ onUpdateStats, onUpdateCharts }) => {
   const [payments, setPayments] = useState([]);
   const [selectedProof, setSelectedProof] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +36,7 @@ const PaymentPage = ({ onUpdateStats }) => {
       });
       fetchPayments();
       if (onUpdateStats) onUpdateStats();
+      if (onUpdateCharts) onUpdateCharts();
     } catch (err) {
       alert(`❌ Failed to ${newStatus} payment.`);
       console.error(err);
