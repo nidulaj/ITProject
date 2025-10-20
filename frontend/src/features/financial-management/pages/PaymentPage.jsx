@@ -4,7 +4,6 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 
-
 const PaymentPage = ({ onUpdateStats }) => {
   const [payments, setPayments] = useState([]);
   const [selectedProof, setSelectedProof] = useState(null);
@@ -231,29 +230,6 @@ const downloadPDF = () => {
       </div>
 
 
-      {/*{selectedProof && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl relative max-w-lg shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-blue-700">
-              Payment Proof
-            </h2>
-
-            <img
-              src={`http://localhost:5000/uploads/${selectedProof}`}
-              alt="Payment Proof"
-              className="max-w-full max-h-[80vh] rounded-lg border"
-            />
-
-            <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl"
-              onClick={() => setSelectedProof(null)}
-            >
-              &times;
-            </button>
-          </div>
-        </div>
-      )}*/}
-
       {selectedProof && (
   <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
     <div className="bg-white p-6 rounded-xl relative max-w-lg shadow-xl w-full sm:w-auto">
@@ -261,7 +237,6 @@ const downloadPDF = () => {
         Payment Proof
       </h2>
 
-      {/* Image container with fade-in effect */}
       <div className="relative flex justify-center items-center min-h-[200px]">
         {!imageLoaded && (
           <div className="absolute text-gray-500 text-sm animate-pulse">
