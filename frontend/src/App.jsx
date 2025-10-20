@@ -62,7 +62,7 @@ const IngReqAccTable = lazy(() =>
   import("./features/production-management/components/IngReqAccTable")
 ); //Rahmika
 const PubuduHomepage = lazy(() =>
-  import("./features/production-management/pages/PubuduHomepage")
+  import("./features/production-management/pages/PubuduHomePage")
 ); //Rashmika
 const ResetPasswordStaff = lazy(() =>
   import("./features/user-management/pages/ResetPasswordStaff")

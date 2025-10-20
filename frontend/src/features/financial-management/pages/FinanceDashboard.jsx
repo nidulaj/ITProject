@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Routes, Route } from "react-router-dom";
 import {
   LayoutGrid,
   CreditCard,
@@ -11,6 +10,7 @@ import {
   PieChart as PieIcon,
   Activity,
 } from "lucide-react";
+
 import {
   AreaChart,
   Area,
@@ -30,7 +30,6 @@ import StatCard from "../components/StatCard";
 import Header from "../components/Header";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
 
-const PIE_COLORS = ["#10b981", "#f59e0b", "#ef4444"]; // Green, Orange, Red
 
 const FinanceDashboard = () => {
   const [stats, setStats] = useState({
@@ -80,7 +79,7 @@ const FinanceDashboard = () => {
     }
   };
 
-  // 🔹 Fetch chart data (both line & pie chart)
+  
   const fetchChartData = async () => {
     try {
       const res = await authFetch({
@@ -95,7 +94,7 @@ const FinanceDashboard = () => {
     } catch (error) {
       console.error("❌ Error fetching chart data:", error);
 
-      // Fallback mock data with current stats
+      
       setChartData(prevData => ({
         trend: [
           { day: "Mon", payments: 8 },
@@ -131,7 +130,7 @@ const FinanceDashboard = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-sky-50 to-white">
-      {/* Sidebar */}
+      
       <aside className="hidden md:flex flex-col w-64 bg-white/90 backdrop-blur border-r border-slate-200 shadow-sm">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
           <div className="p-2 bg-gradient-to-br from-sky-500 to-cyan-500 text-white rounded-lg">
@@ -161,7 +160,7 @@ const FinanceDashboard = () => {
         </nav>
       </aside>
 
-      {/* Main content */}
+      
       <main className="flex-1 p-8">
         <Header userInfo={userInfo} />
 
@@ -173,7 +172,7 @@ const FinanceDashboard = () => {
           <>
             {activePage === "overview" && (
               <>
-                {/* Stat Cards */}
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
                   <StatCard
                     title="Pending Payments"
@@ -201,7 +200,7 @@ const FinanceDashboard = () => {
                   />
                 </div>
 
-                {/* Charts */}
+                
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
                   {/* Line Chart */}
                   <div className="bg-white p-6 rounded-2xl shadow border border-slate-100 lg:col-span-2">
@@ -244,14 +243,11 @@ const FinanceDashboard = () => {
                           dataKey="value"
                         >
                           {chartData.status.map((entry, i) => {
-                            // Assign colors based on payment status
-                            let color = PIE_COLORS[i % PIE_COLORS.length]; // Default fallback
-                            if (entry.name === 'Completed') {
-                              color = '#10b981'; // Green
-                            } else if (entry.name === 'Pending') {
-                              color = '#f59e0b'; // Orange
+                            let color = '#10b981';
+                            if (entry.name === 'Pending') {
+                              color = '#f59e0b';
                             } else if (entry.name === 'Declined') {
-                              color = '#ef4444'; // Red
+                              color = '#ef4444';
                             }
                             return <Cell key={i} fill={color} />;
                           })}
@@ -261,7 +257,7 @@ const FinanceDashboard = () => {
                   </div>
                 </div>
 
-                {/* Management cards */}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
                   <DashboardCard
                     title="Manage Discounts"
@@ -279,7 +275,9 @@ const FinanceDashboard = () => {
               </>
             )}
 
-            {activePage === "payments" && <PaymentPage onUpdateStats={fetchStats} />}
+            {activePage === "payments" && (
+              <PaymentPage onUpdateStats={fetchStats} onUpdateCharts={fetchChartData} />
+            )}
             {activePage === "discounts" && (
               <DiscountPage
                 onUpdateStats={fetchStats}
@@ -287,7 +285,7 @@ const FinanceDashboard = () => {
               />
             )}
 
-            {/* Activity Section */}
+            
             {activePage === "activity" && (
               <div className="bg-white p-8 rounded-2xl shadow border border-slate-100 mt-8">
                 <h3 className="font-semibold text-slate-800 mb-6 flex items-center gap-2 text-lg">
@@ -322,17 +320,3 @@ const FinanceDashboard = () => {
 };
 
 export default FinanceDashboard;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
