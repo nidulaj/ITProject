@@ -2,7 +2,7 @@ const {
   calculateTotalsByIcode,
   getAllIngredientTotals,
   updateTotalForIcode,
-  reduceIngredientTotal,
+  //reduceIngredientTotal,
 } = require("../models/ingredientTotalsModel");
 
 // -------------------- Calculate and update all totals --------------------
@@ -57,4 +57,5 @@ module.exports = {
   calculateTotals,
   getIngredientTotals,
   reduceTotal,
+  updateTotalForIcode
 };
