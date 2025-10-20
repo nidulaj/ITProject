@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProductForm from '../components/ProductForm';
 import ProductGrid from '../components/ProductGrid';
+import FinalProductsTable from '../components/FinalProductsTable';
+import UnifiedSidebar from '../components/UnifiedSidebar';
+import Header from '../components/Header';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { authFetch } from '../../user-management/utils/authFetchStaff';
 import './ProductCatalog.css';
@@ -9,6 +12,8 @@ import './ProductCatalog.css';
 const ProductCatalog = ({ onNavigateToCustomer }) => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const { showSuccess, showError } = useNotification();
   const navigate = useNavigate();
 
@@ -17,6 +22,20 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
   // Fetch all products on component mount
   useEffect(() => {
     fetchProducts();
+    fetchUserInfo();
+  }, []);
+
+  // Listen for custom event to open create product modal
+  useEffect(() => {
+    const handleOpenCreateModal = () => {
+      setShowProductForm(true);
+    };
+
+    window.addEventListener('openCreateProductModal', handleOpenCreateModal);
+    
+    return () => {
+      window.removeEventListener('openCreateProductModal', handleOpenCreateModal);
+    };
   }, []);
 
   const fetchProducts = async () => {
@@ -42,26 +61,39 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
     }
   };
 
+  const fetchUserInfo = async () => {
+    try {
+      const res = await authFetch({
+        method: "get",
+        url: "http://localhost:5000/api/staff/auth/userInfo",
+      });
+      setUserInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
+
   const handleAddProduct = async (formData) => {
     try {
+      console.log('🚀 handleAddProduct called with:', formData);
       
       // Create FormData for file upload
       const productData = new FormData();
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
         productData.append('image', formData.image);
       }
       
-      console.log('Sending product data:', {
+      console.log('📤 Sending product data to backend:', {
         name: formData.name,
         description: formData.description,
         price: formData.price,
-        stock_quantity: formData.stock_quantity,
+        final_product_id: formData.final_product_id,
         category: formData.category,
         hasImage: !!formData.image
       });
@@ -104,7 +136,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       productData.append('name', formData.name);
       productData.append('description', formData.description);
       productData.append('price', parseFloat(formData.price));
-      productData.append('stock_quantity', parseInt(formData.stock_quantity));
+      productData.append('final_product_id', parseInt(formData.final_product_id));
       productData.append('category', formData.category);
       
       if (formData.image) {
@@ -116,7 +148,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
         name: formData.name,
         description: formData.description,
         price: formData.price,
-        stock_quantity: formData.stock_quantity,
+        final_product_id: formData.final_product_id,
         category: formData.category,
         hasImage: !!formData.image
       });
@@ -154,6 +186,7 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
 
   const handleEditProduct = (product) => {
     setEditingProduct(product);
+    setShowProductForm(true);
   };
 
   const handleDeleteProduct = async (productId) => {
@@ -220,61 +253,63 @@ const ProductCatalog = ({ onNavigateToCustomer }) => {
       <Route path="/" element={
         <div className="product-catalog-container">
           {/* Left sidebar navigation */}
-          <div className="w-64 bg-white shadow-2xl fixed h-full transform perspective-1000">
-            <div className="flex flex-col h-full">
-              <div className="p-6 mb-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform rotate-x-1">
-                <h1 className="text-xl font-bold text-white drop-shadow-lg">Product Management</h1>
-              </div>
-
-              <div className="px-4 mb-6">
-                <div className="py-3 px-4 mb-6 bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700 drop-shadow-sm">Total Products</span>
-                    <span className="bg-gradient-to-r from-blue-200 to-blue-300 text-blue-900 text-xs font-medium rounded-full px-2 py-0.5 shadow-md">
-                      {products.length}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <NavLink 
-                    title="Product Catalog"
-                    icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>}
-                    isActive={true}
-                  />
-                  
-
-                  <NavLink 
-                    title="Orders Dashboard" 
-                    icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>}
-                    onClick={() => handleNavigation('orders')}
-                  />
-                </div>
-              </div>
-
-
-            </div>
-          </div>
+          <UnifiedSidebar title="Product Management" />
 
           {/* Main content */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen p-6">
-            <div className="catalog-content flex gap-6">
-              <ProductForm
-                editingProduct={editingProduct}
-                onAddProduct={handleAddProduct}
-                onUpdateProduct={handleUpdateProduct}
-                onCancelEdit={handleCancelEdit}
-              />
-              
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 ml-64 w-full min-h-screen">
+            {/* Header */}
+            <Header userInfo={userInfo} />
+            
+            <div className="p-6">
+
+            {/* Final Products Table - Centered */}
+            <div className="mb-6 flex justify-center">
+              <div className="max-w-4xl w-full">
+                <FinalProductsTable />
+              </div>
+            </div>
+            
+            {/* Product Grid - Full Width */}
+            <div className="w-full">
               <ProductGrid
                 products={products}
                 onEditProduct={handleEditProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
+            </div>
+
+            {/* Product Form Modal */}
+            {showProductForm && (
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden flex flex-col">
+                  <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <h3 className="text-2xl font-bold text-gray-800">
+                      {editingProduct ? 'Edit Product' : 'Add New Product'}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setShowProductForm(false);
+                        setEditingProduct(null);
+                      }}
+                      className="text-gray-500 hover:text-gray-700 text-3xl font-bold hover:bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center transition-colors"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <ProductForm
+                      editingProduct={editingProduct}
+                      onAddProduct={handleAddProduct}
+                      onUpdateProduct={handleUpdateProduct}
+                      onCancelEdit={() => {
+                        setShowProductForm(false);
+                        setEditingProduct(null);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             </div>
           </div>
         </div>

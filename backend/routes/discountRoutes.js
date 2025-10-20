@@ -17,6 +17,6 @@ router.get('/', getAllDiscountsController);
 router.put('/:discount_id', staffAuthMiddleware, updateDiscountController); 
 router.delete('/:discount_id', staffAuthMiddleware, deleteDiscountController); 
 router.post("/apply", staffAuthMiddleware, applyBestDiscount);
-router.post("/validate-code", validateDiscountCode); // No auth required for customers
+router.post("/validate-code", validateDiscountCode);
 
 module.exports = router;

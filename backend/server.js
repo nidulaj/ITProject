@@ -1,9 +1,10 @@
-const express = require('express');
 require('dotenv').config();
+const express = require('express');
 const cors = require('cors');
 const {connectDB} = require('./db/dbConnect');
 const { createServer } = require("http");
 const { initSocket } = require("./utils/socket");
+
 
 const app = express();
 const server = createServer(app);
@@ -35,7 +36,10 @@ const userRoleRoutes = require("./routes/userRoleRoutes");
 const icodeRoutes = require("./routes/icodeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const chatSystemRoutes = require("./routes/chatSystemRoutes");
+
+
 const ingredientTotalsRoutes = require("./routes/ingredientTotalsRoutes");
+
 
 const notificationProductionRoutes = require('./routes/notificationProductionRoutes'); //Rahmika
 
@@ -87,6 +91,7 @@ app.use("/api/ingredient-totals", ingredientTotalsRoutes);
 app.use('/api/notifications', notificationProductionRoutes); //Rashmika
  
 app.use("/api/ingredientReport", ingredientReport);
+
 
 
 server.listen(5000, () => {

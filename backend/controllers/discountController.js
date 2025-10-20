@@ -1,11 +1,10 @@
 const { createDiscount, getAllDiscounts, updateDiscount, deleteDiscount, getDiscountByCode } = require('../models/discountModel');
 
-
 const createDiscountController = async (req, res) => {
   try {
     const { discount_name, discount_type, value, eligibility_criteria, valid_from, valid_to, discount_code } = req.body;
     
-    // Validate that discount_code is provided
+    
     if (!discount_code) {
       return res.status(400).json({ message: "Discount code is required" });
     }
@@ -61,53 +60,18 @@ const deleteDiscountController = async (req, res) => {
 
 
 
-function isDiscountActive(discount) {
-  const today = new Date();
-  return today >= new Date(discount.valid_from) && today <= new Date(discount.valid_to);
-}
-
-
-function isEligible(totalPrice, discount) {
-  const criteria = discount.eligibility_criteria;
-
-  if (!criteria) return true; 
-
-  if (criteria === "seasonal") {
-    return true;
-  }
-
-  
-  if (criteria.startsWith("totalPrice>")) {
-    const minPrice = parseFloat(criteria.split(">")[1]);
-    return totalPrice >= minPrice;
-  }
-
-  return true;
-}
-
-
-function applyDiscount(totalPrice, discount) {
-  if (discount.discount_type === "Percentage") {
-    return totalPrice - (totalPrice * (discount.value / 100));
-  } else if (discount.discount_type === "Fixed") {
-    return totalPrice - discount.value;
-  }
-  return totalPrice;
-}
-
-
 function calculateBestDiscount(totalPrice, discounts) {
   let bestDiscountAmount = 0;
   let bestDiscount = null;
   let bestFinalPrice = totalPrice;
 
   discounts.forEach(discount => {
-    // Check if discount is active (has valid dates)
+    
     if (discount.valid_from && discount.valid_to && !isDiscountActive(discount)) {
       return;
     }
 
-    // Check eligibility criteria
+    
     if (isEligible(totalPrice, discount)) {
       let discountAmount = 0;
       let finalPrice = totalPrice;
@@ -116,11 +80,11 @@ function calculateBestDiscount(totalPrice, discounts) {
         discountAmount = totalPrice * (discount.value / 100);
         finalPrice = totalPrice - discountAmount;
       } else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
-        discountAmount = Math.min(discount.value, totalPrice); // Can't discount more than total
+        discountAmount = Math.min(discount.value, totalPrice); 
         finalPrice = totalPrice - discountAmount;
       }
 
-      // Choose the discount that gives the largest discount amount
+      
       if (discountAmount > bestDiscountAmount) {
         bestDiscountAmount = discountAmount;
         bestDiscount = discount;
@@ -156,7 +120,8 @@ const applyBestDiscount = async (req, res) => {
   }
 };
 
-// Validate and apply discount code
+
+
 const validateDiscountCode = async (req, res) => {
   try {
     const { discount_code, totalPrice } = req.body;
@@ -167,34 +132,31 @@ const validateDiscountCode = async (req, res) => {
 
     console.log("🔍 Validating discount code:", discount_code, "for total:", totalPrice);
 
-    // Get discount by code
     const discount = await getDiscountByCode(discount_code);
-    
+
     if (!discount) {
-      return res.status(404).json({ 
-        valid: false, 
-        error: "Invalid discount code" 
+      return res.status(404).json({
+        valid: false,
+        error: "Invalid discount code"
       });
     }
 
     console.log("📊 Found discount:", discount.discount_name);
 
-    // Check if discount is active - DISABLED FOR TESTING
-    console.log("📅 Date validation disabled for testing");
-    
-    // Skip date validation for now
-    // const today = new Date();
-    // const validFrom = new Date(discount.valid_from);
-    // const validTo = new Date(discount.valid_to);
-    // 
-    // if (today < validFrom || today > validTo) {
-    //   return res.status(400).json({ 
-    //     valid: false, 
-    //     error: "Discount code has expired" 
-    //   });
-    // }
+    const today = new Date();
+    const validFrom = discount.valid_from ? new Date(discount.valid_from) : null;
+    const validTo = discount.valid_to ? new Date(discount.valid_to) : null;
 
-    // Check eligibility
+    if (
+      (validFrom && today < validFrom) ||
+      (validTo && today > validTo)
+    ) {
+      return res.status(400).json({
+        valid: false,
+        error: "This discount code has expired or is not yet active"
+      });
+    }
+
     const criteria = discount.eligibility_criteria;
     let isEligible = true;
 
@@ -204,14 +166,13 @@ const validateDiscountCode = async (req, res) => {
     }
 
     if (!isEligible) {
-      return res.status(400).json({ 
-        valid: false, 
-        error: "Order total does not meet discount requirements" 
+      return res.status(400).json({
+        valid: false,
+        error: "Order total does not meet discount requirements"
       });
     }
 
-    // Calculate discount amount
-    /*let discountAmount = 0;
+    let discountAmount = 0;
     let finalPrice = totalPrice;
 
     if (discount.discount_type === "percentage" || discount.discount_type === "Percentage") {
@@ -220,42 +181,15 @@ const validateDiscountCode = async (req, res) => {
       finalPrice = totalPrice - discountAmount;
     } else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
       const fixedValue = parseFloat(discount.value);
-      discountAmount = Math.min(fixedValue, totalPrice);
+      if (fixedValue > totalPrice) {
+        return res.status(400).json({
+          valid: false,
+          error: "This discount cannot be applied for this order total!"
+        });
+      }
+      discountAmount = fixedValue;
       finalPrice = totalPrice - discountAmount;
     }
-
-    console.log("💰 Discount calculation:", {
-      originalPrice: totalPrice,
-      discountAmount,
-      finalPrice,
-      discountName: discount.discount_name
-    });*/
-
-
-    // ✅ Calculate discount amount
-      let discountAmount = 0;
-      let finalPrice = totalPrice;
-
-      if (discount.discount_type === "percentage" || discount.discount_type === "Percentage") {
-        const percentageValue = parseFloat(discount.value);
-        discountAmount = totalPrice * (percentageValue / 100);
-        finalPrice = totalPrice - discountAmount;
-      } 
-      else if (discount.discount_type === "fixed" || discount.discount_type === "Fixed") {
-
-        // ✅ Check: fixed discount should not exceed total
-        const fixedValue = parseFloat(discount.value);
-        if (fixedValue > totalPrice) {
-          return res.status(400).json({
-            valid: false,
-            error: "This discount cannot be applied for this order total !"
-          });
-        }
-
-        discountAmount = fixedValue;
-        finalPrice = totalPrice - discountAmount;
-      }
-
 
     res.json({
       valid: true,
@@ -276,6 +210,7 @@ const validateDiscountCode = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 module.exports = {
   createDiscountController,

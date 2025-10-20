@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { authFetch } from "../../user-management/utils/authFetchStaff";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-const PaymentPage = ({ onUpdateStats }) => {
+
+const PaymentPage = ({ onUpdateStats, onUpdateCharts }) => {
   const [payments, setPayments] = useState([]);
   const [selectedProof, setSelectedProof] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [imageLoaded, setImageLoaded] = useState(false);
+
 
   const fetchPayments = async () => {
     try {
@@ -30,17 +36,110 @@ const PaymentPage = ({ onUpdateStats }) => {
       });
       fetchPayments();
       if (onUpdateStats) onUpdateStats();
+      if (onUpdateCharts) onUpdateCharts();
     } catch (err) {
       alert(`❌ Failed to ${newStatus} payment.`);
       console.error(err);
     }
   };
 
+  const filteredPayments = payments.filter((payment) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      payment.customer_name?.toLowerCase().includes(query) ||
+      payment.order_id?.toString().includes(query) ||
+      payment.payment_status?.toLowerCase().includes(query) ||
+      new Date(payment.payment_date)
+        .toLocaleDateString()
+        .toLowerCase()
+        .includes(query)
+    );
+  });
+
+
+
+const downloadPDF = () => {
+  try {
+    const doc = new jsPDF();
+    const isFiltered = searchQuery.trim() !== "";
+    const recordsToExport = isFiltered ? filteredPayments : payments;
+
+    if (!recordsToExport.length) {
+      alert("No records to export.");
+      return;
+    }
+
+    
+    doc.setFontSize(16);
+    doc.text(
+      isFiltered ? "Filtered Payment Records" : "Payment Records Report",
+      14,
+      20
+    );
+    doc.setFontSize(10);
+    doc.text(`Exported on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+    
+    const columns = ["Order ID", "Customer", "Amount", "Date", "Status"];
+    const rows = recordsToExport.map((p) => [
+      p?.order_id ?? "-",
+      p?.customer_name ?? "-",
+      `Rs. ${p?.amount ?? 0}`,
+      new Date(p?.payment_date).toLocaleDateString(),
+      p?.payment_status ?? "-",
+    ]);
+
+    
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 35,
+      headStyles: { fillColor: [41, 128, 185] },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+      styles: { fontSize: 10 },
+    });
+
+    
+    doc.save(
+      isFiltered
+        ? `filtered_payments_${new Date().toISOString().slice(0, 10)}.pdf`
+        : `payment_records_${new Date().toISOString().slice(0, 10)}.pdf`
+    );
+  } catch (err) {
+    console.error("❌ Error generating PDF:", err);
+    alert(
+      isFiltered
+        ? "Failed to export filtered records."
+        : "Failed to export full records."
+    );
+  }
+};
+
+
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Payments</h1>
-      </div>
+      <div className="mb-6">
+      <div className="flex justify-between items-center">
+      <h1 className="text-2xl font-bold text-blue-600">Payments</h1>
+      <div className="flex items-center space-x-3">
+      <input
+        type="text"
+        placeholder="Search by order ID, customer, status or date"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="border border-blue-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+<button
+  onClick={downloadPDF}
+  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow"
+>
+  📄 Download Payment Report
+</button>
+     
+    </div>
+  </div>
+</div>
 
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-xl overflow-hidden">
@@ -57,7 +156,7 @@ const PaymentPage = ({ onUpdateStats }) => {
         </thead>
 
         <tbody className="divide-y divide-blue-100 text-gray-700 text-sm">
-        {payments.map((payment) => (
+        {filteredPayments.map((payment) => (
           <tr
             key={payment.payment_id}
             className="hover:bg-blue-50 transition-all duration-200"
@@ -75,7 +174,7 @@ const PaymentPage = ({ onUpdateStats }) => {
                 className="text-blue-600 underline hover:text-blue-800"
                 onClick={() => setSelectedProof(payment.payment_proof)}
               >
-                View
+                View receipt
               </button>
             ) : (
               <span className="text-gray-400">None</span>
@@ -133,32 +232,61 @@ const PaymentPage = ({ onUpdateStats }) => {
 
 
       {selectedProof && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl relative max-w-lg shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-blue-700">
-              Payment Proof
-            </h2>
+  <div className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-xl relative max-w-lg shadow-xl w-full sm:w-auto">
+      <h2 className="text-xl font-bold mb-4 text-blue-700 text-center">
+        Payment Proof
+      </h2>
 
-            <img
-              src={`http://localhost:5000/uploads/${selectedProof}`}
-              alt="Payment Proof"
-              className="max-w-full max-h-[80vh] rounded-lg border"
-            />
-
-            <button
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl"
-              onClick={() => setSelectedProof(null)}
-            >
-              &times;
-            </button>
+      <div className="relative flex justify-center items-center min-h-[200px]">
+        {!imageLoaded && (
+          <div className="absolute text-gray-500 text-sm animate-pulse">
+            Loading image...
           </div>
-        </div>
-      )}
+        )}
+
+        <img
+          src={`http://localhost:5000/uploads/${selectedProof}`}
+          alt="Payment Proof"
+          className={`max-w-full max-h-[80vh] rounded-lg border transition-opacity duration-500 ${
+            imageLoaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setImageLoaded(true)}
+        />
+      </div>
+
+      <button
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-2xl"
+        onClick={() => {
+          setSelectedProof(null);
+          setImageLoaded(false);
+        }}
+      >
+        &times;
+      </button>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };
 
 export default PaymentPage;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

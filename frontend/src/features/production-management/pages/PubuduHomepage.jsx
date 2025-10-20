@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, User, Heart, Star, Truck, Shield, Award, Phone, Mail, MapPin, Menu, X } from "lucide-react";
+import { Link } from 'react-router-dom'; 
+import Header from "../../../components/DashboardHeader"
 
-const PubuduHomepage = () => {
+const PubuduHomepage = ({ hideHeader = false, userInfo }) => {
   const [selectedProduct, setSelectedProduct] = useState("classic-yogurt");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -79,7 +81,7 @@ const PubuduHomepage = () => {
     {
       title: "Pure Ceylon Milk Goodness",
       subtitle: "Farm Fresh • Naturally Delicious • Always Pure",
-      image: "/images_sadi/cow5.png",
+      image: "/images_sadi/products.png",
       cta: "Shop Now"
     },
     {
@@ -108,72 +110,8 @@ const PubuduHomepage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div>
-                <img 
-                  src="/images_sadi/logoPubudu.png" 
-                  alt="Pubudu Logo" 
-                  className="w-25 h-12 object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-blue-600">Pubudu</h1>
-                <p className="text-xs text-gray-500 -mt-1">Milk Products</p>
-              </div>
-            </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-              <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
-              <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
-              <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
-            </nav>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-3">
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-                <Heart className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-blue-50 transition-colors">
-                <User className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 rounded-full bg-blue-500 hover:bg-blue-600 transition-colors relative">
-                <ShoppingCart className="w-5 h-5 text-white" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
-              </button>
-              
-              {/* Mobile menu button */}
-              <button 
-                className="md:hidden p-2"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {isMenuOpen && (
-            <nav className="md:hidden mt-4 pb-4 border-t pt-4">
-              <div className="flex flex-col space-y-3">
-                <a href="#home" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-                <a href="#products" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Products</a>
-                <a href="#customize" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Customize</a>
-                <a href="#about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</a>
-                <a href="#contact" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
-              </div>
-            </nav>
-          )}
-        </div>
-      </header>
-
+{userInfo===null ? <Header userInfo={null} /> : null}
       {/* Hero Section */}
       <section id="home" className="relative overflow-hidden">
         <div className="container mx-auto px-6 py-12">
@@ -352,9 +290,11 @@ const PubuduHomepage = () => {
 
                     <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-blue-600">{product.price}</span>
-                    <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full font-semibold transition-colors text-sm">
-                        Customized Now
-                    </button>
+                    <Link to="/yogurt-landing">
+                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-full font-semibold transition-all hover:scale-[1.05] shadow-lg">
+                        Customize Now
+                      </button>
+                    </Link>
                     </div>
                 </div>
                 </div>
@@ -375,10 +315,13 @@ const PubuduHomepage = () => {
               Why settle for ordinary when you can create extraordinary? Design your own custom yogurt 
               with our wide selection of flavors, toppings, and healthy additions.
             </p>
+            
             <div className="flex flex-wrap justify-center gap-4">
+              <Link to="/yogurt-landing">
               <button className="bg-white text-blue-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105 shadow-xl">
                 Start Customizing
               </button>
+              </Link>
               <button className="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-blue-600 transition-all">
                 View Examples
               </button>

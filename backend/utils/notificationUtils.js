@@ -5,7 +5,7 @@ const formatNotifications = (orders) => {
   return orders.map((order) => {
     return {
       id: order.id,
-      message: `${order.customer_name} likes to order ${order.quantity} yoghurts with ${order.fruit}, ${order.topping}, and ${order.bottom}.`,
+      message: `${order.order_no} from ${order.customer_name} likes to order ${order.quantity} yoghurts with ${order.fruit}, ${order.topping}, and ${order.bottom}.`,
       timeAgo: new Date(order.order_date).toLocaleDateString(),
     };
   });

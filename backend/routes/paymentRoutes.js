@@ -6,6 +6,8 @@ const paymentController = require("../controllers/paymentController");
 const upload = require("../middlewares/uploadMiddleware");
 const { staffAuthMiddleware } = require("../middlewares/staffAuthMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
+const { pool } = require("../db/dbConnect");
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
