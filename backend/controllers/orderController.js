@@ -6,8 +6,7 @@ const {
   updateOrderStatus, 
   updatePaymentStatus,
   deleteOrder,
-  getOrderItemsByOrderId,
-  getOrdersWithFilters
+  getOrderItemsByOrderId
 } = require('../models/orderModel');
 
 const { createNotification } = require('../models/notificationModel');
@@ -19,7 +18,10 @@ const PDFDocument = require('pdfkit');
 // Create a new order
 const createOrderController = async (req, res) => {
   try {
-    const { customer_id, items, discount_id, discount_amount, delivery_address } = req.body;
+    const { items, discount_id, discount_amount, delivery_address } = req.body;
+    
+    // Use authenticated user's ID instead of request body
+    const customer_id = req.user.id;
     
     console.log('Create order request:', { customer_id, items, discount_id, discount_amount, delivery_address });
     
@@ -85,33 +87,25 @@ const getOrders = async (req, res) => {
   }
 };
 
-// Get orders by customer ID
+// Get orders by customer ID (modified to return all orders)
 const getCustomerOrders = async (req, res) => {
   try {
-    const { customer_id } = req.params;
-    console.log(`Fetching orders for customer ID: ${customer_id}`);
+    // Instead of filtering by customer ID, return all orders
+    console.log('Fetching all orders for customer view');
     
-    if (!customer_id) {
-      return res.status(400).json({ 
-        success: false,
-        error: 'Customer ID is required' 
-      });
-    }
-
-    const orders = await getOrdersByCustomer(customer_id);
-    console.log(`Retrieved ${orders.length} orders for customer ${customer_id}`);
+    const orders = await getAllOrders();
+    console.log(`Retrieved ${orders.length} orders`);
     
     res.status(200).json({ 
       success: true,
       orders: orders,
-      count: orders.length,
-      customer_id: customer_id
+      count: orders.length
     });
   } catch (error) {
-    console.error('Error fetching customer orders:', error);
+    console.error('Error fetching orders:', error);
     res.status(500).json({ 
       success: false,
-      error: 'Failed to fetch customer orders',
+      error: 'Failed to fetch orders',
       details: error.message 
     });
   }
@@ -522,19 +516,8 @@ const generateOrderSummaryReport = async (req, res) => {
   try {
     console.log('Generating order summary report...');
     
-    // Extract filter parameters from query
-    const { startDate, endDate, status, paymentStatus, customerId } = req.query;
-    
-    // Build filters object
-    const filters = {};
-    if (startDate) filters.startDate = startDate;
-    if (endDate) filters.endDate = endDate;
-    if (status) filters.status = status;
-    if (paymentStatus) filters.paymentStatus = paymentStatus;
-    if (customerId) filters.customerId = customerId;
-    
-    // Get filtered orders
-    const orders = await getOrdersWithFilters(filters);
+    // Get all orders
+    const orders = await getAllOrders();
     
     // Create PDF document
     const doc = new PDFDocument({ margin: 50 });
@@ -566,68 +549,23 @@ const generateOrderSummaryReport = async (req, res) => {
        .fontSize(12)
        .text(`Generated: ${new Date().toLocaleString()}`, 400, 130);
     
-    // Add filter information if any filters were applied
-    if (Object.keys(filters).length > 0) {
-      doc.fontSize(12)
-         .fillColor('#1f2937')
-         .text('Filters Applied:', 50, 160);
-      
-      let filterY = 175;
-      if (startDate) {
-        doc.text(`Start Date: ${new Date(startDate).toLocaleDateString()}`, 60, filterY);
-        filterY += 15;
-      }
-      if (endDate) {
-        doc.text(`End Date: ${new Date(endDate).toLocaleDateString()}`, 60, filterY);
-        filterY += 15;
-      }
-      if (status) {
-        doc.text(`Status: ${status}`, 60, filterY);
-        filterY += 15;
-      }
-      if (paymentStatus) {
-        doc.text(`Payment Status: ${paymentStatus}`, 60, filterY);
-        filterY += 15;
-      }
-      if (customerId) {
-        doc.text(`Customer ID: ${customerId}`, 60, filterY);
-        filterY += 15;
-      }
-    }
-    
-    // Add enhanced summary statistics
+    // Add summary statistics
     const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
     const pendingOrders = orders.filter(order => order.order_status === 'pending').length;
-    const confirmedOrders = orders.filter(order => order.order_status === 'confirmed').length;
-    const packingOrders = orders.filter(order => order.order_status === 'packing').length;
-    const outForDeliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
     const deliveredOrders = orders.filter(order => order.order_status === 'delivered').length;
-    const cancelledOrders = orders.filter(order => order.order_status === 'cancelled').length;
-    const paidOrders = orders.filter(order => order.payment_status === 'paid').length;
-    const pendingPaymentOrders = orders.filter(order => order.payment_status === 'pending').length;
+    const outForDeliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
     
-    // Calculate average order value
-    const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
-    
-    // Add summary statistics
     doc.fontSize(14)
        .fillColor('#1f2937')
-       .text('Summary Statistics:', 50, 200)
+       .text('Summary Statistics:', 50, 180)
        .fontSize(12)
-       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, 225)
-       .text(`Total Orders: ${orders.length}`, 50, 245)
-       .text(`Average Order Value: LKR ${averageOrderValue.toFixed(2)}`, 50, 265)
-       .text(`Pending Orders: ${pendingOrders}`, 250, 225)
-       .text(`Confirmed Orders: ${confirmedOrders}`, 250, 245)
-       .text(`Packing Orders: ${packingOrders}`, 250, 265)
-       .text(`Out for Delivery: ${outForDeliveryOrders}`, 400, 225)
-       .text(`Delivered: ${deliveredOrders}`, 400, 245)
-       .text(`Cancelled: ${cancelledOrders}`, 400, 265)
-       .text(`Paid Orders: ${paidOrders}`, 50, 285)
-       .text(`Pending Payments: ${pendingPaymentOrders}`, 250, 285);
+       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, 205)
+       .text(`Pending Orders: ${pendingOrders}`, 50, 225)
+       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, 245)
+       .text(`Delivered: ${deliveredOrders}`, 50, 265);
     
     // Add orders table header
-    const tableTop = 320;
+    const tableTop = 300;
     doc.fontSize(12)
        .fillColor('#1f2937')
        .text('Order ID', 50, tableTop)
@@ -645,31 +583,10 @@ const generateOrderSummaryReport = async (req, res) => {
     // Add order rows
     let currentY = tableTop + 35;
     
-    // Process orders (show all orders, not just first 15)
-    for (let i = 0; i < orders.length; i++) {
+    // Process orders in batches to avoid async issues
+    for (let i = 0; i < Math.min(orders.length, 15); i++) {
       const order = orders[i];
-      
-      // Check if we need a new page
-      if (currentY > 700) {
-        doc.addPage();
-        currentY = 50;
-        
-        // Re-add table header on new page
-        doc.fontSize(12)
-           .fillColor('#1f2937')
-           .text('Order ID', 50, currentY)
-           .text('Customer', 120, currentY)
-           .text('Date', 200, currentY)
-           .text('Status', 280, currentY)
-           .text('Payment', 360, currentY)
-           .text('Total', 440, currentY);
-        
-        doc.moveTo(50, currentY + 20)
-           .lineTo(520, currentY + 20)
-           .stroke();
-        
-        currentY += 35;
-      }
+      if (currentY > 650) break; // Prevent overflow
       
       // Get customer name
       let customerName = `Customer ${order.cus_id}`;

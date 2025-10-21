@@ -24,15 +24,11 @@ const CustomerOrders = () => {
       
       console.log('Current customer in CustomerOrders:', currentCustomer);
       
-      if (!currentCustomer?.id) {
-        setError('Customer not found');
-        return;
-      }
-
-      console.log(`Fetching orders for customer ID: ${currentCustomer.id}`);
+      // Fetch all orders instead of customer-specific orders
+      console.log('Fetching all orders');
       const response = await authFetchCustomer({
         method: 'get',
-        url: `${API_BASE_URL}/customer/${currentCustomer.id}`
+        url: `${API_BASE_URL}/all`
       });
       
       if (response.data.success) {
