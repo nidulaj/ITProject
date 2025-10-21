@@ -79,7 +79,11 @@ export default function CustomerInfo() {
       (!accountStatus.deactivationPeriod ||
         accountStatus.deactivationPeriod === "default")
     ) {
-      alert("Please select a valid deactivation period.");
+      Swal.fire({
+        title: "Error",
+        text: "Please select a deactivation period before disabling the account.",
+        icon: "error",
+      });
       return;
     }
     const newStatus = {
@@ -97,9 +101,19 @@ export default function CustomerInfo() {
         url: `http://localhost:5000/api/auth/changeAccountActivation/${customerId}`,
         data: newStatus,
       });
+      Swal.fire({
+        title: "Success",
+        text: "Account status updated successfully.",
+        icon: "success",
+      });
       setCustomer(res.data);
     } catch (error) {
       console.error("Error changing account status:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Account status update failed.",
+        icon: "error",
+      });
     }
   };
 
@@ -113,9 +127,19 @@ export default function CustomerInfo() {
         url: `http://localhost:5000/api/auth/change2FASetting/${customerId}`,
         data: { is2FAEnabled: isEnabled },
       });
+      Swal.fire({
+        title: "Success",
+        text: "2FA setting updated successfully.",
+        icon: "success",
+      });
       setCustomer(res.data);
     } catch (error) {
       console.error("Error changing 2FA setting:", error);
+      Swal.fire({
+        title: "Error",
+        text: "2FA setting update failed.",
+        icon: "error",
+      });
     }
   };
 
@@ -129,8 +153,18 @@ export default function CustomerInfo() {
       });
       setCustomer(res.data);
       setIsEditOpen(false);
+      Swal.fire({
+        title: "Success",
+        text: "Customer details updated successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error editing staff details:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to update customer details.",
+        icon: "error",
+      });
     }
   };
 
@@ -140,16 +174,28 @@ export default function CustomerInfo() {
         method: "put",
         url: `http://localhost:5000/api/auth/removeCustomerAccount/${customerId}`,
       });
+      Swal.fire({
+        title: "Success",
+        text: "Customer account removed successfully.",
+        icon: "success",
+      });
       navigate("/dashboard/admin/staff");
     } catch (error) {
       console.error("Error removing staff member:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to remove customer account.",
+        icon: "error",
+      });
     }
   };
 
   if (!customer) {
     return (
       <div className="text-center p-6">
-        <p className="text-gray-600 dark:text-gray-300">Loading customer details...</p>
+        <p className="text-gray-600 dark:text-gray-300">
+          Loading customer details...
+        </p>
       </div>
     );
   }
@@ -162,12 +208,14 @@ export default function CustomerInfo() {
         </h2>
         {/* Status Badge */}
         <div className="flex items-center gap-2">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-            customer.is_active 
-              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-          }`}>
-            {customer.is_active ? 'Active' : 'Inactive'}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              customer.is_active
+                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+            }`}
+          >
+            {customer.is_active ? "Active" : "Inactive"}
           </span>
         </div>
       </div>
@@ -178,7 +226,9 @@ export default function CustomerInfo() {
         <div className="flex flex-col items-center space-y-3">
           <div className="relative">
             <img
-              src={customer.profile_photo || "/src/assets/default-user-icon.png"}
+              src={
+                customer.profile_photo || "/src/assets/default-user-icon.png"
+              }
               alt="Customer Profile"
               className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 shadow-lg"
             />
@@ -198,10 +248,12 @@ export default function CustomerInfo() {
           {/* Left Side */}
           <div className="space-y-4 text-gray-700 dark:text-gray-300">
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Contact Information</span>
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">
+                Contact Information
+              </span>
               <div className="space-y-2 text-sm">
                 <p className="flex items-center gap-2">
-                  <span className="font-medium">Email:</span> 
+                  <span className="font-medium">Email:</span>
                   {customer.email}
                   {customer.is_email_verified ? (
                     <span className="text-green-500 text-xs">✓ Verified</span>
@@ -210,7 +262,7 @@ export default function CustomerInfo() {
                   )}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className="font-medium">Phone:</span> 
+                  <span className="font-medium">Phone:</span>
                   {customer.phone}
                   {customer.is_phone_verified ? (
                     <span className="text-green-500 text-xs">✓ Verified</span>
@@ -219,7 +271,7 @@ export default function CustomerInfo() {
                   )}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className="font-medium">Address:</span> 
+                  <span className="font-medium">Address:</span>
                   {customer.address}
                 </p>
               </div>
@@ -229,7 +281,9 @@ export default function CustomerInfo() {
           {/* Right Side */}
           <div className="space-y-4 text-gray-700 dark:text-gray-300">
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Account Timeline</span>
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">
+                Account Timeline
+              </span>
               <div className="space-y-2 text-sm">
                 <p>
                   <span className="font-medium">Created:</span>{" "}
@@ -243,7 +297,9 @@ export default function CustomerInfo() {
             </div>
 
             <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-              <span className="font-semibold text-gray-900 dark:text-white block mb-2">Account Status</span>
+              <span className="font-semibold text-gray-900 dark:text-white block mb-2">
+                Account Status
+              </span>
               <div className="flex items-center gap-3">
                 {accountStatus.isActive ? (
                   <select
@@ -331,7 +387,9 @@ export default function CustomerInfo() {
           {/* Email Verified */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-900 dark:text-white">Email Verified</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                Email Verified
+              </span>
               <label className="flex items-center cursor-not-allowed">
                 <input
                   type="checkbox"
@@ -352,7 +410,9 @@ export default function CustomerInfo() {
           {/* Phone Verified */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-900 dark:text-white">Phone Verified</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                Phone Verified
+              </span>
               <label className="flex items-center cursor-not-allowed">
                 <input
                   type="checkbox"
@@ -373,7 +433,9 @@ export default function CustomerInfo() {
           {/* 2FA Enabled */}
           <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="font-medium text-gray-900 dark:text-white">2FA Enabled</span>
+              <span className="font-medium text-gray-900 dark:text-white">
+                2FA Enabled
+              </span>
               <label
                 className={`flex items-center ${
                   !customer.is_active && customer.deactivated_until === null
@@ -386,7 +448,9 @@ export default function CustomerInfo() {
                   className="sr-only peer"
                   checked={customer.is_2FA_enabled || false}
                   onChange={handle2FAChange}
-                  disabled={!customer.is_active && customer.deactivated_until === null}
+                  disabled={
+                    !customer.is_active && customer.deactivated_until === null
+                  }
                 />
                 <div
                   className={`w-11 h-6 rounded-full relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] 

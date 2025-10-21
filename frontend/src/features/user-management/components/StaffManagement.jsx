@@ -67,8 +67,18 @@ export default function StaffManagement() {
         phone: "",
         role: "",
       });
+      Swal.fire({
+        title: "Success",
+        text: "Staff member added successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error adding staff:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to add staff member.",
+        icon: "error",
+      });
     }
   };
 

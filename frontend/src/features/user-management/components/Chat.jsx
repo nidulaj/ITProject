@@ -99,6 +99,11 @@ export default function Chat() {
       await axios.post("http://localhost:5000/api/chat/send", msg);
     } catch (err) {
       console.error("Error saving message:", err);
+      Swal.fire({
+        title: "Error",
+        text: "Something went wrong. Please try again.",
+        icon: "error",
+      });
     }
 
     setMessages((prev) => [...prev, msg]);

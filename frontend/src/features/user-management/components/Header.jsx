@@ -18,10 +18,20 @@ export default function Header({ userInfo }) {
         logout();
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("user");
+        Swal.fire({
+          title: "Success",
+          text: "Logged out successfully.",
+          icon: "success",
+        });
         navigate("/login");
       }
     } catch (error) {
-      console.error("Error fetching staff list:", error);
+      console.error("Error in logout:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Logout failed.",
+        icon: "error",
+      });
     }
   };
 

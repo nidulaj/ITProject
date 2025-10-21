@@ -3,6 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.swal2-container {
+  z-index: 99999 !important;
+}
+
 /* Custom animations and 3D effects */
 @layer utilities {
   /* 3D Effects for Order Management Dashboard */

@@ -64,8 +64,18 @@ export default function Verify2FA() {
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };
@@ -79,11 +89,26 @@ export default function Verify2FA() {
       );
       console.log("Resend 2FA code");
       setTimeLeft(60);
+      Swal.fire({
+        title: "Success",
+        text: "A new verification code has been sent to your email.",
+        icon: "success",
+      });
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };
@@ -107,9 +132,9 @@ export default function Verify2FA() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-5">
               <div className="relative">
-                <img 
-                  src="/public/images_sadi/logoPubudu.png" 
-                  alt="Smart Dairy Logo" 
+                <img
+                  src="/public/images_sadi/logoPubudu.png"
+                  alt="Smart Dairy Logo"
                   className="h-20 w-auto object-contain"
                 />
               </div>
@@ -118,8 +143,18 @@ export default function Verify2FA() {
             {/* Security Shield Icon */}
             <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
                 </svg>
               </div>
             </div>
@@ -128,7 +163,8 @@ export default function Verify2FA() {
               Two-Factor Authentication
             </h1>
             <p className="text-gray-500 dark:text-gray-400 font-medium">
-              Enter the verification code sent to your {mode === "staff" ? "staff " : ""}email
+              Enter the verification code sent to your{" "}
+              {mode === "staff" ? "staff " : ""}email
             </p>
           </div>
 
@@ -144,8 +180,18 @@ export default function Verify2FA() {
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                 </div>
                 <input
@@ -164,14 +210,29 @@ export default function Verify2FA() {
             {/* Timer Display */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4">
               <div className="flex items-center justify-center space-x-2">
-                <svg className="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-5 w-5 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
                   {timeLeft > 0 ? (
-                    <>Code expires in <span className="font-bold">{timeLeft}s</span></>
+                    <>
+                      Code expires in{" "}
+                      <span className="font-bold">{timeLeft}s</span>
+                    </>
                   ) : (
-                    <span className="text-red-600 dark:text-red-400">Code expired - request a new one</span>
+                    <span className="text-red-600 dark:text-red-400">
+                      Code expired - request a new one
+                    </span>
                   )}
                 </p>
               </div>
@@ -183,8 +244,18 @@ export default function Verify2FA() {
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-800"
             >
               <span className="flex items-center justify-center">
-                <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="mr-2 h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
                 Verify & Continue
               </span>
@@ -211,8 +282,18 @@ export default function Verify2FA() {
               }`}
             >
               <span className="flex items-center justify-center">
-                <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="mr-2 h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 Resend Verification Code
               </span>
@@ -222,12 +303,22 @@ export default function Verify2FA() {
           {/* Back to Login Link */}
           <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-800">
             <p className="text-center">
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
               >
-                <svg className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg
+                  className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
                 Back to Login
               </Link>
@@ -238,7 +329,8 @@ export default function Verify2FA() {
         {/* Help Text */}
         <div className="mt-6 text-center max-w-md">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            For security purposes, this code will expire after use. If you need assistance, please contact support.
+            For security purposes, this code will expire after use. If you need
+            assistance, please contact support.
           </p>
         </div>
       </div>
