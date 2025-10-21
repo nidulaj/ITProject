@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../../components/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
@@ -119,55 +119,57 @@ export default function Login() {
 
   return (
     <>
-    <CartProvider>
-      <Header userInfo={null} />
-    </CartProvider>
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-all duration-700 px-4">
-      {/* Floating Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-blue-200 dark:bg-blue-800 rounded-full opacity-20 blur-xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-200 dark:bg-purple-800 rounded-full opacity-20 blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-10 w-24 h-24 bg-indigo-200 dark:bg-indigo-800 rounded-full opacity-20 blur-xl animate-pulse delay-2000"></div>
-      </div>
+      <CartProvider>
+        <Header userInfo={null} />
+      </CartProvider>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-all duration-700 px-4">
+        {/* Floating Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-blue-200 dark:bg-blue-800 rounded-full opacity-20 blur-xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-40 h-40 bg-purple-200 dark:bg-purple-800 rounded-full opacity-20 blur-xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-10 w-24 h-24 bg-indigo-200 dark:bg-indigo-800 rounded-full opacity-20 blur-xl animate-pulse delay-2000"></div>
+        </div>
 
-      {/* Top Toggle Buttons */}
-      <div className="absolute top-8 z-10">
-        <div className="bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg border border-gray-100 dark:border-gray-700 mt-14">
-          <div className="flex space-x-1">
-            <button
-              onClick={() => setMode("customer")}
-              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-300 ${
-                mode === "customer"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-105"
-                  : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
-            >
-              Customer Login
-            </button>
-            <button
-              onClick={() => setMode("staff")}
-              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-300 ${
-                mode === "staff"
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-105"
-                  : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
-            >
-              Staff Login
-            </button>
+        {/* Top Toggle Buttons */}
+        <div className="absolute top-8 z-10">
+          <div className="bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg border border-gray-100 dark:border-gray-700 mt-14">
+            <div className="flex space-x-1">
+              <button
+                onClick={() => setMode("customer")}
+                className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-300 ${
+                  mode === "customer"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                Customer Login
+              </button>
+              <button
+                onClick={() => setMode("staff")}
+                className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-300 ${
+                  mode === "staff"
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                Staff Login
+              </button>
+            </div>
           </div>
         </div>
 
-      {/* Login Card */}
-      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 w-full max-w-md transition-all duration-500 hover:shadow-3xl mt-20 mb-10">
-        {/* Logo + Heading */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-5">
-            <div className="relative">
-              <img 
-                src="/public/images_sadi/logoPubudu.png" 
-                alt="Smart Dairy Logo" 
-                className="h-20 w-auto object-contain"
-              />
+        {/* Login Card */}
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 w-full max-w-md transition-all duration-500 hover:shadow-3xl mt-20 mb-10">
+          {/* Logo + Heading */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-5">
+              <div className="relative">
+                <img 
+                  src="/public/images_sadi/logoPubudu.png" 
+                  alt="Smart Dairy Logo" 
+                  className="h-20 w-auto object-contain"
+                />
+              </div>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-2">
               {mode === "customer" ? "Welcome Back!" : "Staff Portal"}
@@ -179,21 +181,31 @@ export default function Login() {
             </p>
           </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
-            >
-              Email Address
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                </svg>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
+                Email Address
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                  </svg>
+                </div>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  className="w-full pl-12 pr-4 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 hover:bg-white dark:hover:bg-gray-750"
+                />
               </div>
             </div>
 
@@ -287,9 +299,8 @@ export default function Login() {
 
             {/* Sign In Button */}
             <button
-              type="button"
-              onClick={() => setShowForgotPasswordModal(true)}
-              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline"
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
             >
               <span className="flex items-center justify-center">
                 Sign In
@@ -338,12 +349,12 @@ export default function Login() {
             </div>
           )}
 
-            {/* Footer Links */}
-            <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{" "}
-              <Link 
-                to="/register" 
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline"
+          {/* Staff-specific content */}
+          {mode === "staff" && (
+            <div className="mt-6">
+              <Link
+                to="/"
+                className="group flex items-center justify-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
               >
                 <svg
                   className="mr-2 h-4 w-4 transform group-hover:-translate-x-1 transition-transform"
@@ -360,29 +371,9 @@ export default function Login() {
                 </svg>
                 Back to Home
               </Link>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Forgot Password Modal */}
-      {showForgotPasswordModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all duration-300 scale-100 animate-in zoom-in-95">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Reset Password
-              </h3>
-              <button
-                onClick={() => setShowForgotPasswordModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
+          )}
+        </div>
 
         {/* Forgot Password Modal */}
         {showForgotPasswordModal && (
@@ -477,9 +468,8 @@ export default function Login() {
               </form>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </>
   );
 }

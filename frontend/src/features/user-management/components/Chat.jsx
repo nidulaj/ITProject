@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Search, Send, User } from "lucide-react";
 import io from "socket.io-client";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const socket = io("http://localhost:5000", { withCredentials: true });
 

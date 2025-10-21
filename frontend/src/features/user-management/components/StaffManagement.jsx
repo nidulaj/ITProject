@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function StaffManagement() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
