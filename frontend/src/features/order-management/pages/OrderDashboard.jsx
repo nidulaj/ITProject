@@ -21,6 +21,8 @@ const OrderDashboard = () => {
   const [generatingReport, setGeneratingReport] = useState(false);
   const [stats, setStats] = useState({
     totalOrders: 0,
+    pendingOrders: 0,
+    processingOrders: 0,
     packingOrders: 0,
     deliveryOrders: 0,
     pendingPayments: 0
@@ -51,12 +53,16 @@ const OrderDashboard = () => {
 
   const calculateStats = () => {
     const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => order.order_status === 'pending').length;
+    const processingOrders = orders.filter(order => order.order_status === 'processing').length;
     const packingOrders = orders.filter(order => order.order_status === 'packing').length;
     const deliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
     const pendingPayments = orders.filter(order => order.payment_status === 'pending').length;
     
     setStats({
       totalOrders,
+      pendingOrders,
+      processingOrders,
       packingOrders,
       deliveryOrders,
       pendingPayments
@@ -308,7 +314,7 @@ const OrderDashboard = () => {
                 </div>
 
               {/* Order Statistics */}
-              <OrderStats stats={stats} />
+              <OrderStats stats={stats} orders={orders} />
 
               {/* Order Report Filters */}
               <OrderReportFilters 
