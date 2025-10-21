@@ -64,8 +64,18 @@ export default function Verify2FA() {
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };
@@ -79,11 +89,26 @@ export default function Verify2FA() {
       );
       console.log("Resend 2FA code");
       setTimeLeft(60);
+      Swal.fire({
+        title: "Success",
+        text: "A new verification code has been sent to your email.",
+        icon: "success",
+      });
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };

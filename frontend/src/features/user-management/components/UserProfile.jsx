@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { authFetch } from "../utils/authFetchStaff";
+import Swal from "sweetalert2";
 
 export default function UserProfile() {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -89,7 +90,8 @@ export default function UserProfile() {
   }, []);
 
   const handleEditProfile = (e) => {
-    e.preventDefault();
+    try {
+      e.preventDefault();
     const res = authFetch({
       method: "put",
       url: `http://localhost:5000/api/staff/auth/updateUserDetails`,
@@ -98,17 +100,38 @@ export default function UserProfile() {
     console.log("Updating profile:", editForm);
     setUser((prev) => ({ ...prev, ...editForm }));
     setIsEditOpen(false);
+    Swal.fire({
+      title: "Success",
+      text: "Profile updated successfully.",
+      icon: "success",
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    Swal.fire({
+      title: "Error",
+      text: "Failed to update profile.",
+        icon: "error",
+      });
+    }
   };
 
   const handleChangePassword = (e) => {
     if (e) e.preventDefault();
     if (passwordForm.new_password !== passwordForm.confirm_password) {
-      alert("New passwords don't match!");
+      Swal.fire({
+        title: "Error",
+        text: "New passwords don't match!",
+        icon: "error",
+      });
       return;
     }
 
     if (passwordStrength < 4) {
-      alert("Password is too weak. Please use a stronger password.");
+      Swal.fire({
+        title: "Weak Password",
+        text: "Please use a stronger password.",
+        icon: "warning",
+      });
       return;
     }
 
@@ -132,8 +155,18 @@ export default function UserProfile() {
       });
       setPasswordStrength(0);
       setPasswordError("");
+      Swal.fire({
+        title: "Success",
+        text: "Password changed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing password:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change password.",
+        icon: "error",
+      });
     }
   };
 
@@ -148,8 +181,18 @@ export default function UserProfile() {
         data: { is2FAEnabled: isEnabled },
       });
       setUser((prev) => ({ ...prev, is_2FA_enabled: isEnabled }));
+      Swal.fire({
+        title: "Success",
+        text: `2FA has been ${isEnabled ? "enabled" : "disabled"}.`,
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing 2FA setting:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change 2FA setting.",
+        icon: "error",
+      });
     }
   };
 
@@ -172,8 +215,18 @@ export default function UserProfile() {
         ...prev,
         profile_photo: res.data.photoUrl,
       }));
+      Swal.fire({
+        title: "Success",
+        text: "Profile photo uploaded successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error uploading photo:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to upload photo.",
+        icon: "error",
+      });
     }
   };
 
@@ -188,8 +241,18 @@ export default function UserProfile() {
         ...prev,
         profile_photo: null,
       }));
+      Swal.fire({
+        title: "Success",
+        text: "Profile photo removed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error removing photo:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to remove photo.",
+        icon: "error",
+      });
     }
   };
 
