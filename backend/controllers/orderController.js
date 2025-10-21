@@ -519,6 +519,9 @@ const generateOrderSummaryReport = async (req, res) => {
     // Get all orders
     const orders = await getAllOrders();
     
+    // Sort orders by date (newest first)
+    orders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
+    
     // Create PDF document
     const doc = new PDFDocument({ margin: 50 });
     
@@ -554,18 +557,24 @@ const generateOrderSummaryReport = async (req, res) => {
     const pendingOrders = orders.filter(order => order.order_status === 'pending').length;
     const deliveredOrders = orders.filter(order => order.order_status === 'delivered').length;
     const outForDeliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
+    const paidOrders = orders.filter(order => order.payment_status === 'paid').length;
+    const pendingPaymentOrders = orders.filter(order => order.payment_status === 'pending').length;
     
+    const statsY = 180;
     doc.fontSize(14)
        .fillColor('#1f2937')
-       .text('Summary Statistics:', 50, 180)
+       .text('Summary Statistics:', 50, statsY)
        .fontSize(12)
-       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, 205)
-       .text(`Pending Orders: ${pendingOrders}`, 50, 225)
-       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, 245)
-       .text(`Delivered: ${deliveredOrders}`, 50, 265);
+       .text(`Total Orders: ${orders.length}`, 50, statsY + 25)
+       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, statsY + 45)
+       .text(`Pending Orders: ${pendingOrders}`, 50, statsY + 65)
+       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, statsY + 85)
+       .text(`Delivered: ${deliveredOrders}`, 50, statsY + 105)
+       .text(`Paid Orders: ${paidOrders}`, 250, statsY + 25)
+       .text(`Pending Payments: ${pendingPaymentOrders}`, 250, statsY + 45);
     
     // Add orders table header
-    const tableTop = 300;
+    const tableTop = statsY + 140;
     doc.fontSize(12)
        .fillColor('#1f2937')
        .text('Order ID', 50, tableTop)
@@ -580,23 +589,45 @@ const generateOrderSummaryReport = async (req, res) => {
        .lineTo(520, tableTop + 20)
        .stroke();
     
-    // Add order rows
+    // Add order rows (show all orders with pagination)
     let currentY = tableTop + 35;
     
-    // Process orders in batches to avoid async issues
-    for (let i = 0; i < Math.min(orders.length, 15); i++) {
+    for (let i = 0; i < orders.length; i++) {
       const order = orders[i];
-      if (currentY > 650) break; // Prevent overflow
+      // Check if we need a new page
+      if (currentY > 700) {
+        doc.addPage();
+        currentY = 50;
+        
+        // Re-add table header on new page
+        doc.fontSize(12)
+           .fillColor('#1f2937')
+           .text('Order ID', 50, currentY)
+           .text('Customer', 120, currentY)
+           .text('Date', 200, currentY)
+           .text('Status', 280, currentY)
+           .text('Payment', 360, currentY)
+           .text('Total', 440, currentY);
+        
+        doc.moveTo(50, currentY + 20)
+           .lineTo(520, currentY + 20)
+           .stroke();
+        
+        currentY += 40;
+      }
       
       // Get customer name
       let customerName = `Customer ${order.cus_id}`;
       try {
-        const customer = await findUserById(order.cus_id);
-        if (customer) {
-          customerName = `${customer.first_name} ${customer.last_name}`;
+        // Add a check to ensure cus_id exists
+        if (order.cus_id) {
+          const customer = await findUserById(order.cus_id);
+          if (customer) {
+            customerName = `${customer.first_name} ${customer.last_name}`;
+          }
         }
       } catch (error) {
-        console.log('Could not fetch customer name for order', order.order_id);
+        console.log('Could not fetch customer name for order', order.order_id, error.message);
       }
       
       doc.fontSize(10)

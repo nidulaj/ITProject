@@ -74,7 +74,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       
       // Prepare order data with discount information and delivery address
       const orderData = {
-        customer_id: currentCustomer?.id, // Use current customer ID
+        customer_id: currentCustomer?.id || 1, // Use current customer ID
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity,
@@ -87,17 +87,10 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
 
       console.log('Creating order:', orderData);
       
-      // Validate that customer is logged in
-      if (!orderData.customer_id) {
-        showError('You must be logged in to place an order');
-        setIsProcessing(false);
-        return;
-      }
-      
       // Create order via API
       const response = await authFetchCustomer({
         method: 'post',
-        url: 'http://localhost:5000/api/orders',
+        url: 'http://localhost:5001/api/orders',
         data: orderData
       });
       

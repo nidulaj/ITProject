@@ -6,7 +6,7 @@ const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = 'http://localhost:5000/api/orders';
+  const API_BASE_URL = 'http://localhost:5001/api/orders';
 
   // Fetch all orders on component mount
   useEffect(() => {

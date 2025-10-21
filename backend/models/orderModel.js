@@ -52,6 +52,7 @@ const getAllOrders = async () => {
     const result = await pool.query(
       'SELECT * FROM orders ORDER BY order_date DESC'
     );
+    console.log(`Retrieved ${result.rows.length} orders from database`);
     return result.rows;
   } catch (error) {
     console.error('Error fetching all orders:', error);

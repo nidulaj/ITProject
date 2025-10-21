@@ -25,7 +25,7 @@ const OrderDashboard = () => {
     pendingPayments: 0
   });
 
-  const API_BASE_URL = 'http://localhost:5000/api/orders';
+  const API_BASE_URL = 'http://localhost:5001/api/orders';
 
   useEffect(() => {
     fetchOrders();
@@ -248,8 +248,6 @@ const OrderDashboard = () => {
     }
   };
 
-
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
@@ -377,8 +375,5 @@ const OrderDashboard = () => {
     </NotificationProvider>
   );
 };
-
-
-
 
 export default OrderDashboard;
