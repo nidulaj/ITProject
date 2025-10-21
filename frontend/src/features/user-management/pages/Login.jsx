@@ -72,10 +72,10 @@ export default function Login() {
           navigate("/dashboard");
         } else {
           if (role === 1) navigate("/dashboard/admin");
-          else if (role === 12) navigate("/dashboard/production");
-          else if (role === 9) navigate("/dashboard/order");
-          else if (role === 11) navigate("/dashboard/inventory");
-          else if (role === 13) navigate("/dashboard/finance");
+          else if (role === 2) navigate("/dashboard/production");
+          else if (role === 3) navigate("/dashboard/order");
+          else if (role === 4) navigate("/dashboard/inventory");
+          else if (role === 5) navigate("/dashboard/finance");
           else {
             navigate("/login");
             setIsLoggedIn(false);
