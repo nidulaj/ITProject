@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { authFetchCustomer } from "../features/user-management/utils/authFetchCustomer";
+import Swal from "sweetalert2";
 
 export default function UserProfile() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [is2FAEnabled, setIs2FAEnabled] = useState(null);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [editForm, setEditForm] = useState({
     first_name: "",
     last_name: "",
@@ -19,6 +22,58 @@ export default function UserProfile() {
   });
 
   const [user, setUser] = useState(null);
+
+  // Handler for name fields - only allows letters and spaces
+  const handleNameChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Handler for phone field - allows + at start and digits only
+  const handlePhoneChange = (e) => {
+    const { name, value } = e.target;
+    const filteredValue = value.replace(/(?!^\+)\D/g, "");
+    setEditForm((prev) => ({ ...prev, [name]: filteredValue }));
+  };
+
+  // Calculate password strength
+  const calculateStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 6) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    return strength;
+  };
+
+  // Handle password form changes
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+
+    setPasswordForm((prev) => {
+      const newPasswordForm = { ...prev, [name]: value };
+
+      if (name === "new_password") {
+        setPasswordStrength(calculateStrength(value));
+      }
+
+      if (name === "new_password" || name === "confirm_password") {
+        if (
+          newPasswordForm.new_password &&
+          newPasswordForm.confirm_password &&
+          newPasswordForm.new_password !== newPasswordForm.confirm_password
+        ) {
+          setPasswordError("Passwords do not match");
+        } else {
+          setPasswordError("");
+        }
+      }
+
+      return newPasswordForm;
+    });
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -35,27 +90,54 @@ export default function UserProfile() {
     fetchUserInfo();
   }, []);
 
-  const handleEditProfile = (e) => {
-    e.preventDefault();
-    const res = authFetchCustomer({
-      method: "put",
-      url: `http://localhost:5000/api/auth/updateUserDetails`,
-      data: editForm,
-    });
-    console.log("Updating profile:", editForm);
-    setUser((prev) => ({ ...prev, ...editForm }));
-    setIsEditOpen(false);
+  const handleEditProfile = async (e) => {
+    try {
+      e.preventDefault();
+      const res = await authFetchCustomer({
+        method: "put",
+        url: `http://localhost:5000/api/auth/updateUserDetails`,
+        data: editForm,
+      });
+      console.log("Updating profile:", editForm);
+      setUser((prev) => ({ ...prev, ...editForm }));
+      setIsEditOpen(false);
+      Swal.fire({
+        title: "Success",
+        text: "Profile updated successfully.",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to update profile.",
+        icon: "error",
+      });
+    }
   };
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     if (e) e.preventDefault();
     if (passwordForm.new_password !== passwordForm.confirm_password) {
-      alert("New passwords don't match!");
+      Swal.fire({
+        title: "Error",
+        text: "New passwords don't match!",
+        icon: "error",
+      });
+      return;
+    }
+
+    if (passwordStrength < 4) {
+      Swal.fire({
+        title: "Weak Password",
+        text: "Please use a stronger password.",
+        icon: "warning",
+      });
       return;
     }
 
     try {
-      const res = authFetchCustomer({
+      const res = await authFetchCustomer({
         method: "put",
         url: `http://localhost:5000/api/auth/updatePassword`,
         data: {
@@ -64,7 +146,7 @@ export default function UserProfile() {
         },
       });
 
-      console.log(res.data)
+      console.log(res.data);
 
       setIsChangePasswordOpen(false);
       setPasswordForm({
@@ -72,8 +154,20 @@ export default function UserProfile() {
         new_password: "",
         confirm_password: "",
       });
+      setPasswordStrength(0);
+      setPasswordError("");
+      Swal.fire({
+        title: "Success",
+        text: "Password changed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing password:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change password.",
+        icon: "error",
+      });
     }
   };
 
@@ -88,8 +182,18 @@ export default function UserProfile() {
         data: { is2FAEnabled: isEnabled },
       });
       setUser((prev) => ({ ...prev, is_2FA_enabled: isEnabled }));
+      Swal.fire({
+        title: "Success",
+        text: `2FA has been ${isEnabled ? "enabled" : "disabled"}.`,
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing 2FA setting:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change 2FA setting.",
+        icon: "error",
+      });
     }
   };
 
@@ -112,8 +216,18 @@ export default function UserProfile() {
         ...prev,
         profile_photo: res.data.photoUrl,
       }));
+      Swal.fire({
+        title: "Success",
+        text: "Profile photo uploaded successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error uploading photo:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to upload photo.",
+        icon: "error",
+      });
     }
   };
 
@@ -128,10 +242,25 @@ export default function UserProfile() {
         ...prev,
         profile_photo: null,
       }));
+      Swal.fire({
+        title: "Success",
+        text: "Profile photo removed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error removing photo:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to remove photo.",
+        icon: "error",
+      });
     }
   };
+
+  const isPasswordValid =
+    passwordStrength >= 4 &&
+    passwordForm.new_password === passwordForm.confirm_password &&
+    passwordForm.current_password;
 
   if (!user) {
     return (
@@ -313,11 +442,11 @@ export default function UserProfile() {
           </span>
           <label className="flex items-center cursor-pointer">
             <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={user.is_2FA_enabled || false}
-                onChange={handle2FAChange}
-              />
+              type="checkbox"
+              className="sr-only peer"
+              checked={user.is_2FA_enabled || false}
+              onChange={handle2FAChange}
+            />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
           </label>
         </div>
@@ -325,178 +454,283 @@ export default function UserProfile() {
 
       {/* Edit Profile Modal */}
       {isEditOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md space-y-4 max-h-96 overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Edit Profile
-            </h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative mx-4">
+            <button
+              onClick={() => setIsEditOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-            <div className="space-y-3">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Edit Profile
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Update your personal information
+              </p>
+            </div>
+
+            <form onSubmit={handleEditProfile} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   First Name
                 </label>
                 <input
                   type="text"
+                  name="first_name"
                   value={editForm.first_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      first_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="John"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Last Name
                 </label>
                 <input
                   type="text"
+                  name="last_name"
                   value={editForm.last_name}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      last_name: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handleNameChange}
+                  required
+                  placeholder="Doe"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Phone
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Phone Number
                 </label>
                 <input
                   type="text"
+                  name="phone"
                   value={editForm.phone}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, phone: e.target.value }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePhoneChange}
+                  required
+                  placeholder="+94 7xxxxxxx"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  address
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Address
                 </label>
                 <input
                   type="text"
+                  name="address"
                   value={editForm.address}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, address: e.target.value }))
                   }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  required
+                  placeholder="123 Main Street"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
               </div>
 
-
-
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleEditProfile}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors"
                 >
                   Save Changes
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* Change Password Modal */}
       {isChangePasswordOpen && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Change Password
-            </h2>
+        <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 relative mx-4">
+            <button
+              onClick={() => {
+                setIsChangePasswordOpen(false);
+                setPasswordStrength(0);
+                setPasswordError("");
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
 
-            <div className="space-y-3">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg
+                  className="w-6 h-6 text-indigo-600 dark:text-indigo-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Change Password
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Create a strong password to secure your account
+              </p>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Current Password
                 </label>
                 <input
                   type="password"
+                  name="current_password"
                   value={passwordForm.current_password}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      current_password: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePasswordChange}
                   required
+                  placeholder="Enter current password"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   New Password
                 </label>
                 <input
                   type="password"
+                  name="new_password"
                   value={passwordForm.new_password}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      new_password: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePasswordChange}
                   required
+                  placeholder="Enter new password"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
+                {/* Password Strength Bar */}
+                {passwordForm.new_password && (
+                  <div className="mt-2">
+                    <div className="h-2 w-full bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          passwordStrength <= 2
+                            ? "bg-red-500"
+                            : passwordStrength === 3
+                            ? "bg-yellow-400"
+                            : "bg-green-500"
+                        }`}
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {passwordStrength <= 2
+                        ? "Weak password"
+                        : passwordStrength === 3
+                        ? "Medium strength"
+                        : "Strong password"}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Confirm New Password
                 </label>
                 <input
                   type="password"
+                  name="confirm_password"
                   value={passwordForm.confirm_password}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      confirm_password: e.target.value,
-                    }))
-                  }
-                  className="w-full mt-1 p-2 border rounded-lg dark:bg-gray-700 dark:text-white"
+                  onChange={handlePasswordChange}
                   required
+                  placeholder="Re-enter new password"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
+                {passwordError && (
+                  <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                )}
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsChangePasswordOpen(false)}
-                  className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
+                  onClick={() => {
+                    setIsChangePasswordOpen(false);
+                    setPasswordStrength(0);
+                    setPasswordError("");
+                  }}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleChangePassword}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                  type="submit"
+                  disabled={!isPasswordValid}
+                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium shadow-sm transition-colors ${
+                    !isPasswordValid
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                  }`}
                 >
                   Update Password
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
