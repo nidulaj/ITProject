@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function RolesAccess() {
   const [userRoles, setUserRoles] = useState([]);
@@ -43,24 +44,18 @@ export default function RolesAccess() {
         setUserRoles((prev) => [...prev, res.data]);
         setNewRole({ role_name: "", description: "" });
         setIsAddRoleOpen(false);
+        Swal.fire({
+          title: "Success",
+          text: "Role created successfully.",
+          icon: "success",
+        });
       }
     } catch (error) {
       console.error("Error creating role:", error);
     }
   };
 
-  const handleDelete = async (roleId) => {
-    try {
-      await authFetch({
-        method: "delete",
-        url: "http://localhost:5000/api/user-roles/deleteRole",
-        data: { roleId },
-      });
-      setUserRoles((prev) => prev.filter((role) => role.role_id !== roleId));
-    } catch (error) {
-      console.error("Error deleting role:", error);
-    }
-  };
+
 
   // Filtering logic
   const filteredRoles = userRoles.filter((role) => {

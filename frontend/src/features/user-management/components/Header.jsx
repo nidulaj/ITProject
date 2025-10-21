@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { AuthContext } from "../../../components/AuthContext";
+import Swal from "sweetalert2";
 
 export default function Header({ userInfo }) {
   const { logout } = useContext(AuthContext);
@@ -18,10 +19,20 @@ export default function Header({ userInfo }) {
         logout();
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("user");
+        Swal.fire({
+          title: "Success",
+          text: "Logged out successfully.",
+          icon: "success",
+        });
         navigate("/login");
       }
     } catch (error) {
-      console.error("Error fetching staff list:", error);
+      console.error("Error in logout:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Logout failed.",
+        icon: "error",
+      });
     }
   };
 

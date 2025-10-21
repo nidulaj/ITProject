@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function StaffManagement() {
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
@@ -67,8 +68,18 @@ export default function StaffManagement() {
         phone: "",
         role: "",
       });
+      Swal.fire({
+        title: "Success",
+        text: "Staff member added successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error adding staff:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to add staff member.",
+        icon: "error",
+      });
     }
   };
 

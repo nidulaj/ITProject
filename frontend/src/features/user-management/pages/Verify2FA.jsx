@@ -4,6 +4,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../../components/AuthContext";
 import Header from "../../../components/DashboardHeader";
 import { CartProvider } from "../../../contexts/CartContext";
+import Swal from "sweetalert2";
 
 export default function Verify2FA() {
   const location = useLocation();
@@ -51,10 +52,10 @@ export default function Verify2FA() {
           navigate("/dashboard");
         } else {
           if (role === 1) navigate("/dashboard/admin");
-          else if (role === 12) navigate("/dashboard/production");
-          else if (role === 9) navigate("/dashboard/order");
-          else if (role === 11) navigate("/dashboard/inventory");
-          else if (role === 13) navigate("/dashboard/finance");
+          else if (role === 2) navigate("/dashboard/production");
+          else if (role === 3) navigate("/dashboard/order");
+          else if (role === 4) navigate("/dashboard/inventory");
+          else if (role === 5) navigate("/dashboard/finance");
           else {
             navigate("/login");
             setIsLoggedIn(false);
@@ -64,8 +65,18 @@ export default function Verify2FA() {
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };
@@ -79,11 +90,26 @@ export default function Verify2FA() {
       );
       console.log("Resend 2FA code");
       setTimeLeft(60);
+      Swal.fire({
+        title: "Success",
+        text: "A new verification code has been sent to your email.",
+        icon: "success",
+      });
     } catch (err) {
       if (err.response) {
         console.log(err.response.data.message);
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
       } else {
         console.error(err.message);
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
       }
     }
   };

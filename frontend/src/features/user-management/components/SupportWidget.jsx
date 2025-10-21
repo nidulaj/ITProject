@@ -2,6 +2,7 @@ import { useEffect, useState, useContext, useRef } from "react";
 import { io } from "socket.io-client";
 import { AuthContext } from "../../../components/AuthContext";
 import { MessageCircle, X, Send } from "lucide-react";
+import Swal from "sweetalert2";
 
 let socket; // global socket instance
 
@@ -78,6 +79,11 @@ export default function SupportWidget() {
       setInput("");
     } catch (err) {
       console.error("Error sending message:", err);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to send message.",
+        icon: "error",
+      });
     }
   };
 

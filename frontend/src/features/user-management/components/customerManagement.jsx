@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function CustomerManagement() {
   const [customerList, setCustomerList] = useState([]);
@@ -62,11 +63,17 @@ export default function CustomerManagement() {
     window.URL.revokeObjectURL(url);
   } catch (err) {
     console.error("Error exporting PDF:", err);
+    Swal.fire({
+      title: "Error",
+      text: "Failed to export PDF.",
+      icon: "error",
+    });
   }
 };
 
 const handleExportCSV = async () => {
-  const res = await authFetch({
+  try{
+      const res = await authFetch({
     method: "POST",
     url: "http://localhost:5000/api/auth/exportCSV",
     data: { customers: filteredCustomers },
@@ -79,6 +86,14 @@ const handleExportCSV = async () => {
   a.href = url;
   a.download = "customers.csv";
   a.click();
+  } catch (err) {
+    console.error("Error exporting CSV:", err);
+    Swal.fire({
+      title: "Error",
+      text: "Failed to export CSV.",
+      icon: "error",
+    });
+  }
 };
 
 

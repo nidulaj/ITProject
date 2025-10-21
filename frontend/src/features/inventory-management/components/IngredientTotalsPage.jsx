@@ -52,20 +52,6 @@ export default function IngredientTotalsPage() {
               <p className="text-gray-600">Total quantities by ingredient code</p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={calculateTotals}
-                disabled={loading}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
-              >
-                Calculate Totals
-              </button>
-              <button
-                onClick={loadTotals}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-              >
-                Refresh
-              </button>
             
             </div>
           </div>

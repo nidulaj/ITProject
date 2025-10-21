@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function staffUserInfo() {
   const { staffId } = useParams();
@@ -92,8 +93,18 @@ export default function staffUserInfo() {
       setIsEditRoleOpen(false);
       setStaff(res.data);
       setSelectedRoleId(null);
+      Swal.fire({
+        title: "Success",
+        text: "Role changed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing role:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change role.",
+        icon: "error",
+      });
     }
   };
 
@@ -106,7 +117,11 @@ export default function staffUserInfo() {
       (!accountStatus.deactivationPeriod ||
         accountStatus.deactivationPeriod === "default")
     ) {
-      alert("Please select a valid deactivation period.");
+      Swal.fire({
+        title: "Error",
+        text: "Please select a valid deactivation period.",
+        icon: "error",
+      });
       return;
     }
     const newStatus = {
@@ -125,8 +140,18 @@ export default function staffUserInfo() {
         data: newStatus,
       });
       setStaff(res.data);
+      Swal.fire({
+        title: "Success",
+        text: "Account status changed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing account status:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change account status.",
+        icon: "error",
+      });
     }
   };
 
@@ -141,8 +166,18 @@ export default function staffUserInfo() {
         data: { is2FAEnabled: isEnabled },
       });
       setStaff(res.data);
+      Swal.fire({
+        title: "Success",
+        text: "2FA setting changed successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error changing 2FA setting:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to change 2FA setting.",
+        icon: "error",
+      });
     }
   };
 
@@ -156,8 +191,18 @@ export default function staffUserInfo() {
       });
       setStaff(res.data);
       setIsEditOpen(false);
+      Swal.fire({
+        title: "Success",
+        text: "Staff details updated successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error editing staff details:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to edit staff details.",
+        icon: "error",
+      });
     }
   };
 
@@ -167,9 +212,19 @@ export default function staffUserInfo() {
         method: "put",
         url: `http://localhost:5000/api/staff/auth/removeStaff/${staffId}`,
       });
+      Swal.fire({
+        title: "Success",
+        text: "Staff member removed successfully.",
+        icon: "success",
+      });
       navigate("/dashboard/admin/staff");
     } catch (error) {
       console.error("Error removing staff member:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to remove staff member.",
+        icon: "error",
+      });
     }
   };
 

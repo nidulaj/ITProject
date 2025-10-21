@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function RoleInfo() {
   const { roleId } = useParams();
@@ -32,8 +33,41 @@ export default function RoleInfo() {
       });
       setRole(res.data);
       setIsEditOpen(false);
+      Swal.fire({
+        title: "Success",
+        text: "Role updated successfully.",
+        icon: "success",
+      });
     } catch (error) {
       console.error("Error updating role:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to update role.",
+        icon: "error",
+      });
+    }
+  };
+
+    const handleDelete = async (roleId) => {
+    try {
+      await authFetch({
+        method: "delete",
+        url: "http://localhost:5000/api/user-roles/deleteRole",
+        data: { roleId },
+      });
+      setUserRoles((prev) => prev.filter((role) => role.role_id !== roleId));
+      Swal.fire({
+        title: "Success",
+        text: "Role deleted successfully.",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error deleting role:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Failed to delete role.",
+        icon: "error",
+      });
     }
   };
 
@@ -107,7 +141,7 @@ export default function RoleInfo() {
             ✏️ Edit Role
           </button>
           <button
-            onClick={() => alert("Remove role (frontend only)")}
+            onClick={() => handleDelete(roleId)}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow transition"
           >
             🗑️ Remove Role

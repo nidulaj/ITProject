@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import Header from "../../../components/DashboardHeader";
 import { CartProvider } from "../../../contexts/CartContext";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const [userData, setUserData] = React.useState({
@@ -24,11 +25,11 @@ export default function Register() {
 
   const calculateStrength = (password) => {
     let strength = 0;
-    if (password.length >= 6) strength += 1; 
-    if (/[A-Z]/.test(password)) strength += 1; 
-    if (/[a-z]/.test(password)) strength += 1; 
-    if (/[0-9]/.test(password)) strength += 1; 
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1; 
+    if (password.length >= 6) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
     return strength;
   };
 
@@ -80,17 +81,33 @@ export default function Register() {
         userData
       );
       console.log(res.data.message);
+      Swal.fire({
+        title: "Success",
+        text: "Registration successful! Please log in.",
+        icon: "success",
+      });
       navigate("/login");
     } catch (err) {
       if (err.response) {
+        Swal.fire({
+          title: "Error",
+          text: err.response.data.message,
+          icon: "error",
+        });
         console.log(err.response.data.message);
       } else {
+        Swal.fire({
+          title: "Error",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+        });
         console.error(err.message);
       }
     }
   };
 
-  const isPasswordValid = passwordStrength >= 4 && userData.password === userData.confirmPassword;
+  const isPasswordValid =
+    passwordStrength >= 4 && userData.password === userData.confirmPassword;
 
   return (
     <>
