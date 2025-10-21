@@ -9,12 +9,6 @@ CREATE SEQUENCE IF NOT EXISTS public.products_product_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.products_product_id_seq
-    OWNED BY public.products.product_id;
-
-ALTER SEQUENCE public.products_product_id_seq
-    OWNER TO postgres;
-
 
 
 
@@ -101,6 +95,11 @@ CREATE INDEX IF NOT EXISTS idx_products_final_product_id
     (final_product_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
+ALTER SEQUENCE public.products_product_id_seq
+    OWNED BY public.products.product_id;
+
+ALTER SEQUENCE public.products_product_id_seq
+    OWNER TO postgres;
 
 
 
@@ -116,13 +115,6 @@ CREATE SEQUENCE IF NOT EXISTS public.orders_order_id_seq
     MINVALUE 1
     MAXVALUE 2147483647
     CACHE 1;
-
-ALTER SEQUENCE public.orders_order_id_seq
-    OWNED BY public.orders.order_id;
-
-ALTER SEQUENCE public.orders_order_id_seq
-    OWNER TO postgres;
-
 
 
 
@@ -156,17 +148,41 @@ ALTER TABLE IF EXISTS public.orders
 COMMENT ON COLUMN public.orders.delivery_address
     IS 'Delivery address for the order - can be customer default address or custom address';
 
--- Trigger: trigger_reduce_quantities_on_payment_approval
 
--- DROP TRIGGER IF EXISTS trigger_reduce_quantities_on_payment_approval ON public.orders;
+ALTER SEQUENCE public.orders_order_id_seq
+    OWNED BY public.orders.order_id;
 
-CREATE OR REPLACE TRIGGER trigger_reduce_quantities_on_payment_approval
-    AFTER UPDATE OF payment_status
-    ON public.orders
-    FOR EACH ROW
-    EXECUTE FUNCTION public.reduce_quantities_on_payment_approval();
+ALTER SEQUENCE public.orders_order_id_seq
+    OWNER TO postgres;
 
+-- FUNCTION: public.sync_payment_status_to_order()
 
+-- DROP FUNCTION IF EXISTS public.sync_payment_status_to_order();
+
+CREATE OR REPLACE FUNCTION public.sync_payment_status_to_order()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+    -- When payment_status is updated in payments table,
+    -- update the corresponding order's payment_status
+    IF NEW.order_id IS NOT NULL THEN
+        UPDATE public.orders 
+        SET payment_status = NEW.payment_status
+        WHERE order_id = NEW.order_id;
+    END IF;
+    
+    RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.sync_payment_status_to_order()
+    OWNER TO postgres;
+
+COMMENT ON FUNCTION public.sync_payment_status_to_order()
+    IS 'Syncs payment_status from payments to orders table';
 
 
 
@@ -181,11 +197,7 @@ CREATE SEQUENCE IF NOT EXISTS public.order_items_item_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-ALTER SEQUENCE public.order_items_item_id_seq
-    OWNED BY public.order_items.item_id;
 
-ALTER SEQUENCE public.order_items_item_id_seq
-    OWNER TO postgres;
 
 
     
@@ -216,6 +228,9 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.order_items
     OWNER to postgres;
 
+
+
+
 -- Trigger: trg_decrement_final_product_stock
 
 -- DROP TRIGGER IF EXISTS trg_decrement_final_product_stock ON public.order_items;
@@ -227,6 +242,45 @@ CREATE OR REPLACE TRIGGER trg_decrement_final_product_stock
     EXECUTE FUNCTION public.decrement_final_product_stock_on_order_item();
 
 
+-- FUNCTION: public.decrement_final_product_stock_on_order_item()
+
+-- DROP FUNCTION IF EXISTS public.decrement_final_product_stock_on_order_item();
+
+CREATE OR REPLACE FUNCTION public.decrement_final_product_stock_on_order_item()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+DECLARE
+  v_final_product_id INTEGER;
+BEGIN
+  -- Find the mapped final product for the ordered product
+  SELECT final_product_id
+  INTO v_final_product_id
+  FROM products
+  WHERE product_id = NEW.product_id;
+
+  -- If product maps to a final product, decrement its quantity
+  IF v_final_product_id IS NOT NULL THEN
+    UPDATE final_products
+    SET quantity = GREATEST(0, quantity - NEW.quantity)
+    WHERE fproduct_id = v_final_product_id;
+  END IF;
+
+  RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.decrement_final_product_stock_on_order_item()
+    OWNER TO postgres;
+
+
+ALTER SEQUENCE public.order_items_item_id_seq
+    OWNED BY public.order_items.item_id;
+
+ALTER SEQUENCE public.order_items_item_id_seq
+    OWNER TO postgres;
 
 -- SEQUENCE: public.notifications_seq
 
@@ -239,11 +293,7 @@ CREATE SEQUENCE IF NOT EXISTS public.notifications_seq
     MAXVALUE 9223372036854775807
     CACHE 1;
 
-ALTER SEQUENCE public.notifications_seq
-    OWNED BY public.notifications.notification_id;
 
-ALTER SEQUENCE public.notifications_seq
-    OWNER TO postgres;
 -- Table: public.notifications
 
 -- DROP TABLE IF EXISTS public.notifications;
@@ -305,3 +355,27 @@ CREATE OR REPLACE TRIGGER trg_notifications_updated_at
     EXECUTE FUNCTION public.update_notifications_updated_at();
 
 
+-- FUNCTION: public.update_notifications_updated_at()
+
+-- DROP FUNCTION IF EXISTS public.update_notifications_updated_at();
+
+CREATE OR REPLACE FUNCTION public.update_notifications_updated_at()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.update_notifications_updated_at()
+    OWNER TO postgres;
+
+ALTER SEQUENCE public.notifications_seq
+    OWNED BY public.notifications.notification_id;
+
+ALTER SEQUENCE public.notifications_seq
+    OWNER TO postgres;
