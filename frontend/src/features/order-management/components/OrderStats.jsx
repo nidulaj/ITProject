@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 const OrderStats = ({ stats, orders }) => {
-  // Prepare data for pie chart
+  // Prepare data for order status pie chart
   const orderStatusData = [
     { name: 'Pending', value: stats.pendingOrders || 0 },
     { name: 'Processing', value: stats.processingOrders || 0 },
@@ -10,7 +10,20 @@ const OrderStats = ({ stats, orders }) => {
     { name: 'Out for Delivery', value: stats.deliveryOrders || 0 },
   ];
 
-  const COLORS = ['#3b82f6', '#f59e0b', '#8b5cf6', '#10b981'];
+  // Prepare data for payment status pie chart
+  const paymentStatusData = orders.reduce((acc, order) => {
+    const status = order.payment_status || 'unknown';
+    const existing = acc.find(item => item.name === status);
+    if (existing) {
+      existing.value += 1;
+    } else {
+      acc.push({ name: status, value: 1 });
+    }
+    return acc;
+  }, []);
+
+  const ORDER_COLORS = ['#3b82f6', '#f59e0b', '#8b5cf6', '#10b981'];
+  const PAYMENT_COLORS = ['#ef4444', '#10b981', '#f59e0b', '#6b7280'];
 
   // Custom tooltip to show percentages
   const CustomTooltip = ({ active, payload }) => {
@@ -30,45 +43,30 @@ const OrderStats = ({ stats, orders }) => {
     return null;
   };
 
+  // Custom tooltip for payment status
+  const PaymentTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const total = paymentStatusData.reduce((sum, item) => sum + item.value, 0);
+      const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+      
+      return (
+        <div className="bg-white p-2 border border-gray-200 shadow-lg rounded">
+          <p className="font-semibold">{data.name}</p>
+          <p>Count: {data.value}</p>
+          <p>Percentage: {percentage}%</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-      {/* Total Orders Card */}
-      <div className="bg-white rounded-lg p-3 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-gray-600">Total Orders</p>
-            <p className="text-xl font-bold text-gray-900">{stats.totalOrders}</p>
-            <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full bg-green-200 text-green-900 mt-1">Good</span>
-          </div>
-          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 text-white">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      
-      {/* Pending Payments Card */}
-      <div className="bg-white rounded-lg p-3 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font- text-gray-600">Pending Payments</p>
-            <p className="text-xl font-bold text-gray-900">{stats.pendingPayments}</p>
-            <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full mt-1 ${stats.pendingPayments > 0 ? 'bg-yellow-200 text-yellow-900' : 'bg-green-200 text-green-900'}`}>
-              {stats.pendingPayments > 0 ? "Warning" : "Good"}
-            </span>
-          </div>
-          <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-200 to-yellow-300 text-white">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-      </div>
-      
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
       {/* Order Status Pie Chart */}
-      <div className="bg-white rounded-lg p-3 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300 lg:col-span-1">
-        <div className="h-44">
+      <div className="text-center">
+        <h3 className="text-base font-semibold text-gray-800 mb-2">Order Status Distribution</h3>
+        <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -76,12 +74,12 @@ const OrderStats = ({ stats, orders }) => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                outerRadius={50}
+                outerRadius={60}
                 fill="#8884d8"
                 dataKey="value"
               >
                 {orderStatusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={ORDER_COLORS[index % ORDER_COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
@@ -89,7 +87,38 @@ const OrderStats = ({ stats, orders }) => {
                 layout="vertical" 
                 verticalAlign="middle" 
                 align="right"
-                wrapperStyle={{ paddingLeft: '8px', fontSize: '11px' }}
+                wrapperStyle={{ paddingLeft: '15px', fontSize: '11px' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Payment Status Pie Chart */}
+      <div className="text-center">
+        <h3 className="text-base font-semibold text-gray-800 mb-2">Payment Status Distribution</h3>
+        <div className="h-60">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={paymentStatusData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={60}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {paymentStatusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={PAYMENT_COLORS[index % PAYMENT_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<PaymentTooltip />} />
+              <Legend 
+                layout="vertical" 
+                verticalAlign="middle" 
+                align="right"
+                wrapperStyle={{ paddingLeft: '15px', fontSize: '11px' }}
               />
             </PieChart>
           </ResponsiveContainer>
