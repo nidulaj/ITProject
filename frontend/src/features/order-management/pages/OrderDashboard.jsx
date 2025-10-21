@@ -28,7 +28,7 @@ const OrderDashboard = () => {
     pendingPayments: 0
   });
 
-  const API_BASE_URL = 'http://localhost:5001/api/orders';
+  const API_BASE_URL = 'http://localhost:5000/api/orders';
 
   useEffect(() => {
     fetchOrders();
@@ -43,7 +43,7 @@ const OrderDashboard = () => {
     try {
       const res = await authFetch({
         method: "get",
-        url: "http://localhost:5001/api/staff/auth/userInfo",
+        url: "http://localhost:5000/api/staff/auth/userInfo",
       });
       setUserInfo(res.data);
     } catch (error) {

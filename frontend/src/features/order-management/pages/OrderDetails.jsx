@@ -10,7 +10,7 @@ const OrderDetails = () => {
   const navigate = useNavigate();
   const { orderId } = useParams();
 
-  const API_BASE_URL = 'http://localhost:5001/api/orders';
+  const API_BASE_URL = 'http://localhost:5000/api/orders';
 
   // Fetch order details when orderId changes
   useEffect(() => {

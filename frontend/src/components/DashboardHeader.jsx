@@ -132,7 +132,7 @@ export default function DashboardHeader({ userInfo }) {
           <div className="flex items-center space-x-3">
             {/* Notification Icon */}
             <div className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-              <NotificationIcon customerId={1} />
+              <NotificationIcon customerId={userInfo?.cus_id || userInfo?.customer_id || 1} />
             </div>
             
             {/* Cart Icon */}
