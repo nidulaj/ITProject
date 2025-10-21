@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { authFetch } from "../../user-management/utils/authFetchStaff";
 
 const API = import.meta?.env?.VITE_API_URL || "http://localhost:5000";
 
@@ -23,9 +24,56 @@ export default function IngReqAccTable() {
   };
 
   const updateStatus = async (id, status) => {
+    console.log("ingredeint error",id,status)
   try {
     // Use PATCH for updating the status
     const response = await axios.patch(`${API}/api/req_ingredients/${id}/status`, { status });
+    
+    // If accepting the request, reduce ingredient totals
+    if (status === "accept") {
+      const request = requests.find(r => r.req_id === id);
+      if (request) {
+        // Map ingredient names to icode_id based on your icode table
+        const ingredientMappings = {
+          'total_milk': 2,           // ICD002 = Total Milk
+          'total_sugar': 3,         // ICD003 = Total Sugar  
+          'total_strawberry': 4,    // ICD004 = Total strawberry
+          'total_culture': 5,       // ICD005 = Total culture
+          'total_blueberry': 6,     // ICD006 = Total blueberry
+          'total_mango': 7,         // ICD007 = Total mango
+          'total_topping1': 8,      // ICD008 = Total chocolate sirup
+          'total_topping2': 9,      // ICD009 = Total strawberry sirup
+          'total_topping3': 10,     // ICD010 = Total honey
+          'total_bottom1': 11,      // ICD011 = Total cashew
+          'total_bottom2': 12,      // ICD012 = Total peanut
+          'total_bottom3': 13       // ICD013 = Total almond
+        };
+        
+        console.log('Request data:', request);
+        console.log('Processing ingredient reductions for request:', id);
+        
+        // Reduce totals for each ingredient that has a positive quantity
+        for (const [ingredientKey, icode_id] of Object.entries(ingredientMappings)) {
+          const quantity = request[ingredientKey] || 0;
+          console.log(`Checking ${ingredientKey}: quantity=${quantity}, icode_id=${icode_id}`);
+          
+          if (quantity > 0) {
+            try {
+              console.log(`Attempting to reduce ${quantity} from icode_id ${icode_id} (${ingredientKey})`);
+              const response = await axios.put(`${API}/api/ingredient-totals/reduce`, {
+                icode_id: icode_id,
+                quantity: quantity
+              });
+              console.log(`✅ Successfully reduced ${quantity} from icode_id ${icode_id} (${ingredientKey})`, response.data);
+            } catch (reduceError) {
+              console.error(`❌ Failed to reduce ${ingredientKey}:`, reduceError.response?.data || reduceError.message);
+            }
+          } else {
+            console.log(`Skipping ${ingredientKey} - quantity is 0 or undefined`);
+          }
+        }
+      }
+    }
     
     // Update the local state to reflect the status change immediately
     setRequests(requests.map((r) => (r.req_id === id ? { ...r, status } : r)));

@@ -8,7 +8,7 @@ import profilePic from "../../../assets/profile.jpg";
 import Header from "../components/Header";
 import UserProfile from "../../user-management/components/UserProfile";
 import IcodePage from "../components/IcodePage"; 
-import Ing_req_acc_table from "../components/ing_req_acc_table";
+import Ing_req_acc_table from "../../production-management/components/IngReqAccTable";
 import IngredientTotalsPage from "../components/IngredientTotalsPage";
 import IngredientTotalsChart from "../components/IngredientTotalsChart";
 
