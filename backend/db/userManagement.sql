@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS public.customers
     verification_code_expires timestamp without time zone,
     google_id text COLLATE pg_catalog."default",
     deactivated_until timestamp without time zone,
+    profile_photo text COLLATE pg_catalog."default",
     CONSTRAINT customers_pkey PRIMARY KEY (cus_id),
     CONSTRAINT customer_email_unique UNIQUE (email)
 )
@@ -201,6 +202,7 @@ CREATE TABLE IF NOT EXISTS public.staff
     verification_code_expires timestamp without time zone,
     role integer NOT NULL,
     deactivated_until timestamp without time zone,
+    profile_photo text COLLATE pg_catalog."default",
     CONSTRAINT staff_pkey PRIMARY KEY (staff_id),
     CONSTRAINT unique_email UNIQUE (email),
     CONSTRAINT role_in_staff FOREIGN KEY (role)
