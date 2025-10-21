@@ -29,6 +29,11 @@ const ProductionDashboard = () => {
 
   // Productions (used in Dashboard + Productions tab)
   const [productions, setProductions] = useState([]);
+  // 🔍 Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+
   const [prodLoading, setProdLoading] = useState(false);
   const [prodError, setProdError] = useState('');
 
@@ -162,7 +167,8 @@ const generatePDF = () => {
     doc.line(40, 90, 550, 90);
 
     // === TABLE ===
-    const tableData = productions.map((p) => [
+    const tableData = filteredProductions.map((p) => [
+
       String(p.batch_id),
       String(p.recipe_no),
       String(p.quantity),
@@ -592,6 +598,19 @@ const generatePDF = () => {
     };
   });
 
+  // ✅ Derived filtered productions list
+  const filteredProductions = productions.filter((p) => {
+    const matchesSearch =
+      p.batch_id?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.recipe_no?.toString().toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || (p.status?.toLowerCase() === statusFilter.toLowerCase());
+
+    return matchesSearch && matchesStatus;
+  });
+
+
 
   const prodTabCols = ['id', 'batch_id', 'recipe_no', 'quantity', 'status', 'created_at', 'Actions'];
 
@@ -601,12 +620,35 @@ const generatePDF = () => {
         return renderDashboardContent();
 
       case 'productions': {
-        const liveRows = mapProductionsToRows(productions);
+        const liveRows = mapProductionsToRows(filteredProductions); // use filtered data
+
         return (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <h2 className="text-2xl font-bold text-gray-900">Production Management</h2>
-              <div className="space-x-3">
+
+              <div className="flex items-center gap-3">
+                {/* 🔍 Search bar */}
+                <input
+                  type="text"
+                  placeholder="Search by Batch ID or Recipe No"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-200"
+                />
+
+                {/* 🔽 Status filter */}
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring focus:ring-blue-200"
+                >
+                  <option value="all">All</option>
+                  <option value="in production">In Production</option>
+                  <option value="completed">Completed</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+
                 <ActionButton
                   variant="outline"
                   icon={RotateCcw}
@@ -620,6 +662,7 @@ const generatePDF = () => {
                 >
                   {prodLoading ? 'Refreshing…' : 'Refresh'}
                 </ActionButton>
+
                 <ActionButton
                   icon={Package}
                   onClick={generatePDF}
@@ -632,10 +675,16 @@ const generatePDF = () => {
 
             {prodError && <div className="text-sm text-red-600">{prodError}</div>}
 
-            <ProductionTable title="All Productions" data={liveRows} columns={prodTabCols} actions={false} />
+            <ProductionTable
+              title="All Productions"
+              data={liveRows}
+              columns={prodTabCols}
+              actions={false}
+            />
           </div>
         );
       }
+
 
       case 'recipes':
         return (
