@@ -10,6 +10,8 @@ import UserProfile from "../../user-management/components/UserProfile";
 import IcodePage from "../components/IcodePage"; 
 import Ing_req_acc_table from "../components/ing_req_acc_table";
 import IngredientTotalsPage from "../components/IngredientTotalsPage";
+import IngredientTotalsChart from "../components/IngredientTotalsChart";
+
  
  
  
@@ -103,81 +105,11 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Profile & Notifications */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="col-span-1 bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">Profile</h3>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={profilePic}
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full border"
-                  />
-                  <div>
-                    <p className="text-gray-800 font-semibold">Imasha Athapaththu</p>
-                    <p className="text-gray-500 text-sm">Inventory Manager</p>
-                  </div>
-                </div>
-                <div className="mt-4 text-sm text-gray-600 space-y-1">
-                  <p>Email: ima.doe@email.com</p>
-                  <p>Phone: +94 77 123 4567</p>
-                </div>
-              </div>
+              {/* Ingredient Totals Bar Chart */}
+              <div className="mt-8">
+                <IngredientTotalsChart />
+              </div> 
 
-              <div className="col-span-2 bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-800 mb-4">
-                  Notifications
-                </h3>
-                <ul className="space-y-3 text-sm text-gray-700">
-                  <li className="p-3 bg-gray-100 rounded-lg">
-                     New ingredient "Milk" added.
-                  </li>
-                  <li className="p-3 bg-gray-100 rounded-lg">
-                     Stock low for "Mango".
-                  </li>
-                  <li className="p-3 bg-gray-100 rounded-lg">
-                     Final product "Milk Yoghurt" approved.
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Recent Transactions Table */}
-            <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
-                Recent Transactions
-              </h3>
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-3">Item</th>
-                    <th className="p-3">Type</th>
-                    <th className="p-3">Quantity(L,kg,Units)</th>
-                    <th className="p-3">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b">
-                    <td className="p-3">Milk</td>
-                    <td className="p-3">Ingredient</td>
-                    <td className="p-3">50 l</td>
-                    <td className="p-3">2025-09-01</td>
-                  </tr>
-                  <tr className="border-b">
-                    <td className="p-3">Strawberry</td>
-                    <td className="p-3">Special Ingredient</td>
-                    <td className="p-3">20 kg</td>
-                    <td className="p-3">2025-08-28</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3">Milk Yoghurt</td>
-                    <td className="p-3">Final Product</td>
-                    <td className="p-3">100 units</td>
-                    <td className="p-3">2025-08-25</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
           </div>
         );
       case "Ingredients":         return <IngredientForm />;
