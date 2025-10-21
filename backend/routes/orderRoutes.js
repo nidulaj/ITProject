@@ -22,13 +22,13 @@ router.get('/', getOrders);
 // Get all orders (alternative endpoint)
 router.get('/all', getOrders);
 
-// Get orders by customer ID
-router.get('/customer/:customer_id', authMiddleware, getCustomerOrders);
+// Get all orders for customer view (returns all orders regardless of customer)
+router.get('/customer', authMiddleware, getCustomerOrders);
 
 // Generate PDF invoice for order (must be before /:order_id route)
 router.get('/:order_id/invoice', authMiddleware, generateOrderInvoice);
 
-// Generate order summary report
+// Generate order summary report with optional filters
 router.get('/summary/report', authMiddleware, generateOrderSummaryReport);
 
 // Get single order by ID

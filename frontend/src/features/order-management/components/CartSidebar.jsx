@@ -90,7 +90,7 @@ const CartSidebar = ({ isOpen, onClose, cart, onUpdateQuantity, onRemoveItem, on
       // Create order via API
       const response = await authFetchCustomer({
         method: 'post',
-        url: 'http://localhost:5000/api/orders',
+        url: 'http://localhost:5001/api/orders',
         data: orderData
       });
       

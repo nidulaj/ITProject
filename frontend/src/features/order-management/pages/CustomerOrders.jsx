@@ -12,7 +12,7 @@ const CustomerOrders = () => {
   const [generatingPDF, setGeneratingPDF] = useState(null);
   const { currentCustomer } = useCustomer();
 
-  const API_BASE_URL = 'http://localhost:5000/api/orders';
+  const API_BASE_URL = 'http://localhost:5001/api/orders';
 
   useEffect(() => {
     fetchCustomerOrders();
@@ -24,15 +24,11 @@ const CustomerOrders = () => {
       
       console.log('Current customer in CustomerOrders:', currentCustomer);
       
-      if (!currentCustomer?.id) {
-        setError('Customer not found');
-        return;
-      }
-
-      console.log(`Fetching orders for customer ID: ${currentCustomer.id}`);
+      // Fetch all orders instead of customer-specific orders
+      console.log('Fetching all orders');
       const response = await authFetchCustomer({
         method: 'get',
-        url: `${API_BASE_URL}/customer/${currentCustomer.id}`
+        url: `${API_BASE_URL}/all`
       });
       
       if (response.data.success) {
@@ -144,7 +140,7 @@ const CustomerOrders = () => {
       
       const response = await authFetchCustomer({
         method: 'get',
-        url: `http://localhost:5000/api/orders/${orderId}/invoice`,
+        url: `http://localhost:5001/api/orders/${orderId}/invoice`,
         responseType: 'blob' // Important for PDF files
       });
       
