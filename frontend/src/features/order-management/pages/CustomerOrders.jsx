@@ -24,11 +24,11 @@ const CustomerOrders = () => {
       
       console.log('Current customer in CustomerOrders:', currentCustomer);
       
-      // Fetch all orders instead of customer-specific orders
-      console.log('Fetching all orders');
+      // Fetch customer-specific orders
+      console.log('Fetching customer orders');
       const response = await authFetchCustomer({
         method: 'get',
-        url: `${API_BASE_URL}/all`
+        url: `${API_BASE_URL}/customer`
       });
       
       if (response.data.success) {

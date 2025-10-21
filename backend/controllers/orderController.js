@@ -87,14 +87,14 @@ const getOrders = async (req, res) => {
   }
 };
 
-// Get orders by customer ID (modified to return all orders)
+// Get orders by customer ID
 const getCustomerOrders = async (req, res) => {
   try {
-    // Instead of filtering by customer ID, return all orders
-    console.log('Fetching all orders for customer view');
+    const customerId = req.user.id;
+    console.log(`Fetching orders for customer ID: ${customerId}`);
     
-    const orders = await getAllOrders();
-    console.log(`Retrieved ${orders.length} orders`);
+    const orders = await getOrdersByCustomer(customerId);
+    console.log(`Retrieved ${orders.length} orders for customer ${customerId}`);
     
     res.status(200).json({ 
       success: true,
@@ -102,10 +102,10 @@ const getCustomerOrders = async (req, res) => {
       count: orders.length
     });
   } catch (error) {
-    console.error('Error fetching orders:', error);
+    console.error('Error fetching customer orders:', error);
     res.status(500).json({ 
       success: false,
-      error: 'Failed to fetch orders',
+      error: 'Failed to fetch customer orders',
       details: error.message 
     });
   }

@@ -62,19 +62,20 @@ const OrderStats = ({ stats, orders }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-2">
       {/* Order Status Pie Chart */}
-      <div className="text-center">
-        <h3 className="text-base font-semibold text-gray-800 mb-2">Order Status Distribution</h3>
-        <div className="h-60">
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Order Status</h3>
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={orderStatusData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                outerRadius={60}
+                labelLine={true}
+                label={({ value }) => value}
+                outerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -83,29 +84,24 @@ const OrderStats = ({ stats, orders }) => {
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                layout="vertical" 
-                verticalAlign="middle" 
-                align="right"
-                wrapperStyle={{ paddingLeft: '15px', fontSize: '11px' }}
-              />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Payment Status Pie Chart */}
-      <div className="text-center">
-        <h3 className="text-base font-semibold text-gray-800 mb-2">Payment Status Distribution</h3>
-        <div className="h-60">
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Payment Status</h3>
+        <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={paymentStatusData}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
-                outerRadius={60}
+                labelLine={true}
+                label={({ value }) => value}
+                outerRadius={70}
                 fill="#8884d8"
                 dataKey="value"
               >
@@ -114,12 +110,6 @@ const OrderStats = ({ stats, orders }) => {
                 ))}
               </Pie>
               <Tooltip content={<PaymentTooltip />} />
-              <Legend 
-                layout="vertical" 
-                verticalAlign="middle" 
-                align="right"
-                wrapperStyle={{ paddingLeft: '15px', fontSize: '11px' }}
-              />
             </PieChart>
           </ResponsiveContainer>
         </div>
