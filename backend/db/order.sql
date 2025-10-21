@@ -2,6 +2,10 @@
 
 -- DROP SEQUENCE IF EXISTS public.products_product_id_seq;
 
+-- SEQUENCE: public.products_product_id_seq
+
+-- DROP SEQUENCE IF EXISTS public.products_product_id_seq;
+
 CREATE SEQUENCE IF NOT EXISTS public.products_product_id_seq
     INCREMENT 1
     START 1
@@ -235,17 +239,6 @@ ALTER TABLE IF EXISTS public.order_items
 
 -- DROP TRIGGER IF EXISTS trg_decrement_final_product_stock ON public.order_items;
 
-CREATE OR REPLACE TRIGGER trg_decrement_final_product_stock
-    AFTER INSERT
-    ON public.order_items
-    FOR EACH ROW
-    EXECUTE FUNCTION public.decrement_final_product_stock_on_order_item();
-
-
--- FUNCTION: public.decrement_final_product_stock_on_order_item()
-
--- DROP FUNCTION IF EXISTS public.decrement_final_product_stock_on_order_item();
-
 CREATE OR REPLACE FUNCTION public.decrement_final_product_stock_on_order_item()
     RETURNS trigger
     LANGUAGE 'plpgsql'
@@ -274,6 +267,19 @@ $BODY$;
 
 ALTER FUNCTION public.decrement_final_product_stock_on_order_item()
     OWNER TO postgres;
+
+CREATE OR REPLACE TRIGGER trg_decrement_final_product_stock
+    AFTER INSERT
+    ON public.order_items
+    FOR EACH ROW
+    EXECUTE FUNCTION public.decrement_final_product_stock_on_order_item();
+
+
+-- FUNCTION: public.decrement_final_product_stock_on_order_item()
+
+-- DROP FUNCTION IF EXISTS public.decrement_final_product_stock_on_order_item();
+
+
 
 
 ALTER SEQUENCE public.order_items_item_id_seq
@@ -348,17 +354,6 @@ CREATE INDEX IF NOT EXISTS idx_notifications_is_read
 
 -- DROP TRIGGER IF EXISTS trg_notifications_updated_at ON public.notifications;
 
-CREATE OR REPLACE TRIGGER trg_notifications_updated_at
-    BEFORE UPDATE 
-    ON public.notifications
-    FOR EACH ROW
-    EXECUTE FUNCTION public.update_notifications_updated_at();
-
-
--- FUNCTION: public.update_notifications_updated_at()
-
--- DROP FUNCTION IF EXISTS public.update_notifications_updated_at();
-
 CREATE OR REPLACE FUNCTION public.update_notifications_updated_at()
     RETURNS trigger
     LANGUAGE 'plpgsql'
@@ -373,6 +368,19 @@ $BODY$;
 
 ALTER FUNCTION public.update_notifications_updated_at()
     OWNER TO postgres;
+
+
+CREATE OR REPLACE TRIGGER trg_notifications_updated_at
+    BEFORE UPDATE 
+    ON public.notifications
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_notifications_updated_at();
+
+
+-- FUNCTION: public.update_notifications_updated_at()
+
+-- DROP FUNCTION IF EXISTS public.update_notifications_updated_at();
+
 
 ALTER SEQUENCE public.notifications_seq
     OWNED BY public.notifications.notification_id;
