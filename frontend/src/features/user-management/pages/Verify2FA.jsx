@@ -4,6 +4,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../../components/AuthContext";
 import Header from "../../../components/DashboardHeader";
 import { CartProvider } from "../../../contexts/CartContext";
+import Swal from "sweetalert2";
 
 export default function Verify2FA() {
   const location = useLocation();

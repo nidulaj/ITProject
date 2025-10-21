@@ -3,6 +3,7 @@ import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { AuthContext } from "../../../components/AuthContext";
+import Swal from "sweetalert2";
 
 export default function Header({ userInfo }) {
   const { logout } = useContext(AuthContext);

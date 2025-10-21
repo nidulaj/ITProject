@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function ResetPasswordStaff() {
   const navigate = useNavigate();

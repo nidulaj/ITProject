@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { authFetch } from "../utils/authFetchStaff";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function staffUserInfo() {
   const { staffId } = useParams();
