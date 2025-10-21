@@ -3,6 +3,8 @@ import axios from "axios";
 import { AuthContext } from "../../../components/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import Header from "../../../components/DashboardHeader";
+import { CartProvider } from "../../../contexts/CartContext";
 
 export default function Login() {
   const { setUser, setIsLoggedIn } = useContext(AuthContext);
@@ -90,6 +92,10 @@ export default function Login() {
   };
 
   return (
+    <>
+    <CartProvider>
+      <Header userInfo={null} />
+    </CartProvider>
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 transition-all duration-700 px-4">
       {/* Floating Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -100,7 +106,7 @@ export default function Login() {
 
       {/* Top Toggle Buttons */}
       <div className="absolute top-8 z-10">
-        <div className="bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-full p-1 shadow-lg border border-gray-100 dark:border-gray-700 mt-14">
           <div className="flex space-x-1">
             <button
               onClick={() => setMode("customer")}
@@ -127,17 +133,16 @@ export default function Login() {
       </div>
 
       {/* Login Card */}
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 w-full max-w-md transition-all duration-500 hover:shadow-3xl mt-20">
+      <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 w-full max-w-md transition-all duration-500 hover:shadow-3xl mt-20 mb-10">
         {/* Logo + Heading */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-5">
             <div className="relative">
-              <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-2xl shadow-lg">
-                SD
-              </div>
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              </div>
+              <img 
+                src="/public/images_sadi/logoPubudu.png" 
+                alt="Smart Dairy Logo" 
+                className="h-20 w-auto object-contain"
+              />
             </div>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-2">
@@ -151,7 +156,7 @@ export default function Login() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email Field */}
           <div className="space-y-2">
             <label
@@ -225,7 +230,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowForgotPasswordModal(true)}
-              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline"
             >
               Forgot password?
             </button>
@@ -265,7 +270,7 @@ export default function Login() {
               Don't have an account?{" "}
               <Link 
                 to="/register" 
-                className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                className="font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors hover:underline"
               >
                 Sign up now
               </Link>
@@ -291,8 +296,8 @@ export default function Login() {
 
       {/* Forgot Password Modal */}
       {showForgotPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all duration-300 scale-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all duration-300 scale-100 animate-in zoom-in-95">
             {/* Modal Header */}
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -300,7 +305,7 @@ export default function Login() {
               </h3>
               <button
                 onClick={() => setShowForgotPasswordModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -363,5 +368,6 @@ export default function Login() {
         </div>
       )}
     </div>
+    </>
   );
 }
