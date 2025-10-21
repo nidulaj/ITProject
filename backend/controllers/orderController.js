@@ -514,10 +514,26 @@ const generateOrderInvoice = async (req, res) => {
 // Generate order summary report as PDF
 const generateOrderSummaryReport = async (req, res) => {
   try {
-    console.log('Generating order summary report...');
+    console.log('Generating order summary report with query params:', req.query);
+    
+    // Get filter parameters from query
+    const { orderStatus, paymentStatus } = req.query;
     
     // Get all orders
-    const orders = await getAllOrders();
+    let orders = await getAllOrders();
+    
+    // Apply filters if provided
+    if (orderStatus && orderStatus !== '') {
+      console.log(`Filtering by order status: ${orderStatus}`);
+      orders = orders.filter(order => order.order_status === orderStatus);
+    }
+    
+    if (paymentStatus && paymentStatus !== '') {
+      console.log(`Filtering by payment status: ${paymentStatus}`);
+      orders = orders.filter(order => order.payment_status === paymentStatus);
+    }
+    
+    console.log(`Filtered orders count: ${orders.length}`);
     
     // Sort orders by date (newest first)
     orders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
@@ -552,15 +568,41 @@ const generateOrderSummaryReport = async (req, res) => {
        .fontSize(12)
        .text(`Generated: ${new Date().toLocaleString()}`, 400, 130);
     
+    // Add filter information if filters are applied
+    let filterY = 160;
+    let hasFilters = false;
+    
+    if ((orderStatus && orderStatus !== '') || (paymentStatus && paymentStatus !== '')) {
+      doc.fontSize(14)
+         .fillColor('#1f2937')
+         .text('Applied Filters:', 50, filterY);
+      
+      filterY += 20;
+      hasFilters = true;
+      
+      if (orderStatus && orderStatus !== '') {
+        doc.fontSize(10)
+           .text(`Order Status: ${orderStatus}`, 60, filterY);
+        filterY += 15;
+      }
+      
+      if (paymentStatus && paymentStatus !== '') {
+        doc.fontSize(10)
+           .text(`Payment Status: ${paymentStatus}`, 60, filterY);
+        filterY += 15;
+      }
+    }
+    
     // Add summary statistics
     const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
     const pendingOrders = orders.filter(order => order.order_status === 'pending').length;
-    const deliveredOrders = orders.filter(order => order.order_status === 'delivered').length;
+    const processingOrders = orders.filter(order => order.order_status === 'processing').length;
+    const packingOrders = orders.filter(order => order.order_status === 'packing').length;
     const outForDeliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
     const paidOrders = orders.filter(order => order.payment_status === 'paid').length;
     const pendingPaymentOrders = orders.filter(order => order.payment_status === 'pending').length;
     
-    const statsY = 180;
+    const statsY = hasFilters ? filterY + 20 : 180;
     doc.fontSize(14)
        .fillColor('#1f2937')
        .text('Summary Statistics:', 50, statsY)
@@ -568,13 +610,14 @@ const generateOrderSummaryReport = async (req, res) => {
        .text(`Total Orders: ${orders.length}`, 50, statsY + 25)
        .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, statsY + 45)
        .text(`Pending Orders: ${pendingOrders}`, 50, statsY + 65)
-       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, statsY + 85)
-       .text(`Delivered: ${deliveredOrders}`, 50, statsY + 105)
+       .text(`Processing: ${processingOrders}`, 50, statsY + 85)
+       .text(`Packing: ${packingOrders}`, 50, statsY + 105)
+       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, statsY + 125)
        .text(`Paid Orders: ${paidOrders}`, 250, statsY + 25)
        .text(`Pending Payments: ${pendingPaymentOrders}`, 250, statsY + 45);
     
     // Add orders table header
-    const tableTop = statsY + 140;
+    const tableTop = statsY + 160;
     doc.fontSize(12)
        .fillColor('#1f2937')
        .text('Order ID', 50, tableTop)

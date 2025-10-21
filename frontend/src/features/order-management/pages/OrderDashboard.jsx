@@ -9,6 +9,7 @@ import OrderDetailsModal from '../components/OrderDetailsModal';
 import UnifiedSidebar from '../components/UnifiedSidebar';
 import Header from '../components/Header';
 import UserProfile from '../../user-management/components/UserProfile';
+import OrderReportFilters from '../components/OrderReportFilters';
 
 const OrderDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -40,7 +41,7 @@ const OrderDashboard = () => {
     try {
       const res = await authFetch({
         method: "get",
-        url: "http://localhost:5000/api/staff/auth/userInfo",
+        url: "http://localhost:5001/api/staff/auth/userInfo",
       });
       setUserInfo(res.data);
     } catch (error) {
@@ -197,15 +198,25 @@ const OrderDashboard = () => {
     }
   };
 
-  // Function to generate order summary report
-  const handleGenerateOrderSummaryReport = async () => {
+  // Function to generate order summary report with filters
+  const handleGenerateOrderSummaryReport = async (filters = {}) => {
     try {
       setGeneratingReport(true);
-      console.log('Generating order summary report...');
+      console.log('Generating order summary report with filters:', filters);
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      if (filters.orderStatus && filters.orderStatus !== '') queryParams.append('orderStatus', filters.orderStatus);
+      if (filters.paymentStatus && filters.paymentStatus !== '') queryParams.append('paymentStatus', filters.paymentStatus);
+      
+      const queryString = queryParams.toString();
+      const url = `${API_BASE_URL}/summary/report${queryString ? `?${queryString}` : ''}`;
+      
+      console.log('Report URL:', url);
       
       const response = await authFetch({
         method: 'get',
-        url: `${API_BASE_URL}/summary/report`,
+        url: url,
         responseType: 'blob' // Important for PDF files
       });
       
@@ -215,9 +226,9 @@ const OrderDashboard = () => {
       const blob = new Blob([response.data], { type: 'application/pdf' });
       
       // Create download link
-      const url = window.URL.createObjectURL(blob);
+      const urlBlob = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = url;
+      link.href = urlBlob;
       link.download = `order-summary-report-${new Date().toISOString().split('T')[0]}.pdf`;
       
       // Trigger download
@@ -226,7 +237,7 @@ const OrderDashboard = () => {
       
       // Cleanup
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(urlBlob);
       
       console.log('Order summary report downloaded successfully');
     } catch (error) {
@@ -299,32 +310,17 @@ const OrderDashboard = () => {
               {/* Order Statistics */}
               <OrderStats stats={stats} />
 
+              {/* Order Report Filters */}
+              <OrderReportFilters 
+                onGenerateReport={handleGenerateOrderSummaryReport} 
+                generatingReport={generatingReport} 
+              />
+
               {/* Recent Orders Table */}
               <div className="bg-white rounded-xl shadow-lg border border-blue-200 transform perspective-1000 hover:shadow-xl transition-all duration-300">
                 <div className="px-6 py-4 border-b border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-blue-800 drop-shadow-sm">Recent Orders</h2>
-                    <button
-                      onClick={handleGenerateOrderSummaryReport}
-                      disabled={generatingReport}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                        generatingReport 
-                          ? 'bg-gray-400 text-white cursor-not-allowed' 
-                          : 'bg-green-600 hover:bg-green-700 text-white hover:shadow-lg'
-                      }`}
-                      title={generatingReport ? "Generating report..." : "Generate Order Summary Report"}
-                    >
-                      {generatingReport ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      )}
-                      <span className="text-sm font-medium">
-                        {generatingReport ? 'Generating...' : 'Export Report'}
-                      </span>
-                    </button>
                   </div>
                 </div>
                 
