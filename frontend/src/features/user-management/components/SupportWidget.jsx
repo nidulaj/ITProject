@@ -7,7 +7,8 @@ let socket; // global socket instance
 
 export default function SupportWidget() {
   const { user } = useContext(AuthContext);
-  const userId = user?.customer_code ?? user?.staff_code ?? `GUEST${Math.floor(Math.random() * 10000)}`;
+  const [guestId] = useState(() => `GUEST${Math.floor(Math.random() * 10000)}`);
+  const userId = user?.customer_code ?? user?.staff_code ?? guestId;
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -87,8 +88,8 @@ export default function SupportWidget() {
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 z-50 ${
           isOpen
-            ? "bg-red-500 hover:bg-red-600"
-            : "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            ? "bg-red-500 hover:bg-red-600 rotate-90"
+            : "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:scale-110"
         }`}
       >
         {isOpen ? (
@@ -100,7 +101,7 @@ export default function SupportWidget() {
 
       {/* Chat window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-[380px] h-[550px] bg-white dark:bg-gray-800 shadow-2xl rounded-2xl flex flex-col z-40 border border-gray-200 dark:border-gray-700">
+        <div className="fixed bottom-24 right-6 w-[380px] h-[550px] bg-white dark:bg-gray-800 shadow-2xl rounded-2xl flex flex-col z-40 border border-gray-200 dark:border-gray-700 animate-in slide-in-from-bottom-4 fade-in duration-300">
           {/* Header */}
           <div className="p-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-2xl">
             <div className="flex items-center space-x-3">
