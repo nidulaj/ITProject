@@ -1,6 +1,13 @@
 -- Table: public.chat_system
 
 -- DROP TABLE IF EXISTS public.chat_system;
+CREATE SEQUENCE IF NOT EXISTS public.chat_system_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
 
 CREATE TABLE IF NOT EXISTS public.chat_system
 (
@@ -17,3 +24,9 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.chat_system
     OWNER to postgres;
+
+ALTER SEQUENCE public.chat_system_id_seq
+    OWNED BY public.chat_system.id;
+
+ALTER SEQUENCE public.chat_system_id_seq
+    OWNER TO postgres;
