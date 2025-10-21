@@ -426,12 +426,7 @@ const CustomerOrders = () => {
                   Showing {orders.length} of {orders.length} orders
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
-                    Export
-                  </button>
-                  <button className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
-                    Print
-                  </button>
+                
                 </div>
               </div>
             </div>

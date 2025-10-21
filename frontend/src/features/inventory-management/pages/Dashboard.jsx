@@ -66,7 +66,7 @@ const Dashboard = () => {
     { name: "Final Products", gradient: "from-blue-500 to-cyan-500" },
     { name: "Storage Zones", gradient: "from-blue-500 to-cyan-500" },
     { name: "User Profile", gradient: "from-blue-500 to-cyan-500" },
-    { name: "Ingredient Codes", gradient: "from-blue-500 to-cyan-500" }, // ✅ button in sidebar
+    { name: "Ingredient Codes", gradient: "from-blue-500 to-cyan-500" }, 
     { name: "Ingredient Totals", gradient: "from-blue-500 to-cyan-500" },
     { name: "Request form", gradient: "from-blue-500 to-cyan-500" }, 
      
@@ -76,7 +76,7 @@ const Dashboard = () => {
   ];
 
   const renderForm = () => {
-    console.log("ActiveTab:", activeTab); // ✅ debug log
+    console.log("ActiveTab:", activeTab);  
 
     switch (activeTab) {
       case "Dashboard":
@@ -130,13 +130,13 @@ const Dashboard = () => {
                 </h3>
                 <ul className="space-y-3 text-sm text-gray-700">
                   <li className="p-3 bg-gray-100 rounded-lg">
-                    🔔 New ingredient "Milk" added.
+                     New ingredient "Milk" added.
                   </li>
                   <li className="p-3 bg-gray-100 rounded-lg">
-                    ⚠️ Stock low for "Mango".
+                     Stock low for "Mango".
                   </li>
                   <li className="p-3 bg-gray-100 rounded-lg">
-                    ✅ Final product "Milk Yoghurt" approved.
+                     Final product "Milk Yoghurt" approved.
                   </li>
                 </ul>
               </div>
@@ -185,7 +185,7 @@ const Dashboard = () => {
       case "Final Products":      return <FinalProductForm />;
       case "Storage Zones":       return <ZoneForm />;
       case "User Profile":        return <UserProfile userInfo={userInfo} />;
-      case "Ingredient Codes":    return <IcodePage />; // ✅ load page
+      case "Ingredient Codes":    return <IcodePage />;  
       case "Ingredient Totals": return <IngredientTotalsPage />;
       case "Request form":    return <Ing_req_acc_table />;
        

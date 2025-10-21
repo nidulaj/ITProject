@@ -14,6 +14,9 @@ const IngredientManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  //search bar 
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Edit form
   const [editForm, setEditForm] = useState({
     icode_id: "",
@@ -68,6 +71,13 @@ const IngredientManager = () => {
       setError("Expiry date cannot be in the past.");
       return;
     }
+
+    // Validation: quantity
+    if (form.quantity <= 0) {
+      setError("Quantity must be greater than 0.");
+      return;
+    }
+
     setError("");
 
     try {
@@ -117,6 +127,13 @@ const IngredientManager = () => {
       setEditError("Expiry date cannot be in the past.");
       return;
     }
+
+    // Validation: quantity
+    if (editForm.quantity <= 0) {
+      setEditError("Quantity must be greater than 0.");
+      return;
+    }
+
     setEditError("");
 
     try {
@@ -130,6 +147,58 @@ const IngredientManager = () => {
       alert("Error updating ingredient");
     }
   };
+  // Download Report
+const downloadReport = async () => {
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/ingredientReport?search=${encodeURIComponent(searchTerm)}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "ingredients_report.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (err) {
+    console.error("Error downloading report:", err);
+  }
+};
+
+
+  // // Download Report
+  // const downloadReport = async () => {
+  //   try {
+  //     const res = await fetch("http://localhost:5000/api/ingredientReport", {
+  //       method: "GET",
+  //       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  //     });
+
+  //     const blob = await res.blob();
+  //     const url = window.URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     a.download = "ingredients_report.pdf";
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //   } catch (err) {
+  //     console.error("Error downloading report:", err);
+  //   }
+  // };
+
+  // --- filter ingredients by search term ---
+  const filteredIngredients = ingredients.filter(
+    (ingredient) =>
+      ingredient.ingredient_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ingredient.icode_name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
@@ -165,6 +234,7 @@ const IngredientManager = () => {
               value={form.quantity}
               onChange={handleChange}
               required
+              min="1"
               className="w-full px-4 py-2 border rounded-lg"
             />
           </div>
@@ -200,12 +270,32 @@ const IngredientManager = () => {
         </button>
       </form>
 
-      {/* Ingredient Table */}
+      {/* report*/}
       <div className="bg-white shadow-lg rounded-xl border border-gray-200 p-6">
-        <h2 className="text-2xl font-bold mb-6">Ingredient List</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Ingredient List</h2>
+          <button
+            onClick={downloadReport}
+            className="bg-blue-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg"
+          >
+            Download Report
+          </button>
+        </div>
+
+        {/* --- Search bar --- */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by ICode or Name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          />
+        </div>
+
         {loading ? (
           <p className="text-gray-700">Loading ingredients...</p>
-        ) : ingredients.length === 0 ? (
+        ) : filteredIngredients.length === 0 ? (
           <p className="text-gray-700">No ingredients found.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -222,17 +312,34 @@ const IngredientManager = () => {
                 </tr>
               </thead>
               <tbody>
-                {ingredients.map((ingredient, idx) => (
-                  <tr key={ingredient.ingredient_id} className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-blue-100 transition-colors`}>
+                {filteredIngredients.map((ingredient, idx) => (
+                  <tr
+                    key={ingredient.ingredient_id}
+                    className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-gray-100"} hover:bg-blue-100 transition-colors`}
+                  >
                     <td className="py-2 px-4 border-r border-gray-300 font-medium">{ingredient.ingredient_id}</td>
-                    <td className="py-2 px-4 border-r border-gray-300">{ingredient.ingredient_code} - {ingredient.icode_name}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">
+                      {ingredient.ingredient_code} - {ingredient.icode_name}
+                    </td>
                     <td className="py-2 px-4 border-r border-gray-300">{ingredient.quantity}</td>
                     <td className="py-2 px-4 border-r border-gray-300">{ingredient.expiry_date?.split("T")[0]}</td>
                     <td className="py-2 px-4 border-r border-gray-300">{ingredient.storage_zone_id}</td>
-                    <td className="py-2 px-4 border-r border-gray-300">{new Date(ingredient.created_at).toLocaleDateString()}</td>
+                    <td className="py-2 px-4 border-r border-gray-300">
+                      {new Date(ingredient.created_at).toLocaleDateString()}
+                    </td>
                     <td className="py-2 px-4 flex space-x-2">
-                      <button onClick={() => handleEdit(ingredient)} className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-lg">Edit</button>
-                      <button onClick={() => handleDelete(ingredient.ingredient_id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg">Delete</button>
+                      <button
+                        onClick={() => handleEdit(ingredient)}
+                        className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-lg"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(ingredient.ingredient_id)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -263,12 +370,43 @@ const IngredientManager = () => {
                   </option>
                 ))}
               </select>
-              <input type="number" name="quantity" value={editForm.quantity} onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })} className="w-full px-4 py-2 border rounded-lg" required />
-              <input type="date" name="expiry_date" value={editForm.expiry_date} onChange={(e) => setEditForm({ ...editForm, expiry_date: e.target.value })} className="w-full px-4 py-2 border rounded-lg" min={new Date().toISOString().split("T")[0]} required />
-              <input type="text" name="storage_zone_id" value={editForm.storage_zone_id} onChange={(e) => setEditForm({ ...editForm, storage_zone_id: e.target.value })} className="w-full px-4 py-2 border rounded-lg" required />
+              <input
+                type="number"
+                name="quantity"
+                value={editForm.quantity}
+                onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+                min="1"
+              />
+              <input
+                type="date"
+                name="expiry_date"
+                value={editForm.expiry_date}
+                onChange={(e) => setEditForm({ ...editForm, expiry_date: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+                min={new Date().toISOString().split("T")[0]}
+                required
+              />
+              <input
+                type="text"
+                name="storage_zone_id"
+                value={editForm.storage_zone_id}
+                onChange={(e) => setEditForm({ ...editForm, storage_zone_id: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+                required
+              />
               <div className="flex justify-end space-x-4 mt-4">
-                <button type="button" onClick={() => setShowEditModal(false)} className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
-                <button type="submit" className="bg-blue-600 px-4 py-2 rounded-lg text-white hover:bg-blue-700">Update</button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="bg-blue-600 px-4 py-2 rounded-lg text-white hover:bg-blue-700">
+                  Update
+                </button>
               </div>
             </form>
           </div>
