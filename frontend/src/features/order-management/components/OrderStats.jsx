@@ -2,7 +2,7 @@ import React from 'react';
 
 const OrderStats = ({ stats }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
       <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 transform perspective-1000 hover:rotate-y-2 card-3d">
         <div className="flex items-start justify-between">
           <div className="flex-1">

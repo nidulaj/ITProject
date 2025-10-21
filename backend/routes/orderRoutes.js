@@ -28,7 +28,7 @@ router.get('/customer/:customer_id', authMiddleware, getCustomerOrders);
 // Generate PDF invoice for order (must be before /:order_id route)
 router.get('/:order_id/invoice', authMiddleware, generateOrderInvoice);
 
-// Generate order summary report
+// Generate order summary report with optional filters
 router.get('/summary/report', authMiddleware, generateOrderSummaryReport);
 
 // Get single order by ID

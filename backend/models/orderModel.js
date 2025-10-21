@@ -158,6 +158,52 @@ const deleteOrder = async (order_id) => {
   }
 };
 
+// Get orders with filters
+const getOrdersWithFilters = async (filters) => {
+  try {
+    let query = 'SELECT * FROM orders WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+
+    // Add date range filter
+    if (filters.startDate) {
+      query += ` AND order_date >= $${paramIndex++}`;
+      params.push(filters.startDate);
+    }
+
+    if (filters.endDate) {
+      query += ` AND order_date <= $${paramIndex++}`;
+      params.push(filters.endDate);
+    }
+
+    // Add status filter
+    if (filters.status) {
+      query += ` AND order_status = $${paramIndex++}`;
+      params.push(filters.status);
+    }
+
+    // Add payment status filter
+    if (filters.paymentStatus) {
+      query += ` AND payment_status = $${paramIndex++}`;
+      params.push(filters.paymentStatus);
+    }
+
+    // Add customer ID filter
+    if (filters.customerId) {
+      query += ` AND cus_id = $${paramIndex++}`;
+      params.push(filters.customerId);
+    }
+
+    query += ' ORDER BY order_date DESC';
+
+    const result = await pool.query(query, params);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching orders with filters:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createOrder,
   getAllOrders,
@@ -166,5 +212,6 @@ module.exports = {
   getOrderItemsByOrderId,
   updateOrderStatus,
   updatePaymentStatus,
-  deleteOrder
+  deleteOrder,
+  getOrdersWithFilters
 };

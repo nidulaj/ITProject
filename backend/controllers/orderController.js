@@ -6,7 +6,8 @@ const {
   updateOrderStatus, 
   updatePaymentStatus,
   deleteOrder,
-  getOrderItemsByOrderId
+  getOrderItemsByOrderId,
+  getOrdersWithFilters
 } = require('../models/orderModel');
 
 const { createNotification } = require('../models/notificationModel');
@@ -521,8 +522,19 @@ const generateOrderSummaryReport = async (req, res) => {
   try {
     console.log('Generating order summary report...');
     
-    // Get all orders
-    const orders = await getAllOrders();
+    // Extract filter parameters from query
+    const { startDate, endDate, status, paymentStatus, customerId } = req.query;
+    
+    // Build filters object
+    const filters = {};
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+    if (status) filters.status = status;
+    if (paymentStatus) filters.paymentStatus = paymentStatus;
+    if (customerId) filters.customerId = customerId;
+    
+    // Get filtered orders
+    const orders = await getOrdersWithFilters(filters);
     
     // Create PDF document
     const doc = new PDFDocument({ margin: 50 });
@@ -554,23 +566,68 @@ const generateOrderSummaryReport = async (req, res) => {
        .fontSize(12)
        .text(`Generated: ${new Date().toLocaleString()}`, 400, 130);
     
-    // Add summary statistics
+    // Add filter information if any filters were applied
+    if (Object.keys(filters).length > 0) {
+      doc.fontSize(12)
+         .fillColor('#1f2937')
+         .text('Filters Applied:', 50, 160);
+      
+      let filterY = 175;
+      if (startDate) {
+        doc.text(`Start Date: ${new Date(startDate).toLocaleDateString()}`, 60, filterY);
+        filterY += 15;
+      }
+      if (endDate) {
+        doc.text(`End Date: ${new Date(endDate).toLocaleDateString()}`, 60, filterY);
+        filterY += 15;
+      }
+      if (status) {
+        doc.text(`Status: ${status}`, 60, filterY);
+        filterY += 15;
+      }
+      if (paymentStatus) {
+        doc.text(`Payment Status: ${paymentStatus}`, 60, filterY);
+        filterY += 15;
+      }
+      if (customerId) {
+        doc.text(`Customer ID: ${customerId}`, 60, filterY);
+        filterY += 15;
+      }
+    }
+    
+    // Add enhanced summary statistics
     const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price || 0), 0);
     const pendingOrders = orders.filter(order => order.order_status === 'pending').length;
-    const deliveredOrders = orders.filter(order => order.order_status === 'delivered').length;
+    const confirmedOrders = orders.filter(order => order.order_status === 'confirmed').length;
+    const packingOrders = orders.filter(order => order.order_status === 'packing').length;
     const outForDeliveryOrders = orders.filter(order => order.order_status === 'out for delivery').length;
+    const deliveredOrders = orders.filter(order => order.order_status === 'delivered').length;
+    const cancelledOrders = orders.filter(order => order.order_status === 'cancelled').length;
+    const paidOrders = orders.filter(order => order.payment_status === 'paid').length;
+    const pendingPaymentOrders = orders.filter(order => order.payment_status === 'pending').length;
     
+    // Calculate average order value
+    const averageOrderValue = orders.length > 0 ? totalRevenue / orders.length : 0;
+    
+    // Add summary statistics
     doc.fontSize(14)
        .fillColor('#1f2937')
-       .text('Summary Statistics:', 50, 180)
+       .text('Summary Statistics:', 50, 200)
        .fontSize(12)
-       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, 205)
-       .text(`Pending Orders: ${pendingOrders}`, 50, 225)
-       .text(`Out for Delivery: ${outForDeliveryOrders}`, 50, 245)
-       .text(`Delivered: ${deliveredOrders}`, 50, 265);
+       .text(`Total Revenue: LKR ${totalRevenue.toFixed(2)}`, 50, 225)
+       .text(`Total Orders: ${orders.length}`, 50, 245)
+       .text(`Average Order Value: LKR ${averageOrderValue.toFixed(2)}`, 50, 265)
+       .text(`Pending Orders: ${pendingOrders}`, 250, 225)
+       .text(`Confirmed Orders: ${confirmedOrders}`, 250, 245)
+       .text(`Packing Orders: ${packingOrders}`, 250, 265)
+       .text(`Out for Delivery: ${outForDeliveryOrders}`, 400, 225)
+       .text(`Delivered: ${deliveredOrders}`, 400, 245)
+       .text(`Cancelled: ${cancelledOrders}`, 400, 265)
+       .text(`Paid Orders: ${paidOrders}`, 50, 285)
+       .text(`Pending Payments: ${pendingPaymentOrders}`, 250, 285);
     
     // Add orders table header
-    const tableTop = 300;
+    const tableTop = 320;
     doc.fontSize(12)
        .fillColor('#1f2937')
        .text('Order ID', 50, tableTop)
@@ -588,10 +645,31 @@ const generateOrderSummaryReport = async (req, res) => {
     // Add order rows
     let currentY = tableTop + 35;
     
-    // Process orders in batches to avoid async issues
-    for (let i = 0; i < Math.min(orders.length, 15); i++) {
+    // Process orders (show all orders, not just first 15)
+    for (let i = 0; i < orders.length; i++) {
       const order = orders[i];
-      if (currentY > 650) break; // Prevent overflow
+      
+      // Check if we need a new page
+      if (currentY > 700) {
+        doc.addPage();
+        currentY = 50;
+        
+        // Re-add table header on new page
+        doc.fontSize(12)
+           .fillColor('#1f2937')
+           .text('Order ID', 50, currentY)
+           .text('Customer', 120, currentY)
+           .text('Date', 200, currentY)
+           .text('Status', 280, currentY)
+           .text('Payment', 360, currentY)
+           .text('Total', 440, currentY);
+        
+        doc.moveTo(50, currentY + 20)
+           .lineTo(520, currentY + 20)
+           .stroke();
+        
+        currentY += 35;
+      }
       
       // Get customer name
       let customerName = `Customer ${order.cus_id}`;
