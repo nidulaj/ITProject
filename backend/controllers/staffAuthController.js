@@ -194,7 +194,6 @@ const logout = async (req, res) => {
 const verify2FACode = async (req, res) => {
   const staffId = req.user.id;
   const { code } = req.body;
-  console.log(staffId, code);
 
   try {
     const verificationInfo = await getVerificationDetails(staffId);
@@ -206,14 +205,24 @@ const verify2FACode = async (req, res) => {
     if (!code || Number(verificationInfo.verification_code) !== Number(code)) {
       return res.status(400).json({ message: "Invalid verification code" });
     }
+
+    // ✅ Remove verification code once verified
     await deleteVerificationCode(staffId);
-    const user = req.user;
-    const accessToken = generateAccessTokenStaff(user);
-    const refreshToken = generateRefreshTokenStaff(user);
-    const staffUser = await findUserById(staffId);
+
+    // ✅ Fetch full staff user from DB
+    const staffFromDb = await findUserById(staffId);
+    if (!staffFromDb) {
+      return res.status(404).json({ message: "Staff user not found" });
+    }
+
+    // ✅ Generate fresh tokens based on full user
+    const accessToken = generateAccessTokenStaff(staffFromDb);
+    const refreshToken = generateRefreshTokenStaff(staffFromDb);
+
+    // ✅ Set cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
+      secure: false, // set true in production
       sameSite: "strict",
       maxAge: 15 * 60 * 1000, // 15 minutes
     });
@@ -225,21 +234,24 @@ const verify2FACode = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    // ✅ Clear temp token
     res.clearCookie("tempToken");
 
-    await createLog(staffUser.staff_code, "Logged In", req.ip);
-    res.status(200).json({
+    // ✅ Log login
+    await createLog(staffFromDb.staff_code, "Logged In", req.ip);
+
+    // ✅ Send complete user object back to frontend
+    return res.status(200).json({
       message: "Login successful",
-      accessToken,
-      refreshToken,
-      role: user.role,
-      user: staffUser
+      role: staffFromDb.role || null,
+      user: staffFromDb, // 👈 This ensures frontend gets full userInfo
     });
   } catch (error) {
-    console.error("Error verifying code:", error);
+    console.error("Error verifying 2FA code:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const resend2FACode = async (req, res) => {
   const staffId = req.user.id;
