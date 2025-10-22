@@ -86,7 +86,7 @@ export default function Chat() {
     }
   }, [messages, selectedUser]);
 
-  // send message
+  // ✅ FIXED: send message with proper timestamp
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedUser) return;
 
@@ -94,10 +94,13 @@ export default function Chat() {
       user_code: selectedUser.user_code,
       sender: "admin",
       message: newMessage,
+      created_at: new Date().toISOString(), // ✅ Add timestamp
     };
 
     try {
       await axios.post("http://localhost:5000/api/chat/send", msg);
+      setMessages((prev) => [...prev, msg]); // ✅ Now has created_at
+      setNewMessage("");
     } catch (err) {
       console.error("Error saving message:", err);
       Swal.fire({
@@ -106,9 +109,6 @@ export default function Chat() {
         icon: "error",
       });
     }
-
-    setMessages((prev) => [...prev, msg]);
-    setNewMessage("");
   };
 
   // Filter users based on search query
@@ -198,9 +198,9 @@ export default function Chat() {
 
             {/* Messages Container */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50 dark:bg-gray-900">
-              {messages.map((m) => (
+              {messages.map((m, index) => (
                 <div
-                  key={m.id}
+                  key={m.id || index}
                   className={`flex ${
                     m.sender === "admin" ? "justify-end" : "justify-start"
                   }`}
@@ -220,10 +220,12 @@ export default function Chat() {
                           : "text-gray-500 dark:text-gray-400"
                       }`}
                     >
-                      {new Date(m.created_at).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {m.created_at
+                        ? new Date(m.created_at).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Just now"}
                     </p>
                   </div>
                 </div>
@@ -246,7 +248,8 @@ export default function Chat() {
                 />
                 <button
                   onClick={sendMessage}
-                  className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  disabled={!newMessage.trim()}
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white p-3 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <Send className="w-5 h-5" />
                 </button>

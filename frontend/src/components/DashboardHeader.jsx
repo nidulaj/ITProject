@@ -8,6 +8,7 @@ import { AuthContext } from "./AuthContext";
 import NotificationIcon from "./NotificationIcon";
 import CartSidebar from "../features/order-management/components/CartSidebar";
 import { useCart } from "../contexts/CartContext";
+import Swal from "sweetalert2";
 
 export default function DashboardHeader({ userInfo }) {
   const navigate = useNavigate();
@@ -48,6 +49,11 @@ export default function DashboardHeader({ userInfo }) {
       logout();
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
+      Swal.fire({
+        title: "Success",
+        text: "Logout successful",
+        icon: "success",
+      });
       navigate("/");
       console.log("Logout successful");
     } catch (err) {

@@ -55,12 +55,13 @@ export default function RoleInfo() {
         url: "http://localhost:5000/api/user-roles/deleteRole",
         data: { roleId },
       });
-      setUserRoles((prev) => prev.filter((role) => role.role_id !== roleId));
+
       Swal.fire({
         title: "Success",
         text: "Role deleted successfully.",
         icon: "success",
       });
+      navigate("/dashboard/admin/rolesAccess");
     } catch (error) {
       console.error("Error deleting role:", error);
       Swal.fire({
