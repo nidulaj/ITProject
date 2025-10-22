@@ -12,6 +12,12 @@ const createRecipe = async (req, res) => {
       return res.status(400).json({ error: "order_no and recipe_name are required" });
     }
 
+    
+    if (recipe_name.length < 3) {
+    return res.status(400).json({ error: "recipe_name must be at least 3 characters long" });
+    }
+    
+
     const newRecipe = await insertRecipe(
       order_no,
       recipe_name,
