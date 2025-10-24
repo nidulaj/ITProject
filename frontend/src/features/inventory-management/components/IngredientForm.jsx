@@ -14,7 +14,7 @@ const IngredientManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  //search bar 
+  //search bar
   const [searchTerm, setSearchTerm] = useState("");
 
   // Edit form
