@@ -27,7 +27,7 @@ const IngredientManager = () => {
   const [editId, setEditId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editError, setEditError] = useState("");
-
+  //read part
   // Fetch ingredients
   const fetchIngredients = async () => {
     try {
